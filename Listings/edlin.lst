@@ -1,0 +1,278 @@
+     1                                  [map all ./Listings/edlin.map]
+     2                                  [DEFAULT REL]
+     3                                  BITS 64
+     4                                  ;EDLIN, an absolute last resort file editor.
+     5                                  ;
+     6                                  ;                       !!DONT FORGET!!
+     7                                  ;       Each line is terminated first with 0Dh then 0Ah (CR,LF)
+     8                                  ;                       !!DONT FORGET!!
+     9                                  ;
+    10                                  ;The logic of this EDLIN will be based on my BASIC interpreter editor.
+    11                                  ;Except, users won't need to specify their own line numbers each time.
+    12                                  
+    13                                  ;Edlin will always produce a backup file and refuses to open files 
+    14                                  ; with .BAK extension (backup files)
+    15                                  
+    16                                  ;Edlin will erase the previous backup if one exists, ensuring there
+    17                                  ; is enough free space for a new copy of the backup.
+    18                                  ;It then creates a new file with the specified name and a $$$ extension.
+    19                                  
+    20                                  ;Edlin has two modes of operation: Command and Edit
+    21                                  
+    22                                  %include "./Include/dosMacro.mac"
+     1                              <1> 
+     2                              <1> ;-------------------------------------------------------------------------------
+     3                              <1> ;Generic Macros file
+     4                              <1> ;The following instruction extensions allow to conditionally return
+     5                              <1> ;The idea was borrowed from the DOS Source Code
+     6                              <1> ;
+     7                              <1> ;-------------------------------------------------------------------------------
+     8                              <1> 
+     9                              <1> ;-------------------------------------------------------------------------------
+    10                              <1> ;These macros are live and must not be touched
+    11                              <1> ;-------------------------------------------------------------------------------
+    12                              <1> %macro return 0
+    13                              <1> %%_ret:
+    14                              <1>     ret
+    15                              <1> %assign retOff %%_ret-$$  ;Get offset into segment of %%_ret
+    16                              <1> %endmacro
+    17                              <1> 
+    18                              <1> %macro cret 1
+    19                              <1> %%_base:
+    20                              <1> %assign baseVar %%_base-$$ ;Get offset into segment of %%_base
+    21                              <1>     %ifdef retOff
+    22                              <1>     %if (baseVar - retOff <= 126) && (baseVar > retOff)
+    23                              <1>     %ifdef currSegVBase
+    24                              <1>     j%+1 short (retOff+currSegVBase)
+    25                              <1>     %else
+    26                              <1>     j%+1 short retOff
+    27                              <1>     %endif  ;End ifdef currSegVBase
+    28                              <1>     %else 
+    29                              <1>     j%-1 short %%a
+    30                              <1>     return
+    31                              <1> %%a:
+    32                              <1>     %endif  ;End the distance measurement if
+    33                              <1>     %else   
+    34                              <1>     j%-1 short %%a
+    35                              <1>     return
+    36                              <1> %%a:
+    37                              <1>     %endif  ;End ifdef retoff
+    38                              <1> %endmacro
+    39                              <1> 
+    40                              <1> %macro retz 0
+    41                              <1> cret z
+    42                              <1> %endmacro
+    43                              <1> 
+    44                              <1> %macro retnz 0
+    45                              <1> cret nz
+    46                              <1> %endmacro
+    47                              <1> 
+    48                              <1> %macro rete 0
+    49                              <1> cret e
+    50                              <1> %endmacro
+    51                              <1> 
+    52                              <1> %macro retne 0
+    53                              <1> cret ne
+    54                              <1> %endmacro
+    55                              <1> 
+    56                              <1> %macro retc 0
+    57                              <1> cret c
+    58                              <1> %endmacro
+    59                              <1> 
+    60                              <1> %macro retnc 0
+    61                              <1> cret nc
+    62                              <1> %endmacro
+    63                              <1> 
+    64                              <1> %macro retb 0
+    65                              <1> cret b
+    66                              <1> %endmacro
+    67                              <1> 
+    68                              <1> %macro retnb 0
+    69                              <1> cret nb
+    70                              <1> %endmacro
+    71                              <1> 
+    72                              <1> %macro reta 0
+    73                              <1> cret a
+    74                              <1> %endmacro
+    75                              <1> 
+    76                              <1> %macro retna 0
+    77                              <1> cret na
+    78                              <1> %endmacro
+    79                              <1> 
+    80                              <1> %macro breakpoint 0
+    81                              <1> xchg bx, bx
+    82                              <1> %endmacro
+    23                                  %include "./Include/edStruc.inc"
+     1                              <1> lineLength  equ 128
+     2                              <1> maxAlloc    equ 65536*lineLength ;8Mb in size
+     3                              <1> 
+     4                              <1> struc cmdArgs   ;Ptr returned in rdx after 41h/6101h has this structure
+     5 00000000 <res 10h>           <1>     .fcb1       db 16 dup (?)  ;First FCB,    argument 1 
+     6 00000010 <res 14h>           <1>     .fcb2       db 20 dup (?)  ;Second FCB,   argument 2
+     7                              <1>     .dta:   ;Pointer to the default DTA in the 
+     8 00000024 ??                  <1>     .parmList   db ?   ;Number of characters in command tail
+     9 00000025 <res 7Fh>           <1>     .progTail   db 127 dup (?) ;Default DTA/Program tail
+    10                              <1> endstruc
+    11                              <1> 
+    12                              <1> ;MISC ASCII control chars
+    13                              <1> NUL equ 00h ;^@         | ASCII Null
+    14                              <1> ETX equ 03h ;^C         | ASCII Break (End of Text) 
+    15                              <1> ACK equ 06h ;^F         | ASCII Acknowledgement
+    16                              <1> BEL equ 07h ;^G         | ASCII Bell
+    17                              <1> BSP equ 08h ;^H         | ASCII Backspace
+    18                              <1> TAB equ 09h ;^I         | ASCII Horizontal Tab
+    19                              <1> LF  equ 0Ah ;^J         | ASCII Line Feed
+    20                              <1> CR  equ 0Dh ;^M         | ASCII Carriage Return
+    21                              <1> DLE equ 10h ;^P         | ASCII Data Link End (Toggle Print Echo)
+    22                              <1> DC3 equ 13h ;^S         | ASCII Device Control 3 (Toggle Scroll Lock)
+    23                              <1> DC4 equ 14h ;^T         | ASCII Device Control 4
+    24                              <1> NAK equ 15h ;^U         | ASCII Negative Acknowledgement
+    25                              <1> ETB equ 17h ;^W         | ASCII End of Transmission Block
+    26                              <1> EOF equ 1Ah ;^Z         | ASCII Substitute character (End of File)
+    27                              <1> ESC equ 1Bh ;           | ASCII Escape char, used for ANSI.SYS
+    28                              <1> SPC equ 20h ;Printable  | ASCII Space
+    29                              <1> ;This last one is NEVER printed with a caret as it is a console control char
+    30                              <1> DEL equ 7Fh ;^?         | ASCII Rubout (Del char and dec cursor)
+    31                              <1> 
+    32                              <1> asciiCaret  equ 20h ;Used to check which chars need to be printed with caret
+    33                              <1> ;Extended Ascii Codes
+    34                              <1> eF1     equ 3Bh ;F1 second byte
+    35                              <1> eF2     equ 3Ch ;F2 second byte
+    36                              <1> eF3     equ 3Dh ;F3 second byte
+    37                              <1> eF4     equ 3Eh ;F4 second byte
+    38                              <1> eF5     equ 3Fh ;F5 second byte
+    39                              <1> eF6     equ 40h ;F6 second byte
+    40                              <1> eF7     equ 41h ;F7 second byte
+    41                              <1> eCursL  equ 4Bh ;Cursor Left second byte
+    42                              <1> eCursR  equ 4Dh ;Cursor Right second byte
+    43                              <1> eIns    equ 52h ;Insert second byte
+    44                              <1> eDel    equ 53h ;DEL second byte (not necessarily delete key)
+    24                                  Segment .text align=1 
+    25                                  %include "./Source/edmain.asm"
+     1                              <1> ;Main EDLIN file
+     2                              <1> start:
+     3 00000000 EB01                <1>     jmp short .cVersion
+     4 00000002 01                  <1> .vNum:          db 1    ;Main version number, patchable
+     5                              <1> .cVersion:
+     6 00000003 0FB6D8              <1>     movzx ebx, al   ;Save drive number validity in bl
+     7 00000006 FC                  <1>     cld
+     8 00000007 B800300000          <1>     mov eax, 3000h  ;Get version number
+     9 0000000C CD41                <1>     int 41h
+    10 0000000E 3A05EEFFFFFF        <1>     cmp al, byte [.vNum]
+    11 00000014 761A                <1>     jbe short okVersion
+    12 00000016 488D15(4A000000)    <1>     lea rdx, badVerStr
+    13                              <1> badExitMsg:
+    14 0000001D 4885D2              <1>     test rdx, rdx   ;Check if null ptr => Dont print on exit
+    15 00000020 7407                <1>     jz short .noPrint
+    16 00000022 B800090000          <1>     mov eax, 0900h
+    17 00000027 CD41                <1>     int 41h
+    18                              <1> .noPrint:
+    19 00000029 B8FF4C0000          <1>     mov eax, 4CFFh
+    20 0000002E CD41                <1>     int 41h
+    21                              <1> okVersion:
+    22                              <1> ;No command line arguments except for optional filename
+    23 00000030 B801610000          <1>     mov eax, 6101h  ;Get parsed FCB and cmdtail for filename in rdx
+    24 00000035 CD41                <1>     int 41h
+    25                              <1> ;Now parse the command line, to get full command spec for filename.
+    26 00000037 488D7A25            <1>     lea rdi, qword [rdx + cmdArgs.progTail] ;Get ptr to tail
+    27 0000003B 0FB64A24            <1>     movzx ecx, byte [rdx + cmdArgs.parmList]    ;Get number of chars in cmdline
+    28 0000003F 488D15(7A000000)    <1>     lea rdx, badNameStr ;Prep for error message
+    29 00000046 B020                <1>     mov al, SPC ;Now we search for a space. No leading spaces on cmdine
+    30 00000048 F2AE                <1>     repne scasb
+    31 0000004A 85C9                <1>     test ecx, ecx   ;If no chars left (even on equality with SPC) fail
+    32 0000004C 74CF                <1>     jz short badExitMsg
+    33 0000004E F3AE                <1>     repe scasb  ;Now skip the spaces
+    34 00000050 85C9                <1>     test ecx, ecx   ;If we run out of chars, fail as no filename
+    35 00000052 74C9                <1>     jz short badExitMsg
+    36 00000054 48FFCF              <1>     dec rdi ;Point rdi to the start of the filename as given
+    37 00000057 48893D(00000000)    <1>     mov qword [fileNamePtr], rdi    ;Save the ptr to the filename
+    38 0000005E 48FFC7              <1>     inc rdi ;Go back where it was
+    39                              <1> .findEndLoop:
+    40 00000061 AC                  <1>     lodsb
+    41 00000062 3C20                <1>     cmp al, SPC
+    42 00000064 7408                <1>     je short .endFound
+    43 00000066 3C0D                <1>     cmp al, CR
+    44 00000068 7404                <1>     je short .endFound
+    45 0000006A FFC9                <1>     dec ecx
+    46 0000006C 74AF                <1>     jz short badExitMsg
+    47                              <1> .endFound:
+    48 0000006E 48FFCF              <1>     dec rdi
+    49 00000071 31C0                <1>     xor eax, eax
+    50 00000073 8807                <1>     mov byte [rdi], al  ;Store terminating NULL
+    51                              <1> ;Now go backwards a max of 3 chars to get a ptr to the 
+    52                              <1> ; extension of the filename if one exists. If not, create an empty extension.
+    53                              <1> 
+    54 00000075 488B3D(00000000)    <1>     mov rdi, qword [fileNamePtr]
+    55 0000007C 668B07              <1>     mov ax, word [rdi]  ;Get the first two chars of file name
+    56 0000007F 80FC3A              <1>     cmp ah, ":"
+    57 00000082 750C                <1>     jne short .noDriveSpecified
+    58                              <1>     ;Check if drive specified is OK, bl has signature
+    59 00000084 488D15(60000000)    <1>     lea rdx, badDrvStr
+    60 0000008B 80FBFF              <1>     cmp bl, -1
+    61 0000008E 748D                <1>     je badExitMsg
+    62                              <1> .noDriveSpecified:
+    63                              <1> ;Paths can only be a max of 67 chars but the DTA buffer is 127 bytes
+    64                              <1> ; so if no extension is provided or too short an extension is provided,
+    65                              <1> ; simply add space for the extension.
+    66                              <1> 
+    67                              <1> ;Now we proceed with opening the file/creating if it is new.
+    68                              <1> 
+    69                              <1> ;If the file is new, create with $$$ extension. Goto End.
+    70                              <1> ;Else, check if there is a backup by replacing the extension with .BAK.
+    71                              <1> ;If so, delete the backup.
+    72                              <1> ;Rename the current file to have a .BAK extension.
+    73                              <1> ;Open the Backup.
+    74                              <1> ;Now change the filename to have a $$$ extension.
+    75                              <1> ;Open the new version.
+    76                              <1> ;Copy the whole backup into the buffer.
+    77                              <1> ;Close the backup.
+    78                              <1> ;End:
+    79                              <1> ;Process file. On exit, close the handle.
+    80                              <1> ;Rename file to have the original (potentially empty) extension.
+    81                              <1> ;Return to DOS
+    26                                  %include "./Source/edutils.asm"
+     1                              <1> ;Utility functions for edlin go here
+    27                                  Segment .data align=1 follows=.text 
+    28                                  %include "./Data/eddata.asm"
+     1                              <1> ;This version can only deal with 65536 line of maximum 128 length each.
+     2                              <1> ;This amounts to files of roughly 8Mb in size which is large enough for now.
+     3                              <1> ;It suffices to work with the DOS kernel!
+     4                              <1> 
+     5 00000000 0000000000000000    <1> fileNamePtr dq 0    ;Ptr to the name of the file we are editing
+     6 00000008 0000000000000000    <1> fileExtPtr  dq 0    ;Ptr to the extension of the file we are editing
+     7 00000010 0000                <1> fileHdl     dw 0    
+     8 00000012 202020              <1> bkupExt     db 3 dup (SPC)    ;3 chars to save a given extension if one given
+     9                              <1> 
+    10 00000015 0000                <1> currentLine dw 0    ;Ctr for the current line we are on. 65536 Lines possible
+    11 00000017 0000000000000000    <1> linePtr     dq 0    ;Ptr to the current line start
+    12                              <1> 
+    13                              <1> ;Use a single buffer. For now, if less than 8Mb available, just don't load
+    14 0000001F 0000000000000000    <1> bufferPtr   dq 0    ;Ptr to the buffer for the current line
+    15 00000027 00000000            <1> bufferSize  dd 0    ;Mustnt exceed 1024*1024*8 bytes (8Mbytes)
+    29                                  %include "./Data/edmsg.asm"
+     1                              <1> ;Edlin Strings are in this file 
+     2 0000002B 4E65772066696C65    <1> newStr  db "New file"   ;This string is terminated by the next line
+     3 00000033 0D0A24              <1> crlf    db CR,LF,"$"
+     4 00000036 456E64206F6620696E- <1> eofStr  db "End of input file",CR,LF,"$"    ;When EOF occurs
+     4 0000003F 7075742066696C650D- <1>
+     4 00000048 0A24                <1>
+     5 0000004A 496E76616C69642044- <1> badVerStr   db "Invalid DOS Version",CR,LF,"$"
+     5 00000053 4F532056657273696F- <1>
+     5 0000005C 6E0D0A24            <1>
+     6 00000060 496E76616C69642044- <1> badDrvStr   db "Invalid Drive Specified",CR,LF,"$"
+     6 00000069 726976652053706563- <1>
+     6 00000072 69666965640D0A24    <1>
+     7 0000007A 46696C65206E616D65- <1> badNameStr  db "File name must be specified",CR,LF,"$"
+     7 00000083 206D75737420626520- <1>
+     7 0000008C 737065636966696564- <1>
+     7 00000095 0D0A24              <1>
+     8                              <1> 
+     9 00000098 456E74727920657272- <1> badInput    db "Entry error",CR,LF,"$"
+     9 000000A1 6F720D0A24          <1>
+    30                                  Segment .stack align=8 follows=.data nobits
+    31                                  ;Use a 200 QWORD stack
+    32 00000000 <res 640h>                  dq 200 dup (?)
+    33                                  stackTop:
+    34                                  endOfProgram:   ;Deallocate from here
+    34          ------------------       info: assembly required 1+2+2 passes
+
