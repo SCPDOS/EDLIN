@@ -1,5 +1,6 @@
-lineLength  equ 128
+linelen     equ 128
 maxAlloc    equ 65536*lineLength ;8Mb in size
+fileRO      equ 1   ;Mask for Read Only
 
 struc cmdArgs   ;Ptr returned in rdx after 41h/6101h has this structure
     .fcb1       db 16 dup (?)  ;First FCB,    argument 1 

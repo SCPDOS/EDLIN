@@ -102,7 +102,94 @@
     80                              <1> %macro breakpoint 0
     81                              <1> xchg bx, bx
     82                              <1> %endmacro
-    23                                  %include "./Include/edStruc.inc"
+    23                                  %include "./Include/dosError.inc"
+     1                              <1> ;DOS Error codes
+     2                              <1> 
+     3                              <1> ;Extended Error Codes
+     4                              <1> errInvFnc   equ 1   ;Invalid function number
+     5                              <1> errFnf      equ 2   ;File not found
+     6                              <1> errPnf      equ 3   ;Path not found
+     7                              <1> errNhl      equ 4   ;Too many open handles, no handles left
+     8                              <1> errAccDen   equ 5   ;Access denied (to resource)
+     9                              <1> errBadHdl   equ 6   ;Invalid handle
+    10                              <1> errMCBbad   equ 7   ;MCB's destroyed
+    11                              <1> errNoMem    equ 8   ;Insufficient memory
+    12                              <1> errMemAddr  equ 9   ;Invalid Memory Block Address
+    13                              <1> errBadEnv   equ 10  ;Invalid environment
+    14                              <1> errBadFmt   equ 11  ;Invalid format (path etc)
+    15                              <1> errAccCde   equ 12  ;Invalid Access Code    ?
+    16                              <1> errInvDat   equ 13  ;Invalid data
+    17                              <1> ;           equ 14  ;Reserved
+    18                              <1> errBadDrv   equ 15  ;Invalid drive specified
+    19                              <1> errDelCD    equ 16  ;Attempt to delete the current directory
+    20                              <1> errDevUnk   equ 17  ;Not the same device (Device Unknown)
+    21                              <1> errNoFil    equ 18  ;No more files, no match found
+    22                              <1> ;The following are Driver error codes + 19
+    23                              <1> drvErrShft  equ 19  ;Used to shift Driver error codes to extended error codes
+    24                              <1> errWpd      equ 19  ;Attempt to write on write protected disk
+    25                              <1> errUnkUnt   equ 20  ;Unknown Unit
+    26                              <1> errDrvNR    equ 21  ;Drive not ready
+    27                              <1> errUnkCmd   equ 22  ;Unknown Command
+    28                              <1> errCRCerr   equ 23  ;Data (CRC) error
+    29                              <1> errBadRLn   equ 24  ;Bad request structure length
+    30                              <1> errSekErr   equ 25  ;Seek error
+    31                              <1> errUnkMed   equ 26  ;Unknown media type
+    32                              <1> errSecNF    equ 27  ;Sector not Found
+    33                              <1> errNoPap    equ 28  ;Printer out of paper
+    34                              <1> errWF       equ 29  ;Write fault
+    35                              <1> errRF       equ 30  ;Read fault
+    36                              <1> errGF       equ 31  ;General fault
+    37                              <1> ;----------------------------------------------
+    38                              <1> ;The following two go inbetween the Disk errors
+    39                              <1> errShrVio   equ 32  ;Sharing violations
+    40                              <1> errLokVio   equ 33  ;File Lock violation
+    41                              <1> ;----------------------------------------------
+    42                              <1> errIDC      equ 34  ;Driver code, Invalid Disk Change
+    43                              <1> errNoFCB    equ 35  ;FCB unavailable
+    44                              <1> errShrFul   equ 36  ;Sharing buffer full
+    45                              <1> 
+    46                              <1> errNoNet    equ 50  ;Network request not supported, generic net fail
+    47                              <1> 
+    48                              <1> errFilExist equ 80  ;File already exists
+    49                              <1> errDirExist equ 82  ;Directory already exists
+    50                              <1> errFI44     equ 83  ;Fail on INT 44h
+    51                              <1> errRedir    equ 84  ;Too many levels of redirection
+    52                              <1> errDupRedir equ 85  ;Trying to redirect a redirection
+    53                              <1> errBadPass  equ 86  ;Bad password
+    54                              <1> errBadParam equ 87  ;Bad parameter passed to request
+    55                              <1> errNetWrite equ 88  ;Network Write Fault
+    56                              <1> ;-----------------------------------------------------------------------------
+    57                              <1> ;Error Loci
+    58                              <1> eLocUnk     equ 1   ;Unknown locus, nonspecific or not appropriate
+    59                              <1> eLocDsk     equ 2   ;Disk, related to Random Access to a disk or block device
+    60                              <1> eLocNet     equ 3   ;Network related issues, shouldnt affect us (yet!)
+    61                              <1> eLocChr     equ 4   ;Serial/Character Device error
+    62                              <1> eLocMem     equ 5   ;Related to RAM
+    63                              <1> ;-----------------------------------------------------------------------------
+    64                              <1> ;Error Actions
+    65                              <1> eActRet     equ 1   ;Retry
+    66                              <1> eActDRet    equ 2   ;Delay then retry (Try again later)
+    67                              <1> eActUsr     equ 3   ;Ask user to re-input data, i.e. bad filename or something
+    68                              <1> eActAbt     equ 4   ;Abort with cleanup
+    69                              <1> eActKil     equ 5   ;Abort without cleanup
+    70                              <1> eActIgn     equ 6   ;Ignore error
+    71                              <1> eActRetUsr  equ 7   ;Retry after user intervention (i.e swap remdev)
+    72                              <1> ;-----------------------------------------------------------------------------
+    73                              <1> ;Error classes
+    74                              <1> eClsOoR     equ 1   ;Out of resources, no mem or handles
+    75                              <1> eClsTS      equ 2   ;Temp sitch, should go away
+    76                              <1> eClsAuth    equ 3   ;Authorisation, e.g. file permission error 
+    77                              <1> eClsInt     equ 4   ;Internal DOS error or bug
+    78                              <1> eClsHrdFlt  equ 5   ;Hardware Failure
+    79                              <1> eClsSysFlt  equ 6   ;System Failure, i.e. missing or bad cfg files
+    80                              <1> eClsAppFlt  equ 7   ;Application Program error, inconsistent requests etc...
+    81                              <1> eClsNotFnd  equ 8   ;Resource not found (such as free SFT entry etc...)
+    82                              <1> eClsBadFmt  equ 9   ;Bad format for resource
+    83                              <1> eClsLocked  equ 10  ;Resource Locked
+    84                              <1> eClsMedia   equ 11  ;Error is on medium, i.e. wrong or damaged remdev
+    85                              <1> eClsClash   equ 12  ;Resource already exists!
+    86                              <1> eClsUnk     equ 13  ;Unknown class
+    24                                  %include "./Include/edStruc.inc"
      1                              <1> lineLength  equ 128
      2                              <1> maxAlloc    equ 65536*lineLength ;8Mb in size
      3                              <1> 
@@ -147,8 +234,8 @@
     42                              <1> eCursR  equ 4Dh ;Cursor Right second byte
     43                              <1> eIns    equ 52h ;Insert second byte
     44                              <1> eDel    equ 53h ;DEL second byte (not necessarily delete key)
-    24                                  Segment .text align=1 
-    25                                  %include "./Source/edmain.asm"
+    25                                  Segment .text align=1 
+    26                                  %include "./Source/edmain.asm"
      1                              <1> ;Main EDLIN file
      2                              <1> start:
      3 00000000 EB01                <1>     jmp short .cVersion
@@ -160,7 +247,7 @@
      9 0000000C CD41                <1>     int 41h
     10 0000000E 3A05EEFFFFFF        <1>     cmp al, byte [.vNum]
     11 00000014 761A                <1>     jbe short okVersion
-    12 00000016 488D15(4A000000)    <1>     lea rdx, badVerStr
+    12 00000016 488D15(52000000)    <1>     lea rdx, badVerStr
     13                              <1> badExitMsg:
     14 0000001D 4885D2              <1>     test rdx, rdx   ;Check if null ptr => Dont print on exit
     15 00000020 7407                <1>     jz short .noPrint
@@ -176,7 +263,7 @@
     25                              <1> ;Now parse the command line, to get full command spec for filename.
     26 00000037 488D7A25            <1>     lea rdi, qword [rdx + cmdArgs.progTail] ;Get ptr to tail
     27 0000003B 0FB64A24            <1>     movzx ecx, byte [rdx + cmdArgs.parmList]    ;Get number of chars in cmdline
-    28 0000003F 488D15(7A000000)    <1>     lea rdx, badNameStr ;Prep for error message
+    28 0000003F 488D15(82000000)    <1>     lea rdx, badNameStr ;Prep for error message
     29 00000046 B020                <1>     mov al, SPC ;Now we search for a space. No leading spaces on cmdine
     30 00000048 F2AE                <1>     repne scasb
     31 0000004A 85C9                <1>     test ecx, ecx   ;If no chars left (even on equality with SPC) fail
@@ -207,14 +294,14 @@
     56 0000007F 80FC3A              <1>     cmp ah, ":"
     57 00000082 750C                <1>     jne short .noDriveSpecified
     58                              <1>     ;Check if drive specified is OK, bl has signature
-    59 00000084 488D15(60000000)    <1>     lea rdx, badDrvStr
+    59 00000084 488D15(68000000)    <1>     lea rdx, badDrvStr
     60 0000008B 80FBFF              <1>     cmp bl, -1
     61 0000008E 748D                <1>     je badExitMsg
     62                              <1> .noDriveSpecified:
     63                              <1> ;Paths can only be a max of 67 chars but the DTA buffer is 127 bytes
     64                              <1> ; so if no extension is provided or too short an extension is provided,
     65                              <1> ; simply add space for the extension.
-    66                              <1> 
+    66                              <1> ;-----------------------It is nice to dream big-----------------------
     67                              <1> ;Now we proceed with opening the file/creating if it is new.
     68                              <1> 
     69                              <1> ;If the file is new, create with $$$ extension. Goto End.
@@ -230,10 +317,73 @@
     79                              <1> ;Process file. On exit, close the handle.
     80                              <1> ;Rename file to have the original (potentially empty) extension.
     81                              <1> ;Return to DOS
-    26                                  %include "./Source/edutils.asm"
+    82                              <1> ;-----------------------It is nice to dream big-----------------------
+    83                              <1> ; Now we proceed with creating the file if it is new or opening if not
+    84                              <1> 
+    85 00000090 4889FA              <1>     mov rdx, rdi    ;Get the file name pointer
+    86 00000093 B8023D0000          <1>     mov eax, 3D02h  ;Open in R/W mode
+    87 00000098 CD41                <1>     int 41h
+    88 0000009A 7327                <1>     jnc short .fileOpen
+    89 0000009C 3C02                <1>     cmp al, errFnf
+    90 0000009E 740C                <1>     je short .createFile
+    91 000000A0 488D15(BF000000)    <1>     lea rdx, badOpenStr
+    92 000000A7 E971FFFFFF          <1>     jmp badExitMsg
+    93                              <1> .createFile:
+    94 000000AC B8003C0000          <1>     mov eax, 3C00h  ;Create file
+    95 000000B1 31C9                <1>     xor ecx, ecx    ;Regular attributes 
+    96 000000B3 CD41                <1>     int 41h
+    97 000000B5 730C                <1>     jnc short .fileOpen
+    98 000000B7 488D15(A0000000)    <1>     lea rdx, badCreatStr
+    99 000000BE E95AFFFFFF          <1>     jmp badExitMsg
+   100                              <1> .fileOpen:
+   101 000000C3 668905(10000000)    <1>     mov word [fileHdl], ax  ;Save the handle
+   102                              <1> 
+   103                              <1> 
+   104                              <1> exitOk:
+   105 000000CA B903000000          <1>     mov ecx, 3  ;Try three times to free if we can't for some reason
+   106                              <1> .freeAgain:
+   107 000000CF 4C8B05(1F000000)    <1>     mov r8, qword [memPtr]
+   108 000000D6 B800490000          <1>     mov eax, 4900h
+   109 000000DB CD41                <1>     int 41h
+   110 000000DD 7312                <1>     jnc short .freeOk
+   111 000000DF FFC9                <1>     dec ecx
+   112 000000E1 740E                <1>     jz short .freeOk
+   113 000000E3 51                  <1>     push rcx
+   114 000000E4 B9FFFFFF00          <1>     mov ecx, 0FFFFFFh
+   115 000000E9 E828000000          <1>     call .pauseSpin
+   116 000000EE 59                  <1>     pop rcx
+   117 000000EF EBDE                <1>     jmp short .freeAgain
+   118                              <1> .freeOk:
+   119 000000F1 0FB71D(10000000)    <1>     movzx ebx, word [fileHdl]
+   120                              <1> .hdlAgain:
+   121 000000F8 B8003E0000          <1>     mov eax, 3E00h
+   122 000000FD CD41                <1>     int 41h
+   123 000000FF 730E                <1>     jnc short .hdlOk
+   124 00000101 51                  <1>     push rcx
+   125 00000102 B9FFFFFF00          <1>     mov ecx, 0FFFFFFh
+   126 00000107 E80A000000          <1>     call .pauseSpin
+   127 0000010C 59                  <1>     pop rcx
+   128 0000010D EBE9                <1>     jmp short .hdlAgain
+   129                              <1> .hdlOk:
+   130 0000010F B8004C0000          <1>     mov eax, 4C00h
+   131 00000114 CD41                <1>     int 41h
+   132                              <1> 
+   133                              <1> .pauseSpin:
+   134                              <1> ;Called with ecx loaded with the counter to pause for.
+   135                              <1> ;Totally non-deterministic so please dont load too large a value.
+   136                              <1> ;Recommended: mov ecx, 0FFFFFFh
+   137 00000116 F390                <1>     pause
+   138 00000118 FFC9                <1>     dec ecx
+   139 0000011A 75FA                <1>     jnz short .pauseSpin
+   140                              <1>     return
+    13                              <2> %%_ret:
+    14 0000011C C3                  <2>  ret
+    15                              <2> %assign retOff %%_ret-$$
+   141                              <1> 
+    27                                  %include "./Source/edutils.asm"
      1                              <1> ;Utility functions for edlin go here
-    27                                  Segment .data align=1 follows=.text 
-    28                                  %include "./Data/eddata.asm"
+    28                                  Segment .data align=1 follows=.text 
+    29                                  %include "./Data/eddata.asm"
      1                              <1> ;This version can only deal with 65536 line of maximum 128 length each.
      2                              <1> ;This amounts to files of roughly 8Mb in size which is large enough for now.
      3                              <1> ;It suffices to work with the DOS kernel!
@@ -247,32 +397,41 @@
     11 00000017 0000000000000000    <1> linePtr     dq 0    ;Ptr to the current line start
     12                              <1> 
     13                              <1> ;Use a single buffer. For now, if less than 8Mb available, just don't load
-    14 0000001F 0000000000000000    <1> bufferPtr   dq 0    ;Ptr to the buffer for the current line
-    15 00000027 00000000            <1> bufferSize  dd 0    ;Mustnt exceed 1024*1024*8 bytes (8Mbytes)
-    29                                  %include "./Data/edmsg.asm"
+    14 0000001F 0000000000000000    <1> memPtr      dq 0    ;Ptr to the memory arena given by DOS
+    15 00000027 0000000000000000    <1> bufferPtr   dq 0    ;Ptr to the buffer for the current line
+    16 0000002F 00000000            <1> bufferSize  dd 0    ;Mustnt exceed 1024*1024*8 bytes (8Mbytes)
+    30                                  %include "./Data/edmsg.asm"
      1                              <1> ;Edlin Strings are in this file 
-     2 0000002B 4E65772066696C65    <1> newStr  db "New file"   ;This string is terminated by the next line
-     3 00000033 0D0A24              <1> crlf    db CR,LF,"$"
-     4 00000036 456E64206F6620696E- <1> eofStr  db "End of input file",CR,LF,"$"    ;When EOF occurs
-     4 0000003F 7075742066696C650D- <1>
-     4 00000048 0A24                <1>
-     5 0000004A 496E76616C69642044- <1> badVerStr   db "Invalid DOS Version",CR,LF,"$"
-     5 00000053 4F532056657273696F- <1>
-     5 0000005C 6E0D0A24            <1>
-     6 00000060 496E76616C69642044- <1> badDrvStr   db "Invalid Drive Specified",CR,LF,"$"
-     6 00000069 726976652053706563- <1>
-     6 00000072 69666965640D0A24    <1>
-     7 0000007A 46696C65206E616D65- <1> badNameStr  db "File name must be specified",CR,LF,"$"
-     7 00000083 206D75737420626520- <1>
-     7 0000008C 737065636966696564- <1>
-     7 00000095 0D0A24              <1>
-     8                              <1> 
-     9 00000098 456E74727920657272- <1> badInput    db "Entry error",CR,LF,"$"
-     9 000000A1 6F720D0A24          <1>
-    30                                  Segment .stack align=8 follows=.data nobits
-    31                                  ;Use a 200 QWORD stack
-    32 00000000 <res 640h>                  dq 200 dup (?)
-    33                                  stackTop:
-    34                                  endOfProgram:   ;Deallocate from here
-    34          ------------------       info: assembly required 1+2+2 passes
+     2 00000033 4E65772066696C65    <1> newStr  db "New file"   ;This string is terminated by the next line
+     3 0000003B 0D0A24              <1> crlf    db CR,LF,"$"
+     4 0000003E 456E64206F6620696E- <1> eofStr  db "End of input file",CR,LF,"$"    ;When EOF occurs
+     4 00000047 7075742066696C650D- <1>
+     4 00000050 0A24                <1>
+     5 00000052 496E76616C69642044- <1> badVerStr   db "Invalid DOS Version",CR,LF,"$"
+     5 0000005B 4F532056657273696F- <1>
+     5 00000064 6E0D0A24            <1>
+     6 00000068 496E76616C69642044- <1> badDrvStr   db "Invalid Drive Specified",CR,LF,"$"
+     6 00000071 726976652053706563- <1>
+     6 0000007A 69666965640D0A24    <1>
+     7 00000082 46696C65206E616D65- <1> badNameStr  db "File name must be specified",CR,LF,"$"
+     7 0000008B 206D75737420626520- <1>
+     7 00000094 737065636966696564- <1>
+     7 0000009D 0D0A24              <1>
+     8 000000A0 43616E6E6F74206372- <1> badCreatStr db "Cannot create specified file",CR,LF,"$"
+     8 000000A9 656174652073706563- <1>
+     8 000000B2 69666965642066696C- <1>
+     8 000000BB 650D0A24            <1>
+     9 000000BF 43616E6E6F74206F70- <1> badOpenStr  db "Cannot open specified file",CR,LF,"$"
+     9 000000C8 656E20737065636966- <1>
+     9 000000D1 6965642066696C650D- <1>
+     9 000000DA 0A24                <1>
+    10                              <1> 
+    11 000000DC 456E74727920657272- <1> badInput    db "Entry error",CR,LF,"$"
+    11 000000E5 6F720D0A24          <1>
+    31                                  Segment .stack align=8 follows=.data nobits
+    32                                  ;Use a 200 QWORD stack
+    33 00000000 <res 640h>                  dq 200 dup (?)
+    34                                  stackTop:
+    35                                  endOfProgram:   ;Deallocate from here
+    35          ------------------       info: assembly required 1+2+2 passes
 

@@ -11,16 +11,16 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0                90  00000090  progbits  .text
-              90                90               136  000000A6  progbits  .data
-             138               138               778  00000640  nobits    .stack
+               0                 0               11D  0000011D  progbits  .text
+             11D               11D               207  000000EA  progbits  .data
+             208               208               848  00000640  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                  90
+length:                 11D
 start:                    0
 align:                    1
 follows:   not defined
@@ -31,11 +31,11 @@ vfollows:  not defined
 ---- Section .data ------------------------------------------------------------
 
 class:     progbits
-length:                  A6
-start:                   90
+length:                  EA
+start:                  11D
 align:                    1
 follows:   .text
-vstart:                  90
+vstart:                 11D
 valign:    not defined
 vfollows:  not defined
 
@@ -43,10 +43,10 @@ vfollows:  not defined
 
 class:     nobits
 length:                 640
-start:                  138
+start:                  208
 align:                    8
 follows:   not defined
-vstart:                 138
+vstart:                 208
 valign:                   8
 vfollows:  .data
 
@@ -55,6 +55,76 @@ vfollows:  .data
 ---- No Section ---------------------------------------------------------------
 
 Value     Name
+00000001  errInvFnc
+00000002  errFnf
+00000003  errPnf
+00000004  errNhl
+00000005  errAccDen
+00000006  errBadHdl
+00000007  errMCBbad
+00000008  errNoMem
+00000009  errMemAddr
+0000000A  errBadEnv
+0000000B  errBadFmt
+0000000C  errAccCde
+0000000D  errInvDat
+0000000F  errBadDrv
+00000010  errDelCD
+00000011  errDevUnk
+00000012  errNoFil
+00000013  drvErrShft
+00000013  errWpd
+00000014  errUnkUnt
+00000015  errDrvNR
+00000016  errUnkCmd
+00000017  errCRCerr
+00000018  errBadRLn
+00000019  errSekErr
+0000001A  errUnkMed
+0000001B  errSecNF
+0000001C  errNoPap
+0000001D  errWF
+0000001E  errRF
+0000001F  errGF
+00000020  errShrVio
+00000021  errLokVio
+00000022  errIDC
+00000023  errNoFCB
+00000024  errShrFul
+00000032  errNoNet
+00000050  errFilExist
+00000052  errDirExist
+00000053  errFI44
+00000054  errRedir
+00000055  errDupRedir
+00000056  errBadPass
+00000057  errBadParam
+00000058  errNetWrite
+00000001  eLocUnk
+00000002  eLocDsk
+00000003  eLocNet
+00000004  eLocChr
+00000005  eLocMem
+00000001  eActRet
+00000002  eActDRet
+00000003  eActUsr
+00000004  eActAbt
+00000005  eActKil
+00000006  eActIgn
+00000007  eActRetUsr
+00000001  eClsOoR
+00000002  eClsTS
+00000003  eClsAuth
+00000004  eClsInt
+00000005  eClsHrdFlt
+00000006  eClsSysFlt
+00000007  eClsAppFlt
+00000008  eClsNotFnd
+00000009  eClsBadFmt
+0000000A  eClsLocked
+0000000B  eClsMedia
+0000000C  eClsClash
+0000000D  eClsUnk
 00000080  lineLength
 00800000  maxAlloc
 00000000  cmdArgs
@@ -107,29 +177,41 @@ Real              Virtual           Name
               61                61  okVersion.findEndLoop
               6E                6E  okVersion.endFound
               90                90  okVersion.noDriveSpecified
+              AC                AC  okVersion.createFile
+              C3                C3  okVersion.fileOpen
+              CA                CA  exitOk
+              CF                CF  exitOk.freeAgain
+              F1                F1  exitOk.freeOk
+              F8                F8  exitOk.hdlAgain
+             10F               10F  exitOk.hdlOk
+             116               116  exitOk.pauseSpin
+             11C               11C  ..@5._ret
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-              90                90  fileNamePtr
-              98                98  fileExtPtr
-              A0                A0  fileHdl
-              A2                A2  bkupExt
-              A5                A5  currentLine
-              A7                A7  linePtr
-              AF                AF  bufferPtr
-              B7                B7  bufferSize
-              BB                BB  newStr
-              C3                C3  crlf
-              C6                C6  eofStr
-              DA                DA  badVerStr
-              F0                F0  badDrvStr
-             10A               10A  badNameStr
-             128               128  badInput
+             11D               11D  fileNamePtr
+             125               125  fileExtPtr
+             12D               12D  fileHdl
+             12F               12F  bkupExt
+             132               132  currentLine
+             134               134  linePtr
+             13C               13C  memPtr
+             144               144  bufferPtr
+             14C               14C  bufferSize
+             150               150  newStr
+             158               158  crlf
+             15B               15B  eofStr
+             16F               16F  badVerStr
+             185               185  badDrvStr
+             19F               19F  badNameStr
+             1BD               1BD  badCreatStr
+             1DC               1DC  badOpenStr
+             1F9               1F9  badInput
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-             778               778  stackTop
-             778               778  endOfProgram
+             848               848  stackTop
+             848               848  endOfProgram
 

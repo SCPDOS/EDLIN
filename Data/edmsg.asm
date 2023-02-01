@@ -5,5 +5,7 @@ eofStr  db "End of input file",CR,LF,"$"    ;When EOF occurs
 badVerStr   db "Invalid DOS Version",CR,LF,"$"
 badDrvStr   db "Invalid Drive Specified",CR,LF,"$"
 badNameStr  db "File name must be specified",CR,LF,"$"
+badCreatStr db "Cannot create specified file",CR,LF,"$"
+badOpenStr  db "Cannot open specified file",CR,LF,"$"
 
 badInput    db "Entry error",CR,LF,"$"

@@ -63,7 +63,7 @@ okVersion:
 ;Paths can only be a max of 67 chars but the DTA buffer is 127 bytes
 ; so if no extension is provided or too short an extension is provided,
 ; simply add space for the extension.
-
+;-----------------------It is nice to dream big-----------------------
 ;Now we proceed with opening the file/creating if it is new.
 
 ;If the file is new, create with $$$ extension. Goto End.
@@ -79,3 +79,39 @@ okVersion:
 ;Process file. On exit, close the handle.
 ;Rename file to have the original (potentially empty) extension.
 ;Return to DOS
+;-----------------------It is nice to dream big-----------------------
+; Now we proceed with creating the file if it is new or opening if not
+
+    mov rdx, rdi    ;Get the file name pointer
+    mov eax, 3D02h  ;Open in R/W mode
+    int 41h
+    jnc short .fileOpen
+    cmp al, errFnf
+    je short .createFile
+    lea rdx, badOpenStr
+    jmp badExitMsg
+.createFile:
+    mov eax, 3C00h  ;Create file
+    xor ecx, ecx    ;Regular attributes 
+    int 41h
+    jnc short .fileOpen
+    lea rdx, badCreatStr
+    jmp badExitMsg
+.fileOpen:
+    mov word [fileHdl], ax  ;Save the handle for access whenever
+
+;Now get the attribs of the file (rdi points to the filename)
+    mov eax, 4300h  ;CHMOD get attribs
+    int 41h
+    and cl, fileRO   ;Save only the RO bit
+    jz short .notRO
+    mov byte [roFlag], -1   ;Set Read Only bit on
+.notRO:
+    
+
+exitOk:
+;Let DOS take care of freeing all resources
+    mov eax, 4C00h
+    int 41h
+
+

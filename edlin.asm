@@ -20,6 +20,7 @@ BITS 64
 ;Edlin has two modes of operation: Command and Edit
 
 %include "./Include/dosMacro.mac"
+%include "./Include/dosError.inc"
 %include "./Include/edStruc.inc"
 Segment .text align=1 
 %include "./Source/edmain.asm"
@@ -28,6 +29,7 @@ Segment .data align=1 follows=.text
 %include "./Data/eddata.asm"
 %include "./Data/edmsg.asm"
 Segment .stack align=8 follows=.data nobits
+%include "./Data/edbss.asm"
 ;Use a 200 QWORD stack
     dq 200 dup (?)
 stackTop:
