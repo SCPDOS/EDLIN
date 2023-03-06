@@ -11,16 +11,16 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0               11D  0000011D  progbits  .text
-             11D               11D               207  000000EA  progbits  .data
-             208               208               848  00000640  nobits    .stack
+               0                 0               1F4  000001F4  progbits  .text
+             1F4               1F4               300  0000010C  progbits  .data
+             300               300               A66  00000766  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                 11D
+length:                 1F4
 start:                    0
 align:                    1
 follows:   not defined
@@ -31,22 +31,22 @@ vfollows:  not defined
 ---- Section .data ------------------------------------------------------------
 
 class:     progbits
-length:                  EA
-start:                  11D
+length:                 10C
+start:                  1F4
 align:                    1
 follows:   .text
-vstart:                 11D
+vstart:                 1F4
 valign:    not defined
 vfollows:  not defined
 
 ---- Section .stack -----------------------------------------------------------
 
 class:     nobits
-length:                 640
-start:                  208
+length:                 766
+start:                  300
 align:                    8
 follows:   not defined
-vstart:                 208
+vstart:                 300
 valign:                   8
 vfollows:  .data
 
@@ -125,15 +125,10 @@ Value     Name
 0000000B  eClsMedia
 0000000C  eClsClash
 0000000D  eClsUnk
-00000080  lineLength
+00000080  lineLen
+00010000  maxLine
 00800000  maxAlloc
-00000000  cmdArgs
-00000000  cmdArgs.fcb1
-00000010  cmdArgs.fcb2
-00000024  cmdArgs.dta
-00000024  cmdArgs.parmList
-00000025  cmdArgs.progTail
-000000A4  cmdArgs_size
+00000001  fileRO
 00000000  NUL
 00000003  ETX
 00000006  ACK
@@ -163,6 +158,39 @@ Value     Name
 0000004D  eCursR
 00000052  eIns
 00000053  eDel
+00000000  cmdArgs
+00000000  cmdArgs.fcb1
+00000010  cmdArgs.fcb2
+00000024  cmdArgs.dta
+00000024  cmdArgs.parmList
+00000025  cmdArgs.progTail
+000000A4  cmdArgs_size
+00000000  memArena
+00000000  memArena.pMemArena
+00000008  memArena.dCount
+0000000C  memArena.dMaxAlloc
+00000010  memArena.bFlags
+00000014  memArena.memoryArena
+00000014  memArena_size
+00000014  maxArenaNumber
+00010000  arenaSize
+00000000  line
+00000000  line.dNumber
+00000004  line.bFlags
+00000005  line.pLine
+0000000D  line.pStrHead
+00000015  line.pMemArena
+0000001D  line_size
+00000001  lineFlagRef
+00000002  lineFlagDirty
+00000000  string
+00000000  string.bFlags
+00000001  string.pMemArena
+00000009  string.bLength
+0000000A  string.sHead
+0000008A  string_size
+00000000  strFree
+000000FF  strInUse
 
 
 ---- Section .text ------------------------------------------------------------
@@ -174,44 +202,76 @@ Real              Virtual           Name
               1D                1D  badExitMsg
               29                29  badExitMsg.noPrint
               30                30  okVersion
-              61                61  okVersion.findEndLoop
-              6E                6E  okVersion.endFound
-              90                90  okVersion.noDriveSpecified
-              AC                AC  okVersion.createFile
-              C3                C3  okVersion.fileOpen
-              CA                CA  exitOk
-              CF                CF  exitOk.freeAgain
-              F1                F1  exitOk.freeOk
-              F8                F8  exitOk.hdlAgain
-             10F               10F  exitOk.hdlOk
-             116               116  exitOk.pauseSpin
-             11C               11C  ..@5._ret
+              71                71  okVersion.findEndLoop
+              80                80  okVersion.endFoundSpc
+              A0                A0  okVersion.endFound
+              C6                C6  okVersion.noDriveSpecified
+              FF                FF  okVersion.extSearch
+             120               120  okVersion.extFnd
+             148               148  okVersion.badPathError
+             154               154  okVersion.pathComplete
+             170               170  okVersion.createFile
+             187               187  okVersion.fileOpen
+             1A1               1A1  okVersion.notRO
+             1A1               1A1  exitOk
+             1A8               1A8  strcpy
+             1B0               1B0  strcpy.lp
+             1BC               1BC  strcpy.exit
+             1BF               1BF  ..@14._ret
+             1C0               1C0  memmove
+             1C8               1C8  ..@15._ret
+             1C9               1C9  memset
+             1CF               1CF  ..@16._ret
+             1D0               1D0  findLineEnd
+             1D5               1D5  findLineEnd.lp
+             1DA               1DA  ..@18._base
+             1DE               1DE  ..@20._base
+             1E5               1E5  isCharEOL
+             1E8               1E8  ..@22._base
+             1ED               1ED  ..@24._base
+             1F3               1F3  ..@25._ret
+             1F4               1F4  flushLine
+             1F4               1F4  deallocateLine
+             1F4               1F4  incAllocCount
+             1F4               1F4  freeAlloc
+             1F4               1F4  makeAlloc
+             1F4               1F4  findFreeStringSpace
+             1F4               1F4  findFreeLineSpace
+             1F4               1F4  findFreeSpace
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-             11D               11D  fileNamePtr
-             125               125  fileExtPtr
-             12D               12D  fileHdl
-             12F               12F  bkupExt
-             132               132  currentLine
-             134               134  linePtr
-             13C               13C  memPtr
-             144               144  bufferPtr
-             14C               14C  bufferSize
-             150               150  newStr
-             158               158  crlf
-             15B               15B  eofStr
-             16F               16F  badVerStr
-             185               185  badDrvStr
-             19F               19F  badNameStr
-             1BD               1BD  badCreatStr
-             1DC               1DC  badOpenStr
-             1F9               1F9  badInput
+             1F4               1F4  roFlag
+             1F5               1F5  noEOFCheck
+             1F6               1F6  switchChar
+             1F7               1F7  currOff
+             1FF               1FF  memPtr
+             207               207  bufferPtr
+             20F               20F  bufferSize
+             213               213  newStr
+             21B               21B  crlf
+             21E               21E  eofStr
+             232               232  badVerStr
+             248               248  badDrvStr
+             262               262  badNameStr
+             280               280  badCreatStr
+             29F               29F  badOpenStr
+             2BC               2BC  badFileStr
+             2DE               2DE  badParm
+             2F2               2F2  badInput
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-             848               848  stackTop
-             848               848  endOfProgram
+             300               300  tmpNamePtr
+             300               300  fileNamePtr
+             308               308  fileExtPtr
+             310               310  fileHdl
+             312               312  tmpName
+             322               322  pathspec
+             3A2               3A2  pathspec2
+             422               422  bkupExt
+             A66               A66  stackTop
+             A66               A66  endOfProgram
 

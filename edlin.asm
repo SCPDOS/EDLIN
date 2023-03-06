@@ -7,8 +7,6 @@ BITS 64
 ;       Each line is terminated first with 0Dh then 0Ah (CR,LF)
 ;                       !!DONT FORGET!!
 ;
-;The logic of this EDLIN will be based on my BASIC interpreter editor.
-;Except, users won't need to specify their own line numbers each time.
 
 ;Edlin will always produce a backup file and refuses to open files 
 ; with .BAK extension (backup files)
@@ -25,6 +23,7 @@ BITS 64
 Segment .text align=1 
 %include "./Source/edmain.asm"
 %include "./Source/edutils.asm"
+%include "./Source/edalloc.asm"
 Segment .data align=1 follows=.text 
 %include "./Data/eddata.asm"
 %include "./Data/edmsg.asm"

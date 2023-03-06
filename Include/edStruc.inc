@@ -1,7 +1,7 @@
 ;edlin structures
-linelen     equ 128
+lineLen     equ 128
 maxLine     equ 65536
-maxAlloc    equ maxLine*lineLength ;8Mb in size
+maxAlloc    equ maxLine*lineLen ;8Mb in size
 fileRO      equ 1   ;Mask for Read Only
 
 ;MISC ASCII control chars
@@ -79,7 +79,7 @@ struc string
     .bFlags     db ?    ;Set to -1 if in use, 0 if free
     .pMemArena  dq ?    ;Pointer to the memory arena we are in
     .bLength    db ?    ;String length, computed on edit commit
-    .sHead      db linelen db (?)   ;Each string is of maximum length
+    .sHead      db lineLen dup(?)   ;Each string is of maximum length
 endstruc
 
 strFree     equ 00h

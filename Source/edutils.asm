@@ -70,21 +70,3 @@ isCharEOL:
     retne
     cmp byte [rsi + 1], LF
     return
-
-
-readLineFromDisk:
-;Gets current fpos.
-;Reads 128 chars.
-;Counts until the first CR,LF found.
-;Computes 128-offsetInLine
-;Sets new fpos to currOff minus this amount
-
-flushWindowToDisk:
-;Seek to start of window position
-    movzx ebx, word [fileHdl]   ;Get the file handle
-    mov edx, dword [currOff]
-    mov ecx, dword [currOff + 4]    ;Get high bytes
-    mov eax, 4200h  ;LSEEK from start of file
-    int 41h
-    ;Goto first line in memory block and flush the line
-
