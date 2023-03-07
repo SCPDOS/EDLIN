@@ -11,16 +11,16 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0               1EC  000001EC  progbits  .text
-             1EC               1EC               2F8  0000010C  progbits  .data
-             2F8               2F8               A5E  00000766  nobits    .stack
+               0                 0               1FA  000001FA  progbits  .text
+             1FA               1FA               306  0000010C  progbits  .data
+             308               308               C7F  00000977  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                 1EC
+length:                 1FA
 start:                    0
 align:                    1
 follows:   not defined
@@ -32,21 +32,21 @@ vfollows:  not defined
 
 class:     progbits
 length:                 10C
-start:                  1EC
+start:                  1FA
 align:                    1
 follows:   .text
-vstart:                 1EC
+vstart:                 1FA
 valign:    not defined
 vfollows:  not defined
 
 ---- Section .stack -----------------------------------------------------------
 
 class:     nobits
-length:                 766
-start:                  2F8
+length:                 977
+start:                  308
 align:                    8
 follows:   not defined
-vstart:                 2F8
+vstart:                 308
 valign:                   8
 vfollows:  .data
 
@@ -125,10 +125,11 @@ Value     Name
 0000000B  eClsMedia
 0000000C  eClsClash
 0000000D  eClsUnk
-00000080  lineLen
+000000FD  lineLen
+00000080  halflineLen
 0000FFF9  maxLine
-007FFC80  maxAlloc
-0007FFC9  maxParas
+00FCF915  maxAlloc
+000FCF92  maxParas
 00000001  fileRO
 00000000  NUL
 00000003  ETX
@@ -166,6 +167,16 @@ Value     Name
 00000024  cmdArgs.parmList
 00000025  cmdArgs.progTail
 000000A4  cmdArgs_size
+00000000  line
+00000000  line.bBufLen
+00000001  line.bStrLen
+00000002  line.pString
+000000FF  line_size
+00000000  halfLine
+00000000  halfLine.bBufLen
+00000001  halfLine.bStrLen
+00000002  halfLine.pString
+00000082  halfLine_size
 
 
 ---- Section .text ------------------------------------------------------------
@@ -189,56 +200,70 @@ Real              Virtual           Name
              17F               17F  okVersion.fileOpen
              199               199  okVersion.notRO
              199               199  exitOk
-             1A0               1A0  strcpy
-             1A8               1A8  strcpy.lp
-             1B4               1B4  strcpy.exit
-             1B7               1B7  ..@5._ret
-             1B8               1B8  memmove
-             1C0               1C0  ..@6._ret
-             1C1               1C1  memset
-             1C7               1C7  ..@7._ret
-             1C8               1C8  findLineEnd
-             1CD               1CD  findLineEnd.lp
-             1D2               1D2  ..@9._base
-             1D6               1D6  ..@11._base
-             1DD               1DD  isCharEOL
-             1E0               1E0  ..@13._base
-             1E5               1E5  ..@15._base
-             1EB               1EB  ..@16._ret
+             1A0               1A0  strLen
+             1AD               1AD  ..@11._ret
+             1AE               1AE  strcpy
+             1B6               1B6  strcpy.lp
+             1C2               1C2  strcpy.exit
+             1C5               1C5  ..@12._ret
+             1C6               1C6  memmove
+             1CE               1CE  ..@13._ret
+             1CF               1CF  memset
+             1D5               1D5  ..@14._ret
+             1D6               1D6  findLineEnd
+             1DB               1DB  findLineEnd.lp
+             1E0               1E0  ..@16._base
+             1E4               1E4  ..@18._base
+             1EB               1EB  isCharEOL
+             1EE               1EE  ..@20._base
+             1F3               1F3  ..@22._base
+             1F9               1F9  ..@23._ret
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-             1EC               1EC  roFlag
-             1ED               1ED  noEOFCheck
-             1EE               1EE  eofReached
-             1EF               1EF  currOff
-             1F7               1F7  memPtr
-             1FF               1FF  bufferPtr
-             207               207  bufferSize
-             20B               20B  newStr
-             213               213  crlf
-             216               216  eofStr
-             22A               22A  badVerStr
-             240               240  badDrvStr
-             25A               25A  badNameStr
-             278               278  badCreatStr
-             297               297  badOpenStr
-             2B4               2B4  badFileStr
-             2D6               2D6  badParm
-             2EA               2EA  badInput
+             1FA               1FA  roFlag
+             1FB               1FB  noEOFCheck
+             1FC               1FC  eofReached
+             1FD               1FD  memPtr
+             205               205  arenaSize
+             209               209  memInUse
+             20D               20D  linePtr
+             215               215  lastLine
+             219               219  newStr
+             221               221  crlf
+             224               224  eofStr
+             238               238  badVerStr
+             24E               24E  badDrvStr
+             268               268  badNameStr
+             286               286  badCreatStr
+             2A5               2A5  badOpenStr
+             2C2               2C2  badFileStr
+             2E4               2E4  badParm
+             2F8               2F8  badInput
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-             2F8               2F8  tmpNamePtr
-             2F8               2F8  fileNamePtr
-             300               300  fileExtPtr
-             308               308  fileHdl
-             30A               30A  tmpName
-             31A               31A  pathspec
-             39A               39A  pathspec2
-             41A               41A  bkupExt
-             A5E               A5E  stackTop
-             A5E               A5E  endOfProgram
+             308               308  tmpNamePtr
+             308               308  fileNamePtr
+             310               310  fileExtPtr
+             318               318  fileHdl
+             31A               31A  bkupHdl
+             31C               31C  tmpName
+             32C               32C  pathspec
+             3AC               3AC  pathspec2
+             42C               42C  bkupExt
+             430               430  cmdLine
+             4B2               4B2  args
+             4B3               4B3  cmdChar
+             4B4               4B4  arg1
+             4B6               4B6  arg2
+             4B8               4B8  arg3
+             4BA               4BA  arg4
+             4BC               4BC  argString
+             53E               53E  argPastEnd
+             53F               53F  editLine
+             C7F               C7F  stackTop
+             C7F               C7F  endOfProgram
 

@@ -1,5 +1,19 @@
 ;Utility functions for edlin go here
 
+strLen:
+;String length based on terminator in al
+;Input: rsi -> Source Ptr
+;       al = Terminating char to search for
+;Output: ecx = Number of chars i nstring including terminator
+    xor ecx, ecx
+    dec ecx
+    push rdi
+    mov rdi, rsi
+    repne scasb
+    pop rdi
+    neg ecx ;Take 2's compliment to get number of chars including terminator
+    return
+
 strcpy:
 ;Copies a string from one buffer to another
 ;Input: rsi -> Source Ptr

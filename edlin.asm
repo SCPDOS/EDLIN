@@ -13,7 +13,12 @@ BITS 64
 
 ;Edlin will erase the previous backup if one exists, ensuring there
 ; is enough free space for a new copy of the backup.
-;It then creates a new file with the specified name and a $$$ extension.
+;It then creates a new file with the filename with a $$$ extension.
+;All edits occur in memory and are flushed to it. We then rename it
+; to the desired filename.
+;BAK files cannot be opened.
+;
+;Empty lines are default just a CR,LF pair
 
 ;Edlin has two modes of operation: Command and Edit
 

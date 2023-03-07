@@ -1,7 +1,8 @@
 ;edlin structures
-lineLen     equ 128
+lineLen     equ 253
+halflineLen equ 128
 maxLine     equ 65529
-maxAlloc    equ maxLine*lineLen ;8Mb in size
+maxAlloc    equ maxLine*lineLen 
 maxParas    equ (maxAlloc >> 4) + 1
 fileRO      equ 1   ;Mask for Read Only
 
@@ -47,4 +48,16 @@ struc cmdArgs   ;Ptr returned in rdx after 41h/6101h has this structure
     .dta:   ;Pointer to the default DTA in the 
     .parmList   db ?   ;Number of characters in command tail
     .progTail   db 127 dup (?) ;Default DTA/Program tail
+endstruc
+
+struc line
+    .bBufLen    db ?    ;Buffer size (255)
+    .bStrLen    db ?    ;Length of the string entered in buffer
+    .pString    db lineLen dup (?)      ;Actual string itself
+endstruc
+
+struc halfLine
+    .bBufLen    db ?    ;Buffer size (130)
+    .bStrLen    db ?    ;Length of the string entered in buffer
+    .pString    db halflineLen dup (?)   ;Actual string itself
 endstruc
