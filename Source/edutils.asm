@@ -1,6 +1,6 @@
 ;Utility functions for edlin go here
 
-strLen:
+strlen:
 ;String length based on terminator in al
 ;Input: rsi -> Source Ptr
 ;       al = Terminating char to search for

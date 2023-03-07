@@ -200,7 +200,7 @@ Real              Virtual           Name
              17F               17F  okVersion.fileOpen
              199               199  okVersion.notRO
              199               199  exitOk
-             1A0               1A0  strLen
+             1A0               1A0  strlen
              1AD               1AD  ..@11._ret
              1AE               1AE  strcpy
              1B6               1B6  strcpy.lp
