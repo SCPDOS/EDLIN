@@ -21,8 +21,8 @@ badExitMsg:
 okVersion:
 ;One command line argument except for mandatory filename, /B=(binary read)
     mov eax, 3700h
-    int 41h
-    mov byte [switchChar], dl   ;Save switch char
+    int 41h 
+    mov bh, dl  ;Preserve switch char in bh
 
     mov eax, 6101h  ;Get parsed FCB and cmdtail for filename in rdx
     int 41h
@@ -53,7 +53,7 @@ okVersion:
 .endFoundSpc:
 ;If a space found now search for a switch, continue decrementing ecx 
     mov rdi, rsi    ;Points at first char past CR/SPC terminator
-    mov al, byte [switchChar]
+    mov al, bh  ;Get the switch char back
     repne scasb   ;Search for switchChar, modify rdi
     jne short .endFound ;If we come out here and no switchchar found, exit check
     cmp byte [rdi], "B" ;Was the char after the switchChar a B (binary mode)?

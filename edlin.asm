@@ -23,7 +23,6 @@ BITS 64
 Segment .text align=1 
 %include "./Source/edmain.asm"
 %include "./Source/edutils.asm"
-%include "./Source/edalloc.asm"
 Segment .data align=1 follows=.text 
 %include "./Data/eddata.asm"
 %include "./Data/edmsg.asm"
