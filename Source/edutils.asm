@@ -18,7 +18,7 @@ strcpy:
 ;Copies a string from one buffer to another
 ;Input: rsi -> Source Ptr
 ;       rdi -> Destination Ptr
-    push rsi 
+    push rsi
     push rdi
     push rcx
     mov ecx, lineLen    ;Max number of chars in a string
@@ -35,7 +35,7 @@ strcpy:
     return
 
 memmove:
-;Copies a number of bytes over from one buffer to another 
+;Copies a number of bytes over from one buffer to another
 ;Input: rsi -> Source Ptr
 ;       rdi -> Destination Ptr
 ;       ecx = Count of chars to copy
@@ -77,10 +77,25 @@ findLineEnd:
 isCharEOL:
 ;Input: rsi -> Char/Word to analyse
 ;Output: ZF=ZE if char/word at rsi LF or CR,LF.
-;        ZF=NZ if not 
+;        ZF=NZ if not
+    call isCharEOF
+    rete
     cmp byte [rsi], LF
     rete
     cmp byte [rsi], CR
     retne
     cmp byte [rsi + 1], LF
     return
+
+isCharEOF:
+;Input: rsi -> Char to check if it is ^Z
+;Output: ZF=ZE if char at rsi is ^Z AND we are checking for EOFs
+;        ZF=NZ if char at rsi is not ^Z or we are not checking for eof's
+    push rax
+    mov al, byte [noEofCheck]
+    not al  ;Invert the bits (1's compliment)
+    pop rax
+    retnz   ;Return if not checking for EOF
+    cmp byte [rsi], EOF ;Check if eof
+    return
+

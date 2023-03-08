@@ -1,4 +1,22 @@
+
 ;All variables that dont need initialisation go here
+roFlag      db ?    ;Flag is set if file is read-only. Cannot edit the file.
+noEofCheck  db ?    ;Flag is set if we are not to check for ^Z chars found in the file
+;File editor state information (defaults to 0)
+eofReached  db ?    ;When we reach EOF for file, set to -1
+
+;Treat line numbers as dwords even though they are words
+memPtr      dq ?    ;Ptr to the memory arena given by DOS
+arenaSize   dd ?    ;Size of the arena
+memInUse    dd ?    ;Number of bytes in use
+;If arenaSize = memInUse, refuse any "extensionary" instructions.
+; Allow searching, editing, flushing, editing up to equal
+; number of chars in line.
+
+linePtr     dq ?    ;Ptr to the current source line in memory
+lastLine    dd ?    ;Last line number currently in memory
+
+
 tmpNamePtr:
 fileNamePtr dq ?    ;Ptr to the name portion of filespec
 fileExtPtr  dq ?    ;Ptr to the extension of the file we are editing

@@ -19,9 +19,14 @@ badExitMsg:
     mov eax, 4CFFh
     int 41h
 okVersion:
+;Initialise the BSS and to 0
+    lea rdi, section..bss.start
+    mov rcx, bssLen
+    xor eax, eax
+    rep stosb
 ;One command line argument except for mandatory filename, /B=(binary read)
     mov eax, 3700h
-    int 41h 
+    int 41h
     mov bh, dl  ;Preserve switch char in bh
 
     mov eax, 6101h  ;Get parsed FCB and cmdtail for filename in rdx
@@ -51,7 +56,7 @@ okVersion:
     jz short badExitMsg
     jmp short .findEndLoop  ;Keep looking for the end of the string
 .endFoundSpc:
-;If a space found now search for a switch, continue decrementing ecx 
+;If a space found now search for a switch, continue decrementing ecx
     mov rdi, rsi    ;Points at first char past CR/SPC terminator
     mov al, bh  ;Get the switch char back
     repne scasb   ;Search for switchChar, modify rdi
@@ -59,7 +64,7 @@ okVersion:
     cmp byte [rdi], "B" ;Was the char after the switchChar a B (binary mode)?
     lea rdx, badParm
     jne badExitMsg  ;If not, exit
-    mov byte [noEOFCheck], -1   ;Else, set the flag
+    mov byte [noEofCheck], -1   ;Else, set the flag
 .endFound:
     dec rsi ;Move rsi back to the terminating char
     xor eax, eax
@@ -76,7 +81,7 @@ okVersion:
 .noDriveSpecified:
 ;Now we canonicalise the filename since now it is ASCIIZ
     lea rdi, pathspec
-    mov eax, 6000h  ;Truename the path in rsi to rdi 
+    mov eax, 6000h  ;Truename the path in rsi to rdi
     int 41h
     ;Now get a pointer to the file name and file extension
     mov ecx, 68
@@ -85,7 +90,7 @@ okVersion:
     jecxz .badPathError
     mov al, "\"     ;Find the first pathsep backwards
     mov ecx, 14
-    std 
+    std
     repne scasb
     cld
     jecxz .badPathError
@@ -134,38 +139,44 @@ okVersion:
 ; simply add space for the extension.
 ;-----------------------It is nice to dream big-----------------------
 ;Now we proceed with opening the file/creating if it is new.
-;
-;1) Create a temp file.
-;2) If the file is new, goto End.
-;3) Else, check if there is a backup by replacing the extension with .BAK.
-;4) If so, delete the backup. Fail to edit if backup is Read Only
-;5) Rename the current file to have a .BAK extension.
-;6) Open the Backup and preprocess. Once done, close backup.
-;End:
-;7) Process file, exit when ready. 
-;8) Flush data from temp file and memory to new file
-;8) Rename file to have the original (potentially empty) extension.
-;9) Return to DOS
-;-----------------------It is nice to dream big-----------------------
-; Now we proceed with creating the file if it is new or opening if not
+
 
     mov rdx, rdi    ;Get the file name pointer
-    mov eax, 3D02h  ;Open in R/W mode
+    mov ecx, 27h    ;Inclusive search (Archive, System, Hidden, Read-Only)
+    mov eax, 4E00h  ;Find the file!
     int 41h
-    jnc short .fileOpen
+    jnc short .fileExists
     cmp al, errFnf
     je short .createFile
     lea rdx, badOpenStr
     jmp badExitMsg
 .createFile:
+;If we are creating the file, its a new file.
+;Set variables appropriately.
     mov eax, 3C00h  ;Create file
-    xor ecx, ecx    ;Regular attributes 
+    xor ecx, ecx    ;Regular attributes
     int 41h
-    jnc short .fileOpen
+    mov word [fileHdl], ax
+    ;jnc short .fileOpen
     lea rdx, badCreatStr
     jmp badExitMsg
-.fileOpen:
-    mov word [fileHdl], ax  ;Save the handle for access whenever
+.fileExists:
+;If we are here, we are opening the file.
+    mov eax, 2F00h
+    int 41h     ;Get DTA pointer in rbx
+    mov cl, byte [rbx + ffBlock.attribFnd]
+    lea rdx, badDirStr
+    test cl, fileDir    ;Is dir bit set?
+    jnz badExitMsg
+    xor eax, eax
+    xor ebx, ebx
+    dec ebx
+    test cl, fileRO      ;Is the RO bit set?
+    cmovnz eax, ebx ;Move -1 into al if RO bit set
+    mov byte [roFlag], al   ;Set the ro flag appropriately
+
+
+
 
 ;Now get the attribs of the file (rdi points to the filename)
     mov eax, 4300h  ;CHMOD get attribs
@@ -174,7 +185,7 @@ okVersion:
     jz short .notRO
     mov byte [roFlag], -1   ;Set Read Only bit on
 .notRO:
-    
+
 
 exitOk:
 ;Let DOS take care of freeing all resources

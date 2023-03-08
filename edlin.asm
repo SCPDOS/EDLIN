@@ -25,14 +25,18 @@ BITS 64
 %include "./Include/dosMacro.mac"
 %include "./Include/dosError.inc"
 %include "./Include/edStruc.inc"
+%include "./Include/dosStruc.inc"
 Segment .text align=1 
 %include "./Source/edmain.asm"
 %include "./Source/edutils.asm"
 Segment .data align=1 follows=.text 
 %include "./Data/eddata.asm"
 %include "./Data/edmsg.asm"
-Segment .stack align=8 follows=.data nobits
+Segment .bss align=1 follows=.data nobits
+bssStart:
 %include "./Data/edbss.asm"
+bssLen equ ($ - bssStart)
+Segment .stack align=8 follows=.bss nobits
 ;Use a 200 QWORD stack
     dq 200 dup (?)
 stackTop:
