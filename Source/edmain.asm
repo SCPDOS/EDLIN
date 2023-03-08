@@ -137,10 +137,26 @@ okVersion:
 ;Paths can only be a max of 67 chars but the DTA buffer is 127 bytes
 ; so if no extension is provided or too short an extension is provided,
 ; simply add space for the extension.
-;-----------------------It is nice to dream big-----------------------
+
+;Now realloc memory. No need to add the extra paragraph, but we 
+; do so for as to protect the top of stack from enemy programs 
+; with "segfault-ish" behaviour
+    lea rsp, stackTop
+    lea rbx, endOfProgram   ;Guaranteed paragraph alignment
+    sub rbx, r8 ;Get number of bytes in block
+    shr rbx, 4  ;Convert to paragraphs
+    inc rbx     ;Add one more paragraph for good measure
+    mov eax, 4A00h
+    int 41h
+    lea rdx, badRealloc
+    jc badExitMsg
+;
+;Now we want to allocate our scratchpad space for the file!
+;
+
+
 ;Now we proceed with opening the file/creating if it is new.
-
-
+fileSearch:
     mov rdx, rdi    ;Get the file name pointer
     mov ecx, 27h    ;Inclusive search (Archive, System, Hidden, Read-Only)
     mov eax, 4E00h  ;Find the file!
@@ -156,10 +172,13 @@ okVersion:
     mov eax, 3C00h  ;Create file
     xor ecx, ecx    ;Regular attributes
     int 41h
-    mov word [fileHdl], ax
-    ;jnc short .fileOpen
     lea rdx, badCreatStr
-    jmp badExitMsg
+    jc badExitMsg
+    mov word [fileHdl], ax
+    lea rdx, newStr
+    mov eax, 0900h  ;Write the "new file" string
+    int 41h
+    jmp mainLoop
 .fileExists:
 ;If we are here, we are opening the file.
     mov eax, 2F00h
@@ -176,15 +195,7 @@ okVersion:
     mov byte [roFlag], al   ;Set the ro flag appropriately
 
 
-
-
-;Now get the attribs of the file (rdi points to the filename)
-    mov eax, 4300h  ;CHMOD get attribs
-    int 41h
-    and cl, fileRO   ;Save only the RO bit
-    jz short .notRO
-    mov byte [roFlag], -1   ;Set Read Only bit on
-.notRO:
+mainLoop:
 
 
 exitOk:

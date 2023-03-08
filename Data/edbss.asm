@@ -2,8 +2,7 @@
 ;All variables that dont need initialisation go here
 roFlag      db ?    ;Flag is set if file is read-only. Cannot edit the file.
 noEofCheck  db ?    ;Flag is set if we are not to check for ^Z chars found in the file
-;File editor state information (defaults to 0)
-eofReached  db ?    ;When we reach EOF for file, set to -1
+eofReached  db ?    ;When we reach EOF for file, set to -1, else 0
 
 ;Treat line numbers as dwords even though they are words
 memPtr      dq ?    ;Ptr to the memory arena given by DOS

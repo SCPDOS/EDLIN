@@ -36,7 +36,7 @@ Segment .bss align=1 follows=.data nobits
 bssStart:
 %include "./Data/edbss.asm"
 bssLen equ ($ - bssStart)
-Segment .stack align=8 follows=.bss nobits
+Segment .stack align=16 follows=.bss nobits
 ;Use a 200 QWORD stack
     dq 200 dup (?)
 stackTop:

@@ -11,17 +11,17 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0               259  00000259  progbits  .text
-             259               259               366  0000010D  progbits  .data
-             366               366               6BC  00000356  nobits    .bss
-             6C0               6C0               D00  00000640  nobits    .stack
+               0                 0               273  00000273  progbits  .text
+             273               273               399  00000126  progbits  .data
+             399               399               6EF  00000356  nobits    .bss
+             6F0               6F0               D30  00000640  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                 259
+length:                 273
 start:                    0
 align:                    1
 follows:   not defined
@@ -32,11 +32,11 @@ vfollows:  not defined
 ---- Section .data ------------------------------------------------------------
 
 class:     progbits
-length:                 10D
-start:                  259
+length:                 126
+start:                  273
 align:                    1
 follows:   .text
-vstart:                 259
+vstart:                 273
 valign:    not defined
 vfollows:  not defined
 
@@ -44,10 +44,10 @@ vfollows:  not defined
 
 class:     nobits
 length:                 356
-start:                  366
+start:                  399
 align:                    1
 follows:   not defined
-vstart:                 366
+vstart:                 399
 valign:                   1
 vfollows:  .data
 
@@ -55,11 +55,11 @@ vfollows:  .data
 
 class:     nobits
 length:                 640
-start:                  6C0
-align:                    8
+start:                  6F0
+align:                   10
 follows:   not defined
-vstart:                 6C0
-valign:                   8
+vstart:                 6F0
+valign:                  10
 vfollows:  .bss
 
 -- Symbols --------------------------------------------------------------------
@@ -222,84 +222,87 @@ Real              Virtual           Name
              131               131  okVersion.extFnd
              159               159  okVersion.badPathError
              165               165  okVersion.pathComplete
-             186               186  okVersion.createFile
-             1A2               1A2  okVersion.fileExists
-             1E1               1E1  okVersion.notRO
-             1E1               1E1  exitOk
-             1E8               1E8  strlen
-             1F5               1F5  ..@14._ret
-             1F6               1F6  strcpy
-             1FE               1FE  strcpy.lp
-             20A               20A  strcpy.exit
-             20D               20D  ..@15._ret
-             20E               20E  memmove
-             216               216  ..@16._ret
-             217               217  memset
-             21D               21D  ..@17._ret
-             21E               21E  findLineEnd
-             223               223  findLineEnd.lp
-             228               228  ..@19._base
-             22C               22C  ..@21._base
-             233               233  isCharEOL
-             238               238  ..@23._base
-             23D               23D  ..@25._base
-             242               242  ..@27._base
-             248               248  ..@28._ret
-             249               249  isCharEOF
-             253               253  ..@30._base
-             258               258  ..@31._ret
+             191               191  fileSearch
+             1B2               1B2  fileSearch.createFile
+             1CF               1CF  fileSearch.fileExists
+             1FB               1FB  mainLoop
+             1FB               1FB  exitOk
+             202               202  strlen
+             20F               20F  ..@14._ret
+             210               210  strcpy
+             218               218  strcpy.lp
+             224               224  strcpy.exit
+             227               227  ..@15._ret
+             228               228  memmove
+             230               230  ..@16._ret
+             231               231  memset
+             237               237  ..@17._ret
+             238               238  findLineEnd
+             23D               23D  findLineEnd.lp
+             242               242  ..@19._base
+             246               246  ..@21._base
+             24D               24D  isCharEOL
+             252               252  ..@23._base
+             257               257  ..@25._base
+             25C               25C  ..@27._base
+             262               262  ..@28._ret
+             263               263  isCharEOF
+             26D               26D  ..@30._base
+             272               272  ..@31._ret
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-             259               259  newStr
-             261               261  crlf
-             264               264  eofStr
-             278               278  badVerStr
-             28E               28E  badDrvStr
-             2A8               2A8  badNameStr
-             2C6               2C6  badCreatStr
-             2E5               2E5  badOpenStr
-             302               302  badDirStr
-             322               322  badFileStr
-             344               344  badParm
-             358               358  badInput
+             273               273  newStr
+             27B               27B  crlf
+             27E               27E  eofStr
+             292               292  badVerStr
+             2A8               2A8  badDrvStr
+             2C2               2C2  badNameStr
+             2E0               2E0  badCreatStr
+             2FF               2FF  badOpenStr
+             31C               31C  badDirStr
+             33C               33C  badFileStr
+             35E               35E  badParm
+             372               372  badInput
+             380               380  badRealloc
+             395               395  prompt
 
 ---- Section .bss -------------------------------------------------------------
 
 Real              Virtual           Name
-             366               366  bssStart
-             366               366  roFlag
-             367               367  noEofCheck
-             368               368  eofReached
-             369               369  memPtr
-             371               371  arenaSize
-             375               375  memInUse
-             379               379  linePtr
-             381               381  lastLine
-             385               385  tmpNamePtr
-             385               385  fileNamePtr
-             38D               38D  fileExtPtr
-             395               395  fileHdl
-             397               397  bkupHdl
-             399               399  tmpName
-             3A9               3A9  pathspec
-             429               429  pathspec2
-             4A9               4A9  bkupExt
-             4AD               4AD  cmdLine
-             52F               52F  args
-             530               530  cmdChar
-             531               531  arg1
-             533               533  arg2
-             535               535  arg3
-             537               537  arg4
-             539               539  argString
-             5BB               5BB  argPastEnd
-             5BC               5BC  editLine
+             399               399  bssStart
+             399               399  roFlag
+             39A               39A  noEofCheck
+             39B               39B  eofReached
+             39C               39C  memPtr
+             3A4               3A4  arenaSize
+             3A8               3A8  memInUse
+             3AC               3AC  linePtr
+             3B4               3B4  lastLine
+             3B8               3B8  tmpNamePtr
+             3B8               3B8  fileNamePtr
+             3C0               3C0  fileExtPtr
+             3C8               3C8  fileHdl
+             3CA               3CA  bkupHdl
+             3CC               3CC  tmpName
+             3DC               3DC  pathspec
+             45C               45C  pathspec2
+             4DC               4DC  bkupExt
+             4E0               4E0  cmdLine
+             562               562  args
+             563               563  cmdChar
+             564               564  arg1
+             566               566  arg2
+             568               568  arg3
+             56A               56A  arg4
+             56C               56C  argString
+             5EE               5EE  argPastEnd
+             5EF               5EF  editLine
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-             D00               D00  stackTop
-             D00               D00  endOfProgram
+             D30               D30  stackTop
+             D30               D30  endOfProgram
 
