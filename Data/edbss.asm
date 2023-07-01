@@ -2,25 +2,21 @@
 ;All variables that dont need initialisation go here
 roFlag      db ?    ;Flag is set if file is read-only. Cannot edit the file.
 noEofCheck  db ?    ;Flag is set if we are not to check for ^Z chars found in the file
-eofReached  db ?    ;When we reach EOF for file, set to -1, else 0
+eofReached  db ?    ;When we reach EOF for file on disk, set to -1, else 0
+newFileFlag db ?    ;Flag indicating the file being made is new (when set, above flags meaningless)
 
-;Treat line numbers as dwords even though they are words
+;Memory Related variables
 memPtr      dq ?    ;Ptr to the memory arena given by DOS
-arenaSize   dd ?    ;Size of the arena
-memInUse    dd ?    ;Number of bytes in use
-;If arenaSize = memInUse, refuse any "extensionary" instructions.
-; Allow searching, editing, flushing, editing up to equal
-; number of chars in line.
+arenaSize   dd ?    ;Size of the arena in bytes (rounded up to nearest 256 byte boundary)
+numLines    dw ?    ;Number of 256 byte lines in the arena (arena size / 256 bytes)
 
-linePtr     dq ?    ;Ptr to the current source line in memory
-lastLine    dd ?    ;Last line number currently in memory
 
 
 tmpNamePtr:
 fileNamePtr dq ?    ;Ptr to the name portion of filespec
 fileExtPtr  dq ?    ;Ptr to the extension of the file we are editing
 fileHdl     dw ?    ;Contain the file handle for the open file
-bkupHdl     dw ?    ;Handle to the backup file
+tmpHdl      dw ?    ;Handle to the temporary file
 
 tmpName     db 16 dup (?)   ;Space for the ASCIIZ path for tmp name.
 ;                              names of the form ".\12345678.ext",0
