@@ -27,7 +27,6 @@ BITS 64
 %include "./Include/edStruc.inc"
 %include "./Include/dosStruc.inc"
 Segment .text align=1 
-%include "./Source/edload.asm"
 %include "./Source/edmain.asm"
 %include "./Source/edutils.asm"
 Segment .data align=1 follows=.text 

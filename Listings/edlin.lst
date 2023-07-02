@@ -274,7 +274,7 @@
     56 0000001E <res Dh>            <1>     .asciizName resb 13 ;ASCIIZ name with dot and terminating nul
     57                              <1> endstruc
     29                                  Segment .text align=1 
-    30                                  %include "./Source/edload.asm"
+    30                                  %include "./Source/edmain.asm"
      1                              <1> ;Contains the program loader
      2                              <1> start:
      3 00000000 EB01                <1>     jmp short .cVersion
@@ -511,21 +511,21 @@
    233 0000027B 8915(0C000000)      <1>     mov dword [arenaSize], edx
    234 00000281 C1E904              <1>     shr ecx, 4              ;Get number of 256 byte lines
    235 00000284 66890D(10000000)    <1>     mov word [numLines], cx 
-   236                              <1>     ;Now fall through to edmain
-    31                                  %include "./Source/edmain.asm"
-     1                              <1> ;Main EDLIN file
-     2                              <1> edlinMain:
-     3                              <1> 
-     4                              <1> mainLoop:
-     5                              <1> 
-     6                              <1> 
-     7                              <1> exitOk:
-     8                              <1> ;Let DOS take care of freeing all resources
-     9 0000028B B8004C0000          <1>     mov eax, 4C00h
-    10 00000290 CD41                <1>     int 41h
-    11                              <1> 
-    12                              <1> 
-    32                                  %include "./Source/edutils.asm"
+   236 0000028B F605(03000000)FF    <1>     test byte [newFileFlag], -1
+   237 00000292 7500                <1>     jnz edlinMain
+   238                              <1>     ;Now fall through to edmain
+   239                              <1> 
+   240                              <1>     ;Main EDLIN file
+   241                              <1> edlinMain:
+   242                              <1> 
+   243                              <1> mainLoop:
+   244                              <1> 
+   245                              <1> 
+   246                              <1> exitOk:
+   247                              <1> ;Let DOS take care of freeing all resources
+   248 00000294 B8004C0000          <1>     mov eax, 4C00h
+   249 00000299 CD41                <1>     int 41h
+    31                                  %include "./Source/edutils.asm"
      1                              <1> ;Utility functions for edlin go here
      2                              <1> 
      3                              <1> strlen:
@@ -533,39 +533,39 @@
      5                              <1> ;Input: rsi -> Source Ptr
      6                              <1> ;       al = Terminating char to search for
      7                              <1> ;Output: ecx = Number of chars i nstring including terminator
-     8 00000292 31C9                <1>     xor ecx, ecx
-     9 00000294 FFC9                <1>     dec ecx
-    10 00000296 57                  <1>     push rdi
-    11 00000297 4889F7              <1>     mov rdi, rsi
-    12 0000029A F2AE                <1>     repne scasb
-    13 0000029C 5F                  <1>     pop rdi
-    14 0000029D F7D9                <1>     neg ecx ;Take 2's compliment to get number of chars including terminator
+     8 0000029B 31C9                <1>     xor ecx, ecx
+     9 0000029D FFC9                <1>     dec ecx
+    10 0000029F 57                  <1>     push rdi
+    11 000002A0 4889F7              <1>     mov rdi, rsi
+    12 000002A3 F2AE                <1>     repne scasb
+    13 000002A5 5F                  <1>     pop rdi
+    14 000002A6 F7D9                <1>     neg ecx ;Take 2's compliment to get number of chars including terminator
     15                              <1>     return
     13                              <2> %%_ret:
-    14 0000029F C3                  <2>  ret
+    14 000002A8 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     16                              <1> 
     17                              <1> strcpy:
     18                              <1> ;Copies a string from one buffer to another
     19                              <1> ;Input: rsi -> Source Ptr
     20                              <1> ;       rdi -> Destination Ptr
-    21 000002A0 56                  <1>     push rsi
-    22 000002A1 57                  <1>     push rdi
-    23 000002A2 51                  <1>     push rcx
-    24 000002A3 B9FD000000          <1>     mov ecx, lineLen    ;Max number of chars in a string
+    21 000002A9 56                  <1>     push rsi
+    22 000002AA 57                  <1>     push rdi
+    23 000002AB 51                  <1>     push rcx
+    24 000002AC B9FD000000          <1>     mov ecx, lineLen    ;Max number of chars in a string
     25                              <1> .lp:
-    26 000002A8 E830000000          <1>     call isCharEOL
-    27 000002AD 7405                <1>     je short .exit
-    28 000002AF A4                  <1>     movsb   ;Move the char over, inc both pointers
-    29 000002B0 FFC9                <1>     dec ecx
-    30 000002B2 75F4                <1>     jnz short .lp
+    26 000002B1 E830000000          <1>     call isCharEOL
+    27 000002B6 7405                <1>     je short .exit
+    28 000002B8 A4                  <1>     movsb   ;Move the char over, inc both pointers
+    29 000002B9 FFC9                <1>     dec ecx
+    30 000002BB 75F4                <1>     jnz short .lp
     31                              <1> .exit:
-    32 000002B4 59                  <1>     pop rcx
-    33 000002B5 5F                  <1>     pop rdi
-    34 000002B6 5E                  <1>     pop rsi
+    32 000002BD 59                  <1>     pop rcx
+    33 000002BE 5F                  <1>     pop rdi
+    34 000002BF 5E                  <1>     pop rsi
     35                              <1>     return
     13                              <2> %%_ret:
-    14 000002B7 C3                  <2>  ret
+    14 000002C0 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     36                              <1> 
     37                              <1> memmove:
@@ -573,16 +573,16 @@
     39                              <1> ;Input: rsi -> Source Ptr
     40                              <1> ;       rdi -> Destination Ptr
     41                              <1> ;       ecx = Count of chars to copy
-    42 000002B8 56                  <1>     push rsi
-    43 000002B9 57                  <1>     push rdi
-    44 000002BA 51                  <1>     push rcx
-    45 000002BB F3A4                <1>     rep movsb
-    46 000002BD 59                  <1>     pop rcx
-    47 000002BE 5F                  <1>     pop rdi
-    48 000002BF 5E                  <1>     pop rsi
+    42 000002C1 56                  <1>     push rsi
+    43 000002C2 57                  <1>     push rdi
+    44 000002C3 51                  <1>     push rcx
+    45 000002C4 F3A4                <1>     rep movsb
+    46 000002C6 59                  <1>     pop rcx
+    47 000002C7 5F                  <1>     pop rdi
+    48 000002C8 5E                  <1>     pop rsi
     49                              <1>     return
     13                              <2> %%_ret:
-    14 000002C0 C3                  <2>  ret
+    14 000002C9 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     50                              <1> 
     51                              <1> memset:
@@ -590,14 +590,14 @@
     53                              <1> ;Input: rdi -> Buffer to set to given value
     54                              <1> ;       al = Value to set the buffer to
     55                              <1> ;       rcx = Number of bytes in buffer
-    56 000002C1 51                  <1>     push rcx
-    57 000002C2 57                  <1>     push rdi
-    58 000002C3 F3AA                <1>     rep stosb
-    59 000002C5 5F                  <1>     pop rdi
-    60 000002C6 59                  <1>     pop rcx
+    56 000002CA 51                  <1>     push rcx
+    57 000002CB 57                  <1>     push rdi
+    58 000002CC F3AA                <1>     rep stosb
+    59 000002CE 5F                  <1>     pop rdi
+    60 000002CF 59                  <1>     pop rcx
     61                              <1>     return
     13                              <2> %%_ret:
-    14 000002C7 C3                  <2>  ret
+    14 000002D0 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     62                              <1> 
     63                              <1> findLineEnd:
@@ -605,9 +605,9 @@
     65                              <1> ;Input: rsi -> Start of the line find the end of
     66                              <1> ;Output: rsi -> Last char in the string (NOTE: LAST CHAR NOT PAST)
     67                              <1> ;Trashes: rcx
-    68 000002C8 B9FD000000          <1>     mov ecx, lineLen
+    68 000002D1 B9FD000000          <1>     mov ecx, lineLen
     69                              <1> .lp:
-    70 000002CD E80B000000          <1>     call isCharEOL  ;If ZF=ZE, then rsi points to EOL
+    70 000002D6 E80B000000          <1>     call isCharEOL  ;If ZF=ZE, then rsi points to EOL
     71                              <1>     rete
     49                              <2> cret e
     19                              <3> %%_base:
@@ -617,7 +617,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000002D2 74(C7)              <3>  j%+1 short retOff
+    26 000002DB 74(D0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -629,7 +629,7 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-    72 000002D4 FFC9                <1>     dec ecx
+    72 000002DD FFC9                <1>     dec ecx
     73                              <1>     retz    ;If ecx is now 0, means rsi points to the end of line (NO EOL CHAR)
     41                              <2> cret z
     19                              <3> %%_base:
@@ -639,7 +639,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000002D6 74(C7)              <3>  j%+1 short retOff
+    26 000002DF 74(D0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -651,14 +651,14 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-    74 000002D8 48FFC6              <1>     inc rsi
-    75 000002DB EBF0                <1>     jmp short .lp
+    74 000002E1 48FFC6              <1>     inc rsi
+    75 000002E4 EBF0                <1>     jmp short .lp
     76                              <1> 
     77                              <1> isCharEOL:
     78                              <1> ;Input: rsi -> Char/Word to analyse
     79                              <1> ;Output: ZF=ZE if char/word at rsi LF or CR,LF.
     80                              <1> ;        ZF=NZ if not
-    81 000002DD E811000000          <1>     call isCharEOF
+    81 000002E6 E811000000          <1>     call isCharEOF
     82                              <1>     rete
     49                              <2> cret e
     19                              <3> %%_base:
@@ -668,7 +668,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000002E2 74(C7)              <3>  j%+1 short retOff
+    26 000002EB 74(D0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -680,7 +680,7 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-    83 000002E4 803E0A              <1>     cmp byte [rsi], LF
+    83 000002ED 803E0A              <1>     cmp byte [rsi], LF
     84                              <1>     rete
     49                              <2> cret e
     19                              <3> %%_base:
@@ -690,7 +690,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000002E7 74(C7)              <3>  j%+1 short retOff
+    26 000002F0 74(D0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -702,7 +702,7 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-    85 000002E9 803E0D              <1>     cmp byte [rsi], CR
+    85 000002F2 803E0D              <1>     cmp byte [rsi], CR
     86                              <1>     retne
     53                              <2> cret ne
     19                              <3> %%_base:
@@ -712,7 +712,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000002EC 75(C7)              <3>  j%+1 short retOff
+    26 000002F5 75(D0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -724,20 +724,20 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-    87 000002EE 807E010A            <1>     cmp byte [rsi + 1], LF
+    87 000002F7 807E010A            <1>     cmp byte [rsi + 1], LF
     88                              <1>     return
     13                              <2> %%_ret:
-    14 000002F2 C3                  <2>  ret
+    14 000002FB C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     89                              <1> 
     90                              <1> isCharEOF:
     91                              <1> ;Input: rsi -> Char to check if it is ^Z
     92                              <1> ;Output: ZF=ZE if char at rsi is ^Z AND we are checking for EOFs
     93                              <1> ;        ZF=NZ if char at rsi is not ^Z or we are not checking for eof's
-    94 000002F3 50                  <1>     push rax
-    95 000002F4 8A05(01000000)      <1>     mov al, byte [noEofCheck]
-    96 000002FA F6D0                <1>     not al  ;Invert the bits (1's compliment)
-    97 000002FC 58                  <1>     pop rax
+    94 000002FC 50                  <1>     push rax
+    95 000002FD 8A05(01000000)      <1>     mov al, byte [noEofCheck]
+    96 00000303 F6D0                <1>     not al  ;Invert the bits (1's compliment)
+    97 00000305 58                  <1>     pop rax
     98                              <1>     retnz   ;Return if not checking for EOF
     45                              <2> cret nz
     19                              <3> %%_base:
@@ -747,7 +747,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000002FD 75(F2)              <3>  j%+1 short retOff
+    26 00000306 75(FB)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -759,14 +759,14 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-    99 000002FF 803E1A              <1>     cmp byte [rsi], EOF ;Check if eof
+    99 00000308 803E1A              <1>     cmp byte [rsi], EOF ;Check if eof
    100                              <1>     return
     13                              <2> %%_ret:
-    14 00000302 C3                  <2>  ret
+    14 0000030B C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
    101                              <1> 
-    33                                  Segment .data align=1 follows=.text 
-    34                                  %include "./Data/eddata.asm"
+    32                                  Segment .data align=1 follows=.text 
+    33                                  %include "./Data/eddata.asm"
      1                              <1> newFileAllocTable:
      2                              <1> ;Units of paragraphs, less than 1Mb (10000h)
      3 00000000 0080                <1>     dw 8000h    ;512Kb
@@ -782,7 +782,7 @@
     13 00000014 2000                <1>     dw 20h      ;512 bytes
     14 00000016 1000                <1>     dw 10h      ;256 bytes
     15 00000018 FFFF                <1>     dw -1       ;End of table marker
-    35                                  %include "./Data/edmsg.asm"
+    34                                  %include "./Data/edmsg.asm"
      1                              <1> ;Edlin Strings are in this file
      2 0000001A 4E65772066696C65    <1> newStr  db "New file"   ;This string is terminated by the next line
      3 00000022 0D0A24              <1> crlf    db CR,LF,"$"
@@ -828,9 +828,9 @@
     15 0000014E 746F206C6F61642066- <1>
     15 00000157 696C650D0A24        <1>
     16 0000015D 0D0A2A24            <1> prompt      db CR,LF,"*$"
-    36                                  Segment .bss align=1 follows=.data nobits
-    37                                  bssStart:
-    38                                  %include "./Data/edbss.asm"
+    35                                  Segment .bss align=1 follows=.data nobits
+    36                                  bssStart:
+    37                                  %include "./Data/edbss.asm"
      1                              <1> 
      2                              <1> ;All variables that dont need initialisation go here
      3 00000000 ??                  <1> roFlag      db ?    ;Flag is set if file is read-only. Cannot edit the file.
@@ -874,11 +874,11 @@
     41                              <1> ;The editLine gets preloaded with the original line before editing
     42                              <1> ;editLine has type "line"
     43 00000249 <res 100h>          <1> editLine    db 256 dup (?)  ;Line in which all editing takes place
-    39                                  bssLen equ ($ - bssStart)
-    40                                  Segment .stack align=16 follows=.bss nobits
-    41                                  ;Use a 200 QWORD stack
-    42 00000000 <res 640h>                  dq 200 dup (?)
-    43                                  stackTop:
-    44                                  endOfProgram:   ;Deallocate from here
-    44          ------------------       info: assembly required 1+2+2 passes
+    38                                  bssLen equ ($ - bssStart)
+    39                                  Segment .stack align=16 follows=.bss nobits
+    40                                  ;Use a 200 QWORD stack
+    41 00000000 <res 640h>                  dq 200 dup (?)
+    42                                  stackTop:
+    43                                  endOfProgram:   ;Deallocate from here
+    43          ------------------       info: assembly required 1+2+2 passes
 

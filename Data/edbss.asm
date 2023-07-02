@@ -15,7 +15,10 @@ numLines    dw ?    ;Number of 256 byte lines in the arena (arena size / 256 byt
 tmpNamePtr:
 fileNamePtr dq ?    ;Ptr to the name portion of filespec
 fileExtPtr  dq ?    ;Ptr to the extension of the file we are editing
+
+readHdl:            ;Symbol for the same file
 fileHdl     dw ?    ;Contain the file handle for the open file
+writeHdl:           ;Symbol for the same file
 tmpHdl      dw ?    ;Handle to the temporary file
 
 tmpName     db 16 dup (?)   ;Space for the ASCIIZ path for tmp name.
