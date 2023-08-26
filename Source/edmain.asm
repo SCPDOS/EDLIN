@@ -32,6 +32,7 @@ okVersion:
     mov eax, 6101h  ;Get parsed FCB and cmdtail for filename in rdx
     int 41h
 ;Now parse the command line, to get full command spec for filename.
+    breakpoint
     mov byte [noEofCheck], 0    ;Clear the noEofCheck flag
     lea rdi, qword [rdx + cmdArgs.progTail] ;Get ptr to tail
     movzx ecx, byte [rdx + cmdArgs.parmList]    ;Get number of chars in cmdline
@@ -245,7 +246,7 @@ allocateCycle:
     mov rdx, rax    ;Move the pointer into rdx
     movzx ebx, word [readHdl]   
     ;Now fill up 3/4 of the space with data (unless the arena is leq 2 lines)
-    mov ecx, 
+    ;mov ecx, 
 
 promptLoop:
 
