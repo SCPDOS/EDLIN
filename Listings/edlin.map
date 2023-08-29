@@ -11,17 +11,17 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0               319  00000319  progbits  .text
-             319               319               47A  00000161  progbits  .data
-             47A               47A               7C3  00000349  nobits    .bss
-             7D0               7D0               E10  00000640  nobits    .stack
+               0                 0               367  00000367  progbits  .text
+             367               367               4E4  0000017D  progbits  .data
+             4E4               4E4               82F  0000034B  nobits    .bss
+             830               830               E70  00000640  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                 319
+length:                 367
 start:                    0
 align:                    1
 follows:   not defined
@@ -32,22 +32,22 @@ vfollows:  not defined
 ---- Section .data ------------------------------------------------------------
 
 class:     progbits
-length:                 161
-start:                  319
+length:                 17D
+start:                  367
 align:                    1
 follows:   .text
-vstart:                 319
+vstart:                 367
 valign:    not defined
 vfollows:  not defined
 
 ---- Section .bss -------------------------------------------------------------
 
 class:     nobits
-length:                 349
-start:                  47A
+length:                 34B
+start:                  4E4
 align:                    1
 follows:   not defined
-vstart:                 47A
+vstart:                 4E4
 valign:                   1
 vfollows:  .data
 
@@ -55,10 +55,10 @@ vfollows:  .data
 
 class:     nobits
 length:                 640
-start:                  7D0
+start:                  830
 align:                   10
 follows:   not defined
-vstart:                 7D0
+vstart:                 830
 valign:                  10
 vfollows:  .bss
 
@@ -154,6 +154,10 @@ Value     Name
 00000001  halfLine.bStrLen
 00000002  halfLine.pString
 00000082  halfLine_size
+00000000  filename
+00000000  filename.fName
+00000008  filename.fExt
+0000000B  filename_size
 00000000  NUL
 00000003  ETX
 00000006  ACK
@@ -183,6 +187,16 @@ Value     Name
 0000004D  eCursR
 00000052  eIns
 00000053  eDel
+00000001  dirReadOnly
+00000002  dirHidden
+00000004  dirSystem
+00000008  dirVolumeID
+00000010  dirDirectory
+00000020  dirArchive
+00000040  dirCharDev
+0000000F  dirLongName
+00000016  dirInclusive
+00000006  dirIncFiles
 00000000  cmdArgs
 00000000  cmdArgs.fcb1
 00000010  cmdArgs.fcb2
@@ -202,7 +216,8 @@ Value     Name
 0000001A  ffBlock.fileSize
 0000001E  ffBlock.asciizName
 0000002B  ffBlock_size
-00000349  bssLen
+00000080  pspecLen
+0000034B  bssLen
 
 
 ---- Section .text ------------------------------------------------------------
@@ -211,106 +226,130 @@ Real              Virtual           Name
                0                 0  start
                2                 2  start.vNum
                3                 3  start.cVersion
-              1D                1D  badExitMsg
-              29                29  badExitMsg.noPrint
-              30                30  okVersion
-              8C                8C  okVersion.findEndLoop
-              9B                9B  okVersion.endFoundSpc
-              BB                BB  okVersion.endFound
-              E1                E1  okVersion.noDriveSpecified
-             11A               11A  okVersion.extSearch
-             13B               13B  okVersion.extFnd
-             163               163  okVersion.badPathError
-             16F               16F  okVersion.pathComplete
-             19B               19B  fileSearch
-             1BC               1BC  fileSearch.createFile
-             1F0               1F0  fileSearch.fileExists
-             223               223  allocateCycle
-             23A               23A  allocateCycle.memoryError
-             24F               24F  allocateCycle.findAllocation
-             258               258  allocateCycle.allocationLoop
-             272               272  allocateCycle.allocationDone
-             2A1               2A1  promptLoop
-             2A1               2A1  exitOk
-             2A8               2A8  strlen
-             2B5               2B5  ..@15._ret
-             2B6               2B6  strcpy
-             2BE               2BE  strcpy.lp
-             2CA               2CA  strcpy.exit
-             2CD               2CD  ..@16._ret
-             2CE               2CE  memmove
-             2D6               2D6  ..@17._ret
-             2D7               2D7  memset
-             2DD               2DD  ..@18._ret
-             2DE               2DE  findLineEnd
-             2E3               2E3  findLineEnd.lp
-             2E8               2E8  ..@20._base
-             2EC               2EC  ..@22._base
-             2F3               2F3  isCharEOL
-             2F8               2F8  ..@24._base
-             2FD               2FD  ..@26._base
-             302               302  ..@28._base
-             308               308  ..@29._ret
-             309               309  isCharEOF
-             313               313  ..@31._base
-             318               318  ..@32._ret
+              1F                1F  okVersion
+              59                59  getCmdTail
+              68                68  cmdTailParse
+              6A                6A  cmdTailParse.searchLoop
+              86                86  cmdTailParse.parseBadExit
+              8B                8B  cmdTailParse.nameBadExit
+              97                97  cmdTailParse.goodSwitch
+              AD                AD  cmdTailParse.notSwitch
+              CF                CF  cmdTailParse.parseComplete
+              EA                EA  nameCopy
+             11D               11D  nameCopy.genericError
+             12A               12A  nameCopy.nameGood
+             1A4               1A4  wildcardCheck
+             1AB               1AB  wildcardCheck.mainlp
+             1B8               1B8  wildcardCheck.error
+             1C4               1C4  fileOpen
+             1FA               1FA  fileOpen.notReadOnly
+             23A               23A  fileOpen.backupMade
+             23A               23A  fileOpen.fileNotFound
+             24E               24E  exitOk
+             255               255  badParmExit
+             25C               25C  badExitMsg
+             268               268  badExitMsg.noPrint
+             26F               26F  strlen
+             27C               27C  ..@19._ret
+             27D               27D  strcpy
+             285               285  strcpy.lp
+             291               291  strcpy.exit
+             294               294  ..@20._ret
+             295               295  strcpyASCIIZ
+             297               297  strcpyASCIIZ.cpChar
+             29F               29F  ..@21._ret
+             2A0               2A0  memmove
+             2A8               2A8  ..@22._ret
+             2A9               2A9  memset
+             2AF               2AF  ..@23._ret
+             2B0               2B0  findLineEnd
+             2B5               2B5  findLineEnd.lp
+             2BA               2BA  ..@25._base
+             2BE               2BE  ..@27._base
+             2C5               2C5  isCharEOL
+             2CA               2CA  ..@29._base
+             2CF               2CF  ..@31._base
+             2D4               2D4  ..@33._base
+             2DA               2DA  ..@34._ret
+             2DB               2DB  isCharEOF
+             2E5               2E5  ..@36._base
+             2EA               2EA  ..@37._ret
+             2EB               2EB  asciiToFCB
+             2FA               2FA  asciiToFCB.processName
+             30A               30A  asciiToFCB.extSpace
+             313               313  asciiToFCB.ext
+             317               317  asciiToFCB.processExt
+             323               323  asciiToFCB.exitBadChar
+             325               325  asciiToFCB.exit
+             326               326  ..@38._ret
+             327               327  FCBToAsciiz
+             32E               32E  FCBToAsciiz.scanNameSpace
+             341               341  FCBToAsciiz.ext
+             34E               34E  FCBToAsciiz.validExt
+             358               358  FCBToAsciiz.scanExtSpace
+             363               363  FCBToAsciiz.exit
+             366               366  ..@39._ret
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-             319               319  newFileAllocTable
-             333               333  newStr
-             33B               33B  crlf
-             33E               33E  eofStr
-             352               352  badVerStr
-             368               368  badDrvStr
-             382               382  badNameStr
-             3A0               3A0  badCreatStr
-             3BF               3BF  badOpenStr
-             3DC               3DC  badDirStr
-             3FC               3FC  badFileStr
-             41E               41E  badParm
-             432               432  badInput
-             440               440  badRealloc
-             455               455  badMemSize
-             476               476  prompt
+             367               367  newFileAllocTable
+             381               381  newStr
+             389               389  crlf
+             38C               38C  eofStr
+             3A0               3A0  badVerStr
+             3B6               3B6  badDrvStr
+             3D2               3D2  badNameStr
+             3F0               3F0  badCreatStr
+             40F               40F  badOpenStr
+             42C               42C  badFileStr
+             44E               44E  badParm
+             462               462  badInput
+             470               470  badRealloc
+             485               485  badMemSize
+             4A6               4A6  badFileExt
+             4CB               4CB  badBkupStr
+             4E3               4E3  prompt
 
 ---- Section .bss -------------------------------------------------------------
 
 Real              Virtual           Name
-             47A               47A  bssStart
-             47A               47A  roFlag
-             47B               47B  noEofCheck
-             47C               47C  eofReached
-             47D               47D  newFileFlag
-             47E               47E  memPtr
-             486               486  arenaSize
-             48A               48A  numLines
-             48C               48C  tmpNamePtr
-             48C               48C  fileNamePtr
-             494               494  fileExtPtr
-             49C               49C  readHdl
-             49C               49C  fileHdl
-             49E               49E  writeHdl
-             49E               49E  tmpHdl
-             4A0               4A0  tmpName
-             4B0               4B0  pathspec
-             530               530  pathspec2
-             5B0               5B0  bkupExt
-             5B4               5B4  cmdLine
-             636               636  args
-             637               637  cmdChar
-             638               638  arg1
-             63A               63A  arg2
-             63C               63C  arg3
-             63E               63E  arg4
-             640               640  argString
-             6C2               6C2  argPastEnd
-             6C3               6C3  editLine
+             4E4               4E4  bssStart
+             4E4               4E4  pathsepChar
+             4E5               4E5  switchChar
+             4E6               4E6  roFlag
+             4E7               4E7  newFileFlag
+             4E8               4E8  noEofCheck
+             4E9               4E9  eofReached
+             4EA               4EA  memPtr
+             4F2               4F2  arenaSize
+             4F6               4F6  numLines
+             4F8               4F8  tmpNamePtr
+             4F8               4F8  fileNamePtr
+             500               500  tmpNamePtr2
+             500               500  fileExtPtr
+             508               508  readHdl
+             508               508  fileHdl
+             50A               50A  writeHdl
+             50A               50A  tmpHdl
+             50C               50C  fcbBuffer
+             50C               50C  tmpName
+             520               520  pathspec
+             5A0               5A0  bkupfile
+             620               620  cmdLine
+             6A2               6A2  args
+             6A3               6A3  cmdChar
+             6A4               6A4  arg1
+             6A6               6A6  arg2
+             6A8               6A8  arg3
+             6AA               6AA  arg4
+             6AC               6AC  argString
+             72E               72E  argPastEnd
+             72F               72F  editLine
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-             E10               E10  stackTop
-             E10               E10  endOfProgram
+             E70               E70  stackTop
+             E70               E70  endOfProgram
 

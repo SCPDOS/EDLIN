@@ -20,3 +20,9 @@ struc halfLine
     .bStrLen    db ?    ;Length of the string entered in buffer
     .pString    db halflineLen dup (?)   ;Actual string itself
 endstruc
+
+struc filename
+;8.3 File name struct
+    .fName  resb 8
+    .fExt   resb 3
+endstruc

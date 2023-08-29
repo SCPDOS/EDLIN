@@ -34,6 +34,19 @@ eCursR  equ 4Dh ;Cursor Right second byte
 eIns    equ 52h ;Insert second byte
 eDel    equ 53h ;DEL second byte (not necessarily delete key)
 
+;Directory attribute equates
+    dirReadOnly     equ 01h
+    dirHidden       equ 02h
+    dirSystem       equ 04h
+    dirVolumeID     equ 08h
+    dirDirectory    equ 10h
+    dirArchive      equ 20h
+    dirCharDev      equ 40h ;Never written to disk, used to represent a Char Dev
+    dirLongName     equ dirReadOnly | dirHidden | dirSystem | dirVolumeID
+    ;If any of the three bits are set, then ALL three bits are set
+    ; in addition to whatever the user passed to search for.
+    dirInclusive    equ dirHidden | dirSystem | dirDirectory
+    dirIncFiles     equ dirHidden | dirSystem
 
 struc cmdArgs   ;Ptr returned in rdx after 41h/6101h has this structure
     .fcb1       db 16 dup (?)  ;First FCB,    argument 1
