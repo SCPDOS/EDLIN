@@ -127,7 +127,7 @@ nameCopy:
     mov al, "."
     mov rdi, qword [fileNamePtr]    ;Get the ptr to the 8.3 filename
     mov ecx, 8
-    rep scasb   ;Now scan for the extension separator
+    repne scasb   ;Now scan for the extension separator
     ;rdi points just after the separator.
     mov qword [fileExtPtr], rdi
 ;Now we have all the metadata for the filename we are working with
@@ -153,7 +153,6 @@ wildcardCheck:
 fileOpen:
 ;first set the handles to -1
     mov dword [readHdl], -1 ;Init the handles to -1
-    breakpoint
     lea rdx, pathspec
     mov ecx, dirIncFiles
     mov eax, 4E00h  ;Find First 
