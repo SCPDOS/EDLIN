@@ -151,11 +151,11 @@ wildcardCheck:
 fileOpen:
 ;first set the handles to -1
     mov dword [readHdl], -1 ;Init the handles to -1
+    breakpoint
     lea rdx, pathspec
-    mov ecx, dirInclusive
+    mov ecx, dirIncFiles
     mov eax, 4E00h  ;Find First 
     int 41h
-    breakpoint
     jc short .fileNotFound
 ;Check if file is read only
     mov eax, 2F00h  ;Get a pointer to the DTA in rbx
