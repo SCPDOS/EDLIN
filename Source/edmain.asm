@@ -61,12 +61,14 @@ cmdTailParse:
     jz short .parseComplete
     jmp short .searchLoop   ;Now skip next lot of spaces
 .notSwitch:
-    ;Thus rdi must point to a filename. 
+    ;Thus rdi must point one char past the start of a filename. 
     ;If there is no filename, accept the pointer. 
     ;If not, fail.
     cmp qword [tmpNamePtr], 0
     jnz short .parseBadExit ;If its not empty, too many filenames passed in
+    dec rdi
     mov qword [tmpNamePtr], rdi ;Store the ptr temporarily here
+    inc rdi
     repne scasb ;Now we keep going until we hit a space
     mov qword [tmpNamePtr2], rdi    ;Store first char past end of name here.
     cmp byte [rdi - 1], al  ;Was this a space or run out of chars?
