@@ -16,6 +16,17 @@ okVersion:
     mov rcx, bssLen
     xor eax, eax
     rep stosb
+;Now move the stack pointer to its new position and reallocate!
+    breakpoint
+    lea rsp, stackTop
+    lea rbx, endOfProgram   ;Guaranteed paragraph alignment
+    sub rbx, r8 ;Get number of bytes in block
+    shr rbx, 4  ;Convert to paragraphs
+    inc rbx     ;Add one more paragraph for good measure
+    mov eax, 4A00h
+    int 41h
+    lea rdx, badRealloc
+    jc badExitMsg
 ;One command line argument except for mandatory filename, /B=(binary read)
     mov eax, 3700h
     int 41h
