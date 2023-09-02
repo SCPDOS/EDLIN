@@ -17,7 +17,6 @@ okVersion:
     xor eax, eax
     rep stosb
 ;Now move the stack pointer to its new position and reallocate!
-    breakpoint
     lea rsp, stackTop
     lea rbx, endOfProgram   ;Guaranteed paragraph alignment
     sub rbx, r8 ;Get number of bytes in block
@@ -66,7 +65,7 @@ cmdTailParse:
     and al, ~20h    ;Clear the lowercase flag
     cmp al, "B"     ;The flag is /B
     jne short .parseBadExit
-    mov byte [noEofCheck], -1   ;Set the internal flag
+    mov byte [noEofChar], -1   ;Set the internal flag
     inc rdi ;Move rdi to the char after the B
     dec ecx ;And decrement count of chars left
     jz short .parseComplete
@@ -110,42 +109,48 @@ nameCopy:
     lea rdx, badFileStr ;If this fails, bad filespec
     jc badExitMsg  ;The filename is bad for some reason!
 .nameGood:
-    ;Now invalidate tmpNamePtr and tmpNamePtr2
+;Now we produce a backup/working filespec
+    lea rsi, pathspec
+    lea rdi, wkfile ;This pathspec always has an extension
+    call strcpyASCIIZ
+;Now invalidate tmpNamePtr and tmpNamePtr2
     xor ecx, ecx
     mov qword [tmpNamePtr], rcx
     mov qword [tmpNamePtr2], rcx
     dec rcx
-    lea rdi, pathspec
+    lea rdi, wkfile
     xor eax, eax
-    rep scasb   ;rdi points past terminating null
+    repne scasb   ;rdi points past terminating null
     ;Find the nearest pathsep (since we have fully qualified the name)
     std
     movzx eax, byte [pathsepChar]   ;Get pathsep char in al
-    rep scasb
+    repne scasb
     cld
     add rdi, 2  ;Point rdi to first char past the pathsep
     mov qword [fileNamePtr], rdi    ;Save the ptr
-    ;Now convert into an FCB name and back to ASCIIZ string 
-    ; at the end of the provided pathspec
-    mov rdi, rsi
-    lea rdi, fcbBuffer
-    push rsi
-    push rdi
-    call asciiToFCB
-    pop rsi ;Swap the pointers
-    pop rdi
-    call FCBToAsciiz
-    mov al, "."
-    mov rdi, qword [fileNamePtr]    ;Get the ptr to the 8.3 filename
-    mov ecx, 8
-    repne scasb   ;Now scan for the extension separator
-    ;rdi points just after the separator.
-    mov qword [fileExtPtr], rdi
+    mov rsi, rdi
+    mov ecx, 8  ;number of chars to search thru
+    breakpoint
+.extSearch:
+    lodsb
+    test al, al
+    jz short .insertExt
+    cmp al, "."
+    je short .extFound
+    dec ecx
+    jnz short .extSearch    ;Impossible edgecase (TRUENAME returns 8.3 filename)
+.insertExt:
+    ;rsi points just past the null
+    mov byte [rsi - 1], "." ;Store a pathsep
+    mov dword [rsi], "   "   ;Store empty extension so no accidental BAK issues.
+.extFound:
+    mov qword [fileExtPtr], rsi
 ;Now we have all the metadata for the filename we are working with
     lea rdx, badFileExt
-    mov eax, dword [rdi]
+    mov eax, dword [rsi]
     cmp eax, "BAK"  ;Is this a bakup file?
     je badExitMsg   ;If yes, error!
+    mov dword [rsi], "$$$"   ;Now we store working file $$$ extension 
 ;Now we check to make sure the path has no global filename chars
 wildcardCheck:
     lea rsi, pathspec
@@ -164,45 +169,130 @@ wildcardCheck:
 fileOpen:
 ;first set the handles to -1
     mov dword [readHdl], -1 ;Init the handles to -1
+;Now we search for the file
     lea rdx, pathspec
     mov ecx, dirIncFiles
     mov eax, 4E00h  ;Find First 
     int 41h
-    jc short .fileNotFound
+    jc .fileNotFound
 ;Check if file is read only
     mov eax, 2F00h  ;Get a pointer to the DTA in rbx
     int 41h
-    test byte [rbx + ffBlock.attribFnd], dirReadOnly
+    movzx eax, byte [rbx + ffBlock.attribFnd]
+    test al, dirReadOnly
     jz short .notReadOnly
+.readOnly:
 ;Read only files here
     mov byte [roFlag], -1   ;Set read only flag!
 .notReadOnly:
-;File exists, lets rename it to have a .BAK extension
-    lea rsi, pathspec
-    lea rdi, bkupfile
-    call strcpyASCIIZ
-    push rsi
-    push rdi
-    mov rdi, qword [fileExtPtr] ;Get the pointer to the extension
-    add rdi, pspecLen   ;Now make it an offset into the new buffer
-    mov dword [rdi], "BAK"  ;Change it into a BAK,0 file
-    pop rdi
-    pop rsi
-    mov eax, 5600h
-    int 41h
-    jnc short .backupMade
-    lea rdx, badBkupStr
+;File exists, lets open it, to read from
+    mov eax, (3Dh << 8) | ReadAccess | denyWriteShare
+    lea rdx, pathspec    ;Get the pointer to the working filename
+    int 41h         ;Open the file
+    jnc short .backupOpened
+;File failed to open
+    lea rdx, badOpenStr
     jmp badExitMsg
-.backupMade:
-;File renamed to backup!
-
+.backupOpened:
+;Backup opened and handle in ax.
+    mov word [readHdl], ax  ;Store the read handle here
+    jmp short createWorkingFile
 .fileNotFound:
 ;Maybe new file? Check reason for error! If FNF, its good!
     cmp ax, errFnf  ;If its a file not found error, then we are good!
-    lea rdx, badOpenStr ;We can't open the file for whatever
+    lea rdx, badOpenStr ;We can't open the file for whatever reason
     jne badExitMsg
 ;Error was file not found so we can make the file!
     mov byte [newFileFlag], -1  ;Set the new file flag!
+createWorkingFile:
+;Now open a new file with triple question mark extension
+;rdi -> Path to file with $$$ (the working file)
+    lea rdx, wkfile    ;Get a pointer to this filename
+    ;mov eax, 3C00h  ;Create file
+    mov eax, 5B00h  ;Create file (atomic), prevent two edlins from editing same file
+    xor ecx, ecx    ;Clear all file attributes (normal file)
+    int 41h
+    jnc short .fileCreated
+    lea rdx, badCreatStr    ;Creating the working file will fail if already exits
+    jmp badExitMsg          ;This prevents someone from ove
+.fileCreated:
+    mov word [writeHdl], ax ;Store a pointer to the write handle
+;Now the following:
+;1) Allocate max memory (1Mb max)
+;2) If new file, goto 4. Print "new file" message
+;3) Else, fill up to 75% of arena according to table. If 
+;    EOF reached (either due to no bytes left or ^Z (if enabled))
+;    print "EOF reached message".
+;4) Install Int 43h handler
+;5) Goto main loop
+allocateMemory:
+    xor ebx, ebx
+    mov ebx, 10000h ;Start trying to allocate at 1Mb
+    mov eax, 4800h
+    int 41h
+    jnc short .loadProgram
+    ;If the allocation failed, eax has max paragraphs
+    cmp eax, 10h    ;If we have less than 256 bytes available, fail
+    jb short .notEnoughMem
+    mov ebx, eax    ;Get the number of paragraphs into ebx for request
+    mov eax, 4800h
+    int 41h
+    jnc short .loadProgram
+.notEnoughMem:
+    lea rdx, badMemSize
+    jmp badExitMsg
+.loadProgram:
+;rax has pointer here
+    mov qword [memPtr], rax
+    mov rsi, rax
+    shl ebx, 4  ;Multiply by 16 to get number of bytes
+    add rsi, rbx
+    dec rsi     ;Point rsi to the last char of the arena
+    mov qword [endOfArena], rsi
+    mov dword [arenaSize], ebx  ;Save number of bytes in arena here
+    test byte [newFileFlag], -1 ;If this is a new file, skip
+    jnz short initBuffers
+    mov rsi, rax    ;Save the pointer to memory arena in rsi
+    xor ecx, ecx    ;Zero the upper 32 bits
+    lea ecx, dword [2*ebx + ebx]    ;Multiply ebx by 3 into ecx
+    shr ecx, 2  ;Divide by 4 to get # of bytes to fill ~75% of memory space
+    mov dword [fillSize], ecx   ;Save number of bytes to fill arena with
+    mov rdx, rax    ;Move the arena pointer into rdx
+    mov eax, 3F00h
+    movzx ebx, word [readHdl]  
+    int 41h ;If it reads, it reads, if not, oh well.
+;Check now for EOF and setup end of text pointer
+    mov dword [textLen], eax  ;Save number of chars read into eax
+    cmp ecx, eax    ;If less bytes than ecx were read, EOF condition
+    jne short .eofFound
+    test byte [noEofChar], -1   ;Avoid searching for ^Z?
+    jz short initBuffers
+    call searchTextForEOFChar
+    jnz short initBuffers
+.eofFound:
+;Now we print the EOF message
+    lea rdx, eofStr
+    mov eax, 0900h
+    int 41h
+initBuffers:
+;Now we setup the edit and command buffers
+    mov byte [editLine + line.bBufLen], lineLen
+    mov byte [cmdLine + line.bBufLen], halflineLen
+getCommand:
+;Now we install the Int 43h handler
+    lea rdx, i43h
+    mov eax, 2543h  ;Set Interrupt handler for Int 43h
+    int 41h
+    mov eax, prompt
+    call printChar
+    lea rdx, cmdLine
+    mov eax, 0A00h  ;Take buffered input.
+    int 41h
+    call printLF
+;Now we parse the command line!
+parseCommand:
+
+
     
 exitOk:
 ;Let DOS take care of freeing all resources
@@ -214,9 +304,9 @@ badParmExit:
     lea rdx, badParm    ;Bad number of parameters
 badExitMsg:
     test rdx, rdx   ;Check if null ptr => Dont print on exit
-    jz short .noPrint
+    jz short badExit
     mov eax, 0900h
     int 41h
-.noPrint:
+badExit:
     mov eax, 4CFFh
     int 41h

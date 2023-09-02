@@ -11,6 +11,8 @@ BITS 64
 ;Edlin will always produce a backup file and refuses to open files 
 ; with .BAK extension (backup files)
 
+;Edlin will always terminate a file with a single EOF character
+
 ;Edlin will erase the previous backup if one exists, ensuring there
 ; is enough free space for a new copy of the backup.
 ;It then creates a new file with the filename with a $$$ extension.

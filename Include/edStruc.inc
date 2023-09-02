@@ -4,8 +4,8 @@ halflineLen equ 128
 maxLine     equ 65529
 maxAlloc    equ maxLine*lineLen
 maxParas    equ (maxAlloc >> 4) + 1
-fileRO      equ 1   ;Mask for Read Only
-fileDir     equ 10h ;Mask for Directory
+
+prompt      equ "*"
 
 ;Bona-Fida Structures
 

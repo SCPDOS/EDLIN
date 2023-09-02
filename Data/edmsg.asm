@@ -1,6 +1,5 @@
 ;Edlin Strings are in this file
 newStr  db "New file"   ;This string is terminated by the next line
-crlf    db CR,LF,"$"
 eofStr  db "End of input file",CR,LF,"$"    ;When EOF occurs
 badVerStr   db "Invalid DOS Version",CR,LF,"$"
 badDrvStr   db "Invalid Drive or filename",CR,LF,"$"
@@ -14,4 +13,3 @@ badRealloc  db "Reallocation error",CR,LF,"$"
 badMemSize  db "Not enough memory to load file", CR,LF,"$"
 badFileExt  db "Cannot edit .BAK file--rename file",CR,LF,"$"
 badBkupStr  db "Cannot make .BAK file",CR,LF,"$"
-prompt      db "*"

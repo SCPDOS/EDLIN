@@ -68,3 +68,18 @@ struc ffBlock   ;The structure of the Find First structure at the DTA
     .fileSize   resd 1  ;Number of bytes
     .asciizName resb 13 ;ASCIIZ name with dot and terminating nul
 endstruc
+
+;Open Mode equates
+;Access modes   Bits[2:0]
+ReadAccess      equ 0h
+WriteAccess     equ 1h
+RWAccess        equ 2h
+;Bit 3 reserved 0
+;Sharing modes  Bits[6:4]
+CompatShare     equ 0h
+denyRWShare     equ 10h
+denyWriteShare  equ 20h
+denyReadShare   equ 30h
+denyNoneShare   equ 40h
+netFCBShare     equ 70h
+noInherit       equ 80h
