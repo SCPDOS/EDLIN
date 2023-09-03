@@ -244,6 +244,7 @@ allocateMemory:
 .loadProgram:
 ;rax has pointer here
     mov qword [memPtr], rax
+    mov qword [curLinePtr], rax ;This is also where the first byte will go 
     mov rsi, rax
     shl ebx, 4  ;Multiply by 16 to get number of bytes
     add rsi, rbx
@@ -276,8 +277,9 @@ allocateMemory:
     int 41h
 initBuffers:
 ;Now we setup the edit and command buffers
-    mov byte [editLine + line.bBufLen], lineLen
+    mov byte [workLine + line.bBufLen], lineLen
     mov byte [cmdLine + line.bBufLen], halflineLen
+    mov word [curLineNum], 1    ;Start at line 1
 getCommand:
 ;Now we install the Int 43h handler
     lea rdx, i43h
@@ -288,7 +290,7 @@ getCommand:
     lea rdx, cmdLine
     mov eax, 0A00h  ;Take buffered input.
     int 41h
-    call printLF
+    call printLF 
 ;Now we parse the command line!
 parseCommand:
 

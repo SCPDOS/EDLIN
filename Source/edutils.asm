@@ -147,12 +147,26 @@ searchTextForEOFChar:
     pop rax
     return
 
-i43h:
-;^C handler. Reset the stack pointer and flags
-    lea rsp, stackTop
-    cld
-    call printCRLF
-    jmp getCommand  ;Now jump to get the command
+skipSpaces:
+;Skips all the spaces in the command line
+;Input: rsi -> Buffer to skip spaces on
+;Output: rsi -> First non-space char on command line
+    push rax
+    push rcx
+    push rdi
+    mov rdi, rsi
+    xor ecx, ecx
+    dec ecx
+    mov eax, SPC
+    repne scasb
+    dec rdi ;Point to the first non SPC char
+    mov rsi, rdi
+    pop rdi
+    pop rcx
+    pop rax
+    return
+
+
 
 printCRLF:
 ;Prints CRLF
@@ -171,3 +185,10 @@ printChar:
     pop rdx
     pop rax
     return
+
+i43h:
+;^C handler. Reset the stack pointer and jump to get command
+    lea rsp, stackTop
+    cld
+    call printCRLF
+    jmp getCommand  ;Now jump to get the command

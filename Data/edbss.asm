@@ -13,6 +13,8 @@ arenaSize   dd ?    ;Size of the arena in bytes
 fillSize    dd ?    ;Size of 3/4 of the arena in bytes
 textLen     dd ?    ;Number of chars in the arena
 endOfArena  dq ?    ;Ptr to the last byte in the arena
+curLinePtr  dq ?    ;Ptr to the start of the current line in arena
+curLineNum  dw ?    ;Word value for the current line number
 
 ;Don't jiggle these symbols, need dword to be together for -1
 readHdl     dw ?    ;Contain the file handle for the open file
@@ -41,9 +43,10 @@ arg1        dw ?
 arg2        dw ?
 arg3        dw ?
 arg4        dw ?
+qmark       db ?    ;Set if question mark encountered
 argString   db halfLine_size dup (?)    ;Used by search and replace only
 argPastEnd  db ?    ;0 -> normal, -1 -> Offset from end of mem (indicated by #)
 
-;The editLine gets preloaded with the original line before editing
-;editLine has type "line"
-editLine    db 256 dup (?)  ;Line in which all editing takes place
+;The workLine gets preloaded with the original line before editing
+;workLine has type "line"
+workLine    db 256 dup (?)  ;Line in which all editing takes place
