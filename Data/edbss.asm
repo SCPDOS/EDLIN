@@ -32,7 +32,7 @@ fileExtPtr  dq ?    ;Ptr to the extension of the file we are editing
 ;Both file*ptr's point to elements on WKFILE not pathspec
 
 ;Command line variables
-cmdLine     db halfLine_size + 2 dup (?)
+cmdLine     db halfLine_size dup (?)
 args        db ?    ;Count of arguments in parsed command line
 cmdChar     db ?
 
