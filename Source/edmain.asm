@@ -130,7 +130,6 @@ nameCopy:
     mov qword [fileNamePtr], rdi    ;Save the ptr
     mov rsi, rdi
     mov ecx, 8  ;number of chars to search thru
-    breakpoint
 .extSearch:
     lodsb
     test al, al
