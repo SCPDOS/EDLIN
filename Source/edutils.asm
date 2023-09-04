@@ -167,6 +167,100 @@ skipSpaces:
     return
 
 
+printDecBytePrim:
+;Input: rsi -> byte to decimalise 
+;       ecx = 0 => Skip leading zeros, else dont skip
+;Output: If we skipped leading zeros, ecx = Count of chars printed.
+;        Else, ecx undefined. 
+;        rsi -> byte to decimalise
+    push rax
+    push rdx
+    push rsi
+    lodsb   ;Get the byte in al
+    mov ah, al
+    and ah, 0F0h    ;ah has upper nybble
+    and al, 0Fh     ;al has lower nybble
+    mov dl, ah
+    call .printNybble
+    mov dl, al
+    call .printNybble
+.exit:
+    pop rsi
+    pop rdx
+    pop rax
+    return
+.printNybble:
+;dl contains the nybble to print.
+;Increments ecx for each byte printed
+    push rax
+    push rdx
+    mov dh, dl
+    cmp dl, 0Ah
+    jb short .pn1
+    sub dl, 0Ah
+    call .prn
+.pn1:
+    mov dl, dh
+    call .prn
+.rpn:
+    pop rdx
+    pop rax
+    return
+.prn:
+;If ecx is zero and dl is zero print a space.
+;Else, print the value in dl
+    add dl, "0"
+    cmp dl, "0"
+    jne short .prn1
+    test ecx, ecx   ;If dl = 0 and ecx != 0, skip
+    jnz short .prn1
+    mov dl, SPC
+    dec ecx     ;Decrement to equalise below
+.prn1:
+    inc ecx     ;Increment the number of chars we printed
+    mov al, dl
+    call printChar
+    return
+
+
+printDecWordLZ:
+;rsi points to the word to decimalise
+;Prints leading zeros.
+    push rsi
+    push rcx
+    xor ecx, ecx
+    mov ecx, 1
+    jmp short printDecWord.printDecCmn1
+printDecByteLZ:
+;rsi points to the byte to decimalise
+;Prints leading zeros.
+    push rsi
+    push rcx
+    xor ecx, ecx
+    mov ecx, 1    ;Indicate we want to print leading zeros
+    jmp short printDecWord.printDecCmn
+printDecByte:
+;rsi points to the byte to decimalise
+;Does not print leading zeros.
+    push rsi
+    push rcx
+    xor ecx, ecx
+    jmp short printDecWord.printDecCmn
+printDecWord:
+;rsi points to the word to decimalise
+;Does not print leading zeros.
+    push rsi
+    push rcx
+    xor ecx, ecx
+.printDecCmn1:
+    call printDecBytePrim
+    inc rsi
+.printDecCmn:
+    call printDecBytePrim
+    pop rcx
+    pop rsi
+    return
+
 
 printCRLF:
 ;Prints CRLF

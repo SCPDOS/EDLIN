@@ -600,15 +600,15 @@
    281 00000359 00                  <1>
    282                              <1> getCommand:
    283                              <1> ;Now we install the Int 43h handler
-   284 0000035A 488D1532010000      <1>     lea rdx, i43h
+   284 0000035A 488D15B4010000      <1>     lea rdx, i43h
    285 00000361 B843250000          <1>     mov eax, 2543h  ;Set Interrupt handler for Int 43h
    286 00000366 CD41                <1>     int 41h
    287 00000368 B82A000000          <1>     mov eax, prompt
-   288 0000036D E812010000          <1>     call printChar
+   288 0000036D E894010000          <1>     call printChar
    289 00000372 488D15(40010000)    <1>     lea rdx, cmdLine
    290 00000379 B8000A0000          <1>     mov eax, 0A00h  ;Take buffered input.
    291 0000037E CD41                <1>     int 41h
-   292 00000380 E8FD000000          <1>     call printLF 
+   292 00000380 E87F010000          <1>     call printLF 
    293                              <1> ;Now we parse the command line!
    294                              <1> parseCommand:
    295                              <1> 
@@ -947,34 +947,140 @@
     15                              <2> %assign retOff %%_ret-$$
    168                              <1> 
    169                              <1> 
-   170                              <1> 
-   171                              <1> printCRLF:
-   172                              <1> ;Prints CRLF
-   173 0000047B B00D                <1>     mov al, CR
-   174 0000047D E802000000          <1>     call printChar
-   175                              <1> printLF:
-   176 00000482 B00A                <1>     mov al, LF
-   177                              <1> ;Just fall into the next function
-   178                              <1> printChar:
-   179                              <1> ;Input: al = Char to print
-   180 00000484 50                  <1>     push rax    ;To preserve the rest of eax
-   181 00000485 52                  <1>     push rdx
-   182 00000486 0FB6D0              <1>     movzx edx, al
-   183 00000489 B800020000          <1>     mov eax, 0200h
-   184 0000048E CD41                <1>     int 41h
-   185 00000490 5A                  <1>     pop rdx
-   186 00000491 58                  <1>     pop rax
-   187                              <1>     return
+   170                              <1> printDecBytePrim:
+   171                              <1> ;Input: rsi -> byte to decimalise 
+   172                              <1> ;       ecx = 0 => Skip leading zeros, else dont skip
+   173                              <1> ;Output: If we skipped leading zeros, ecx = Count of chars printed.
+   174                              <1> ;        Else, ecx undefined. 
+   175                              <1> ;        rsi -> byte to decimalise
+   176 0000047B 50                  <1>     push rax
+   177 0000047C 52                  <1>     push rdx
+   178 0000047D 56                  <1>     push rsi
+   179 0000047E AC                  <1>     lodsb   ;Get the byte in al
+   180 0000047F 88C4                <1>     mov ah, al
+   181 00000481 80E4F0              <1>     and ah, 0F0h    ;ah has upper nybble
+   182 00000484 240F                <1>     and al, 0Fh     ;al has lower nybble
+   183 00000486 88E2                <1>     mov dl, ah
+   184 00000488 E80B000000          <1>     call .printNybble
+   185 0000048D 88C2                <1>     mov dl, al
+   186 0000048F E804000000          <1>     call .printNybble
+   187                              <1> .exit:
+   188 00000494 5E                  <1>     pop rsi
+   189 00000495 5A                  <1>     pop rdx
+   190 00000496 58                  <1>     pop rax
+   191                              <1>     return
     13                              <2> %%_ret:
-    14 00000492 C3                  <2>  ret
+    14 00000497 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   188                              <1> 
-   189                              <1> i43h:
-   190                              <1> ;^C handler. Reset the stack pointer and jump to get command
-   191 00000493 488D25(40060000)    <1>     lea rsp, stackTop
-   192 0000049A FC                  <1>     cld
-   193 0000049B E8DBFFFFFF          <1>     call printCRLF
-   194 000004A0 E9B5FEFFFF          <1>     jmp getCommand  ;Now jump to get the command
+   192                              <1> .printNybble:
+   193                              <1> ;dl contains the nybble to print.
+   194                              <1> ;Increments ecx for each byte printed
+   195 00000498 50                  <1>     push rax
+   196 00000499 52                  <1>     push rdx
+   197 0000049A 88D6                <1>     mov dh, dl
+   198 0000049C 80FA0A              <1>     cmp dl, 0Ah
+   199 0000049F 7208                <1>     jb short .pn1
+   200 000004A1 80EA0A              <1>     sub dl, 0Ah
+   201 000004A4 E80A000000          <1>     call .prn
+   202                              <1> .pn1:
+   203 000004A9 88F2                <1>     mov dl, dh
+   204 000004AB E803000000          <1>     call .prn
+   205                              <1> .rpn:
+   206 000004B0 5A                  <1>     pop rdx
+   207 000004B1 58                  <1>     pop rax
+   208                              <1>     return
+    13                              <2> %%_ret:
+    14 000004B2 C3                  <2>  ret
+    15                              <2> %assign retOff %%_ret-$$
+   209                              <1> .prn:
+   210                              <1> ;If ecx is zero and dl is zero print a space.
+   211                              <1> ;Else, print the value in dl
+   212 000004B3 80C230              <1>     add dl, "0"
+   213 000004B6 80FA30              <1>     cmp dl, "0"
+   214 000004B9 7508                <1>     jne short .prn1
+   215 000004BB 85C9                <1>     test ecx, ecx   ;If dl = 0 and ecx != 0, skip
+   216 000004BD 7504                <1>     jnz short .prn1
+   217 000004BF B220                <1>     mov dl, SPC
+   218 000004C1 FFC9                <1>     dec ecx     ;Decrement to equalise below
+   219                              <1> .prn1:
+   220 000004C3 FFC1                <1>     inc ecx     ;Increment the number of chars we printed
+   221 000004C5 88D0                <1>     mov al, dl
+   222 000004C7 E83A000000          <1>     call printChar
+   223                              <1>     return
+    13                              <2> %%_ret:
+    14 000004CC C3                  <2>  ret
+    15                              <2> %assign retOff %%_ret-$$
+   224                              <1> 
+   225                              <1> 
+   226                              <1> printDecWordLZ:
+   227                              <1> ;rsi points to the word to decimalise
+   228                              <1> ;Prints leading zeros.
+   229 000004CD 56                  <1>     push rsi
+   230 000004CE 51                  <1>     push rcx
+   231 000004CF 31C9                <1>     xor ecx, ecx
+   232 000004D1 B901000000          <1>     mov ecx, 1
+   233 000004D6 EB15                <1>     jmp short printDecWord.printDecCmn1
+   234                              <1> printDecByteLZ:
+   235                              <1> ;rsi points to the byte to decimalise
+   236                              <1> ;Prints leading zeros.
+   237 000004D8 56                  <1>     push rsi
+   238 000004D9 51                  <1>     push rcx
+   239 000004DA 31C9                <1>     xor ecx, ecx
+   240 000004DC B901000000          <1>     mov ecx, 1    ;Indicate we want to print leading zeros
+   241 000004E1 EB12                <1>     jmp short printDecWord.printDecCmn
+   242                              <1> printDecByte:
+   243                              <1> ;rsi points to the byte to decimalise
+   244                              <1> ;Does not print leading zeros.
+   245 000004E3 56                  <1>     push rsi
+   246 000004E4 51                  <1>     push rcx
+   247 000004E5 31C9                <1>     xor ecx, ecx
+   248 000004E7 EB0C                <1>     jmp short printDecWord.printDecCmn
+   249                              <1> printDecWord:
+   250                              <1> ;rsi points to the word to decimalise
+   251                              <1> ;Does not print leading zeros.
+   252 000004E9 56                  <1>     push rsi
+   253 000004EA 51                  <1>     push rcx
+   254 000004EB 31C9                <1>     xor ecx, ecx
+   255                              <1> .printDecCmn1:
+   256 000004ED E889FFFFFF          <1>     call printDecBytePrim
+   257 000004F2 48FFC6              <1>     inc rsi
+   258                              <1> .printDecCmn:
+   259 000004F5 E881FFFFFF          <1>     call printDecBytePrim
+   260 000004FA 59                  <1>     pop rcx
+   261 000004FB 5E                  <1>     pop rsi
+   262                              <1>     return
+    13                              <2> %%_ret:
+    14 000004FC C3                  <2>  ret
+    15                              <2> %assign retOff %%_ret-$$
+   263                              <1> 
+   264                              <1> 
+   265                              <1> printCRLF:
+   266                              <1> ;Prints CRLF
+   267 000004FD B00D                <1>     mov al, CR
+   268 000004FF E802000000          <1>     call printChar
+   269                              <1> printLF:
+   270 00000504 B00A                <1>     mov al, LF
+   271                              <1> ;Just fall into the next function
+   272                              <1> printChar:
+   273                              <1> ;Input: al = Char to print
+   274 00000506 50                  <1>     push rax    ;To preserve the rest of eax
+   275 00000507 52                  <1>     push rdx
+   276 00000508 0FB6D0              <1>     movzx edx, al
+   277 0000050B B800020000          <1>     mov eax, 0200h
+   278 00000510 CD41                <1>     int 41h
+   279 00000512 5A                  <1>     pop rdx
+   280 00000513 58                  <1>     pop rax
+   281                              <1>     return
+    13                              <2> %%_ret:
+    14 00000514 C3                  <2>  ret
+    15                              <2> %assign retOff %%_ret-$$
+   282                              <1> 
+   283                              <1> i43h:
+   284                              <1> ;^C handler. Reset the stack pointer and jump to get command
+   285 00000515 488D25(40060000)    <1>     lea rsp, stackTop
+   286 0000051C FC                  <1>     cld
+   287 0000051D E8DBFFFFFF          <1>     call printCRLF
+   288 00000522 E933FEFFFF          <1>     jmp getCommand  ;Now jump to get the command
     35                                  %include "./Source/edfunc.asm"
      1                              <1> ;This is where the main user selectable routines are
      2                              <1> ;All arguments specified are signed words
@@ -1086,21 +1192,21 @@
      5 00000000 0D3B41434445494C50- <1>     db CR,";ACDEILPMQRSTW"
      5 00000009 4D5152535457        <1>
      6                              <1> cmdFcnTable:
-     7 0000000F A504                <1>     dw editLine - progHeadPtr
-     8 00000011 A504                <1>     dw editLine - progHeadPtr
-     9 00000013 A504                <1>     dw appendLines - progHeadPtr
-    10 00000015 A504                <1>     dw copyLines - progHeadPtr
-    11 00000017 A504                <1>     dw deleteLines - progHeadPtr
-    12 00000019 A504                <1>     dw endEdit - progHeadPtr
-    13 0000001B A504                <1>     dw insertLine - progHeadPtr
-    14 0000001D A504                <1>     dw listLines - progHeadPtr
-    15 0000001F A504                <1>     dw pageLines - progHeadPtr
-    16 00000021 A504                <1>     dw moveLines - progHeadPtr
-    17 00000023 A504                <1>     dw quit - progHeadPtr
-    18 00000025 A504                <1>     dw replaceText - progHeadPtr
-    19 00000027 A504                <1>     dw searchText - progHeadPtr
-    20 00000029 A504                <1>     dw transferLines - progHeadPtr
-    21 0000002B A504                <1>     dw writeLines - progHeadPtr
+     7 0000000F 2705                <1>     dw editLine - progHeadPtr
+     8 00000011 2705                <1>     dw editLine - progHeadPtr
+     9 00000013 2705                <1>     dw appendLines - progHeadPtr
+    10 00000015 2705                <1>     dw copyLines - progHeadPtr
+    11 00000017 2705                <1>     dw deleteLines - progHeadPtr
+    12 00000019 2705                <1>     dw endEdit - progHeadPtr
+    13 0000001B 2705                <1>     dw insertLine - progHeadPtr
+    14 0000001D 2705                <1>     dw listLines - progHeadPtr
+    15 0000001F 2705                <1>     dw pageLines - progHeadPtr
+    16 00000021 2705                <1>     dw moveLines - progHeadPtr
+    17 00000023 2705                <1>     dw quit - progHeadPtr
+    18 00000025 2705                <1>     dw replaceText - progHeadPtr
+    19 00000027 2705                <1>     dw searchText - progHeadPtr
+    20 00000029 2705                <1>     dw transferLines - progHeadPtr
+    21 0000002B 2705                <1>     dw writeLines - progHeadPtr
     22                              <1> cmdRoTable:
     23                              <1> ;Byte set if we can do this command in RO mode
     24 0000002D 00                  <1>     db 0    ;Insert
