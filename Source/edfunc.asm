@@ -47,6 +47,10 @@ insertLine:
 ;--------------------------------------------
 ;Invoked by: [line]I
 ;--------------------------------------------
+;If a user types CTRL+V, then the next
+; UPPERCASE char is taken to be a control
+; char. Else, we throw away the ^V from the 
+; line before saving it.
 
 listLines:
 ;Prints a line or a number of lines.

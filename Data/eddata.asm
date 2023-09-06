@@ -3,6 +3,7 @@
 ;The following three tables are connected. Don't jiggle!
 cmdLetterTable:
     db CR,";ACDEILPMQRSTW"
+    cmdLetterTableL equ $ - cmdLetterTable
 cmdFcnTable:
     dw editLine - progHeadPtr
     dw editLine - progHeadPtr

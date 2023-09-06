@@ -35,7 +35,7 @@ okVersion:
     cmove eax, ecx  ;Move if alternative
     mov bl, dl  ;Preserve switch char in bl
     mov byte [switchChar], bl
-    mov byte [pathsepChar], al
+    mov byte [pathSep], al
 getCmdTail:
     mov eax, 6101h  ;Get parsed FCB and cmdtail for filename in rdx
     int 41h
@@ -123,7 +123,7 @@ nameCopy:
     repne scasb   ;rdi points past terminating null
     ;Find the nearest pathsep (since we have fully qualified the name)
     std
-    movzx eax, byte [pathsepChar]   ;Get pathsep char in al
+    movzx eax, byte [pathSep]   ;Get pathsep char in al
     repne scasb
     cld
     add rdi, 2  ;Point rdi to first char past the pathsep
@@ -291,6 +291,13 @@ getCommand:
     int 41h
     call printLF 
 ;Now we parse the command line!
+;NOTE: Multiple commands may be on the same command line.
+;Commands are terminated by a command letter (except in the
+; case of S and R where they may be followed by a string).
+;If we encounter a CR in the string parsing, then we are
+; finished with this command line. Else, we keep parsing the
+; same command line, until all the chars in the buffer 
+; have been processed and/or a CR has been hit.
 parseCommand:
 
 

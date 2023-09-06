@@ -11,17 +11,17 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0               4A5  000004A5  progbits  .text
-             4A5               4A5               628  00000183  progbits  .data
-             628               628               978  00000350  nobits    .bss
-             980               980               FC0  00000640  nobits    .stack
+               0                 0               5C9  000005C9  progbits  .text
+             5C9               5C9               74C  00000183  progbits  .data
+             74C               74C               A9E  00000352  nobits    .bss
+             AA0               AA0              10E0  00000640  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                 4A5
+length:                 5C9
 start:                    0
 align:                    1
 follows:   not defined
@@ -33,21 +33,21 @@ vfollows:  not defined
 
 class:     progbits
 length:                 183
-start:                  4A5
+start:                  5C9
 align:                    1
 follows:   .text
-vstart:                 4A5
+vstart:                 5C9
 valign:    not defined
 vfollows:  not defined
 
 ---- Section .bss -------------------------------------------------------------
 
 class:     nobits
-length:                 350
-start:                  628
+length:                 352
+start:                  74C
 align:                    1
 follows:   not defined
-vstart:                 628
+vstart:                 74C
 valign:                   1
 vfollows:  .data
 
@@ -55,10 +55,10 @@ vfollows:  .data
 
 class:     nobits
 length:                 640
-start:                  980
+start:                  AA0
 align:                   10
 follows:   not defined
-vstart:                 980
+vstart:                 AA0
 valign:                  10
 vfollows:  .bss
 
@@ -225,7 +225,8 @@ Value     Name
 00000040  denyNoneShare
 00000070  netFCBShare
 00000080  noInherit
-00000350  bssLen
+0000000F  cmdLetterTableL
+00000352  bssLen
 
 
 ---- Section .text ------------------------------------------------------------
@@ -299,89 +300,133 @@ Real              Virtual           Name
              422               422  searchTextForEOFChar
              45C               45C  searchTextForEOFChar.exit
              45F               45F  ..@36._ret
-             460               460  skipSpaces
-             47A               47A  ..@37._ret
-             47B               47B  printCRLF
-             482               482  printLF
-             484               484  printChar
-             492               492  ..@38._ret
-             493               493  i43h
-             4A5               4A5  appendLines
-             4A5               4A5  copyLines
-             4A5               4A5  deleteLines
-             4A5               4A5  editLine
-             4A5               4A5  endEdit
-             4A5               4A5  insertLine
-             4A5               4A5  listLines
-             4A5               4A5  pageLines
-             4A5               4A5  moveLines
-             4A5               4A5  quit
-             4A5               4A5  replaceText
-             4A5               4A5  searchText
-             4A5               4A5  transferLines
-             4A5               4A5  writeLines
+             460               460  getDecimalDwordLZ
+             466               466  getDecimalDwordLZ.lp
+             476               476  getDecimalDwordLZ.swapBack
+             479               479  getDecimalDwordLZ.exit
+             47D               47D  ..@37._ret
+             47E               47E  getDecimalDword
+             487               487  getDecimalDword.dwpfb0
+             49D               49D  getDecimalDword.dwpfb1
+             4A4               4A4  ..@38._ret
+             4A5               4A5  skipSpaces
+             4AD               4AD  ..@40._base
+             4AF               4AF  skipSpaces.skip
+             4B4               4B4  parseEntry
+             4B9               4B9  processArg
+             4E1               4E1  processArg.skipCmdLetter
+             4E1               4E1  processArg.notTerminal
+             4E1               4E1  processArg.exit
+             4E7               4E7  ..@41._ret
+             4E8               4E8  processSpecialChar
+             4E8               4E8  ..@43._base
+             513               513  ..@44._ret
+             514               514  processSpecialChar.plus
+             51B               51B  ..@45._ret
+             51C               51C  processSpecialChar.minus
+             523               523  ..@46._ret
+             524               524  processSpecialChar.qmark
+             52B               52B  ..@47._ret
+             52C               52C  processSpecialChar.dot
+             535               535  processSpecialChar.pound
+             539               539  processSpecialChar.storeLineNum
+             54E               54E  ..@48._ret
+             54F               54F  processSpecialChar.specialTbl
+             554               554  processSpecialChar.specialTbl2
+             55E               55E  isCharTerminal
+             570               570  ..@49._ret
+             571               571  isCharSpecial
+             573               573  ..@51._base
+             577               577  ..@53._base
+             57B               57B  ..@55._base
+             57F               57F  ..@57._base
+             583               583  ..@58._ret
+             584               584  readChar
+             59E               59E  ..@59._ret
+             59F               59F  printCRLF
+             5A6               5A6  printLF
+             5A8               5A8  printChar
+             5B6               5B6  ..@60._ret
+             5B7               5B7  i43h
+             5C9               5C9  appendLines
+             5C9               5C9  copyLines
+             5C9               5C9  deleteLines
+             5C9               5C9  editLine
+             5C9               5C9  endEdit
+             5C9               5C9  insertLine
+             5C9               5C9  listLines
+             5C9               5C9  pageLines
+             5C9               5C9  moveLines
+             5C9               5C9  quit
+             5C9               5C9  replaceText
+             5C9               5C9  searchText
+             5C9               5C9  transferLines
+             5C9               5C9  writeLines
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-             4A5               4A5  cmdLetterTable
-             4B4               4B4  cmdFcnTable
-             4D2               4D2  cmdRoTable
-             4E1               4E1  newStr
-             4E9               4E9  eofStr
-             4FD               4FD  badVerStr
-             513               513  badDrvStr
-             52F               52F  badNameStr
-             54D               54D  badCreatStr
-             56C               56C  badOpenStr
-             589               589  badFileStr
-             5AB               5AB  badParm
-             5BF               5BF  badInput
-             5CD               5CD  badRealloc
-             5E2               5E2  badMemSize
-             603               603  badFileExt
+             5C9               5C9  cmdLetterTable
+             5D8               5D8  cmdFcnTable
+             5F6               5F6  cmdRoTable
+             605               605  newStr
+             60D               60D  eofStr
+             621               621  badVerStr
+             637               637  badDrvStr
+             653               653  badNameStr
+             671               671  badCreatStr
+             690               690  badOpenStr
+             6AD               6AD  badFileStr
+             6CF               6CF  badParm
+             6E3               6E3  badInput
+             6F1               6F1  badRealloc
+             706               706  badMemSize
+             727               727  badFileExt
 
 ---- Section .bss -------------------------------------------------------------
 
 Real              Virtual           Name
-             628               628  bssStart
-             628               628  pathsepChar
-             629               629  switchChar
-             62A               62A  roFlag
-             62B               62B  newFileFlag
-             62C               62C  noEofChar
-             62D               62D  eofReached
-             62E               62E  memPtr
-             636               636  arenaSize
-             63A               63A  fillSize
-             63E               63E  textLen
-             642               642  endOfArena
-             64A               64A  curLinePtr
-             652               652  curLineNum
-             654               654  readHdl
-             656               656  writeHdl
-             658               658  pathspec
-             6D8               6D8  wkfile
-             6D8               6D8  bkupfile
-             758               758  tmpNamePtr
-             758               758  fileNamePtr
-             760               760  tmpNamePtr2
-             760               760  fileExtPtr
-             768               768  cmdLine
-             7EA               7EA  args
-             7EB               7EB  cmdChar
-             7EC               7EC  arg1
-             7EE               7EE  arg2
-             7F0               7F0  arg3
-             7F2               7F2  arg4
-             7F4               7F4  qmark
-             7F5               7F5  argString
-             877               877  argPastEnd
-             878               878  workLine
+             74C               74C  bssStart
+             74C               74C  pathSep
+             74D               74D  switchChar
+             74E               74E  roFlag
+             74F               74F  newFileFlag
+             750               750  noEofChar
+             751               751  eofReached
+             752               752  memPtr
+             75A               75A  arenaSize
+             75E               75E  fillSize
+             762               762  textLen
+             766               766  endOfArena
+             76E               76E  curLinePtr
+             776               776  curLineNum
+             778               778  readHdl
+             77A               77A  writeHdl
+             77C               77C  pathspec
+             7FC               7FC  wkfile
+             7FC               7FC  bkupfile
+             87C               87C  tmpNamePtr
+             87C               87C  fileNamePtr
+             884               884  tmpNamePtr2
+             884               884  fileExtPtr
+             88C               88C  cmdLine
+             90E               90E  charInLine
+             90F               90F  argCnt
+             910               910  cmdChar
+             911               911  relCur
+             912               912  argTbl
+             912               912  arg1
+             914               914  arg2
+             916               916  arg3
+             918               918  arg4
+             91A               91A  qmarkSet
+             91B               91B  argString
+             99D               99D  argPastEnd
+             99E               99E  workLine
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-             FC0               FC0  stackTop
-             FC0               FC0  endOfProgram
+            10E0              10E0  stackTop
+            10E0              10E0  endOfProgram
 

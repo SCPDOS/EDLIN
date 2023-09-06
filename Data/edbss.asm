@@ -1,4 +1,4 @@
-pathsepChar db ?    ;Default \, Alternative /
+pathSep     db ?    ;Default \, Alternative /
 switchChar  db ?    ;Default /, Alternative -
 
 ;All variables that dont need initialisation go here
@@ -33,17 +33,20 @@ fileExtPtr  dq ?    ;Ptr to the extension of the file we are editing
 
 ;Command line variables
 cmdLine     db halfLine_size dup (?)
-args        db ?    ;Count of arguments in parsed command line
-cmdChar     db ?
-
+;Arguments for parsing
+charInLine  db ?    ;Offset into cmdLine of char we are studying
+argCnt      db ?    ;Count of arguments in parsed command line
+cmdChar     db ?    ;Command Letter 
+relCur      db ?    ;Tells if rel curline. 0=no, 1=+, -1=-
 ;Arguments are converted to signed words where appropriate
 ; and parsed into here in the order they are encountered in.
 ;
+argTbl:
 arg1        dw ?
 arg2        dw ?
 arg3        dw ?
 arg4        dw ?
-qmark       db ?    ;Set if question mark encountered
+qmarkSet    db ?    ;Set if question mark encountered
 argString   db halfLine_size dup (?)    ;Used by search and replace only
 argPastEnd  db ?    ;0 -> normal, -1 -> Offset from end of mem (indicated by #)
 
