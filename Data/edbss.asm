@@ -34,10 +34,8 @@ fileExtPtr  dq ?    ;Ptr to the extension of the file we are editing
 ;Command line variables
 cmdLine     db halfLine_size dup (?)
 ;Arguments for parsing
-charInLine  db ?    ;Offset into cmdLine of char we are studying
+charPtr     dq ?    ;Ptr to char for continuing processing
 argCnt      db ?    ;Count of arguments in parsed command line
-cmdChar     db ?    ;Command Letter 
-relCur      db ?    ;Tells if rel curline. 0=no, 1=+, -1=-
 ;Arguments are converted to signed words where appropriate
 ; and parsed into here in the order they are encountered in.
 ;
@@ -48,7 +46,6 @@ arg3        dw ?
 arg4        dw ?
 qmarkSet    db ?    ;Set if question mark encountered
 argString   db halfLine_size dup (?)    ;Used by search and replace only
-argPastEnd  db ?    ;0 -> normal, -1 -> Offset from end of mem (indicated by #)
 
 ;The workLine gets preloaded with the original line before editing
 ;workLine has type "line"

@@ -323,11 +323,11 @@
      9 0000000B 3A05F1FFFFFF        <1>     cmp al, byte [.vNum]
     10 00000011 760C                <1>     jbe short okVersion
     11 00000013 488D15(58000000)    <1>     lea rdx, badVerStr
-    12 0000001A E974030000          <1>     jmp badExitMsg
+    12 0000001A E97E040000          <1>     jmp badExitMsg
     13                              <1> okVersion:
     14                              <1> ;Initialise the BSS and to 0
     15 0000001F 488D3D(00000000)    <1>     lea rdi, section..bss.start
-    16 00000026 48B952030000000000- <1>     mov rcx, bssLen
+    16 00000026 48B956030000000000- <1>     mov rcx, bssLen
     16 0000002F 00                  <1>
     17 00000030 31C0                <1>     xor eax, eax
     18 00000032 F3AA                <1>     rep stosb
@@ -340,7 +340,7 @@
     25 0000004C B8004A0000          <1>     mov eax, 4A00h
     26 00000051 CD41                <1>     int 41h
     27 00000053 488D15(28010000)    <1>     lea rdx, badRealloc
-    28 0000005A 0F8233030000        <1>     jc badExitMsg
+    28 0000005A 0F823D040000        <1>     jc badExitMsg
     29                              <1> ;One command line argument except for mandatory filename, /B=(binary read)
     30 00000060 B800370000          <1>     mov eax, 3700h
     31 00000065 CD41                <1>     int 41h
@@ -372,10 +372,10 @@
     57 000000AD 80FC20              <1>     cmp ah, SPC ;If char after switchchar is SPC, accept
     58 000000B0 7411                <1>     je short .goodSwitch
     59                              <1> .parseBadExit:
-    60 000000B2 E9D5020000          <1>     jmp badParmExit
+    60 000000B2 E9DF030000          <1>     jmp badParmExit
     61                              <1> .nameBadExit:
     62 000000B7 488D15(8A000000)    <1>     lea rdx, badNameStr
-    63 000000BE E9D0020000          <1>     jmp badExitMsg
+    63 000000BE E9DA030000          <1>     jmp badExitMsg
     64                              <1> .goodSwitch:
     65 000000C3 24DF                <1>     and al, ~20h    ;Clear the lowercase flag
     66 000000C5 3C42                <1>     cmp al, "B"     ;The flag is /B
@@ -421,15 +421,15 @@
    104 0000013C 3C0F                <1>     cmp al, errBadDrv
    105 0000013E 750C                <1>     jne short .genericError
    106 00000140 488D15(6E000000)    <1>     lea rdx, badDrvStr
-   107 00000147 E947020000          <1>     jmp badExitMsg
+   107 00000147 E951030000          <1>     jmp badExitMsg
    108                              <1> .genericError:
    109 0000014C 488D15(E4000000)    <1>     lea rdx, badFileStr ;If this fails, bad filespec
-   110 00000153 0F823A020000        <1>     jc badExitMsg  ;The filename is bad for some reason!
+   110 00000153 0F8244030000        <1>     jc badExitMsg  ;The filename is bad for some reason!
    111                              <1> .nameGood:
    112                              <1> ;Now we produce a backup/working filespec
    113 00000159 488D35(30000000)    <1>     lea rsi, pathspec
    114 00000160 488D3D(B0000000)    <1>     lea rdi, wkfile ;This pathspec always has an extension
-   115 00000167 E860020000          <1>     call strcpyASCIIZ
+   115 00000167 E86A030000          <1>     call strcpyASCIIZ
    116                              <1> ;Now invalidate tmpNamePtr and tmpNamePtr2
    117 0000016C 31C9                <1>     xor ecx, ecx
    118 0000016E 48890D(30010000)    <1>     mov qword [tmpNamePtr], rcx
@@ -465,7 +465,7 @@
    148 000001C9 488D15(5E010000)    <1>     lea rdx, badFileExt
    149 000001D0 8B06                <1>     mov eax, dword [rsi]
    150 000001D2 3D42414B00          <1>     cmp eax, "BAK"  ;Is this a bakup file?
-   151 000001D7 0F84B6010000        <1>     je badExitMsg   ;If yes, error!
+   151 000001D7 0F84C0020000        <1>     je badExitMsg   ;If yes, error!
    152 000001DD C70624242400        <1>     mov dword [rsi], "$$$"   ;Now we store working file $$$ extension 
    153                              <1> ;Now we check to make sure the path has no global filename chars
    154                              <1> wildcardCheck:
@@ -480,7 +480,7 @@
    163 000001F5 75F3                <1>     jne short .mainlp
    164                              <1> .error:
    165 000001F7 488D15(6E000000)    <1>     lea rdx, badDrvStr
-   166 000001FE E990010000          <1>     jmp badExitMsg
+   166 000001FE E99A020000          <1>     jmp badExitMsg
    167                              <1> ;Now we open the file to check if it exists and if it does, if it is readonly
    168                              <1> fileOpen:
    169                              <1> ;first set the handles to -1
@@ -509,7 +509,7 @@
    191 00000246 730C                <1>     jnc short .backupOpened
    192                              <1> ;File failed to open
    193 00000248 488D15(C7000000)    <1>     lea rdx, badOpenStr
-   194 0000024F E93F010000          <1>     jmp badExitMsg
+   194 0000024F E949020000          <1>     jmp badExitMsg
    195                              <1> .backupOpened:
    196                              <1> ;Backup opened and handle in ax.
    197 00000254 668905(2C000000)    <1>     mov word [readHdl], ax  ;Store the read handle here
@@ -518,7 +518,7 @@
    200                              <1> ;Maybe new file? Check reason for error! If FNF, its good!
    201 0000025D 663D0200            <1>     cmp ax, errFnf  ;If its a file not found error, then we are good!
    202 00000261 488D15(C7000000)    <1>     lea rdx, badOpenStr ;We can't open the file for whatever reason
-   203 00000268 0F8525010000        <1>     jne badExitMsg
+   203 00000268 0F852F020000        <1>     jne badExitMsg
    204                              <1> ;Error was file not found so we can make the file!
    205 0000026E C605(03000000)FF    <1>     mov byte [newFileFlag], -1  ;Set the new file flag!
    206                              <1> createWorkingFile:
@@ -531,7 +531,7 @@
    213 00000283 CD41                <1>     int 41h
    214 00000285 730C                <1>     jnc short .fileCreated
    215 00000287 488D15(A8000000)    <1>     lea rdx, badCreatStr    ;Creating the working file will fail if already exits
-   216 0000028E E900010000          <1>     jmp badExitMsg          ;This prevents someone from ove
+   216 0000028E E90A020000          <1>     jmp badExitMsg          ;This prevents someone from ove
    217                              <1> .fileCreated:
    218 00000293 668905(2E000000)    <1>     mov word [writeHdl], ax ;Store a pointer to the write handle
    219                              <1> ;Now the following:
@@ -557,7 +557,7 @@
    239 000002BA 730C                <1>     jnc short .loadProgram
    240                              <1> .notEnoughMem:
    241 000002BC 488D15(3D010000)    <1>     lea rdx, badMemSize
-   242 000002C3 E9CB000000          <1>     jmp badExitMsg
+   242 000002C3 E9D5010000          <1>     jmp badExitMsg
    243                              <1> .loadProgram:
    244                              <1> ;rax has pointer here
    245 000002C8 488905(06000000)    <1>     mov qword [memPtr], rax
@@ -585,7 +585,7 @@
    267 00000323 7510                <1>     jne short .eofFound
    268 00000325 F605(04000000)FF    <1>     test byte [noEofChar], -1   ;Avoid searching for ^Z?
    269 0000032C 7415                <1>     jz short initBuffers
-   270 0000032E E8EF000000          <1>     call searchTextForEOFChar
+   270 0000032E E8F9010000          <1>     call searchTextForEOFChar
    271 00000333 750E                <1>     jnz short initBuffers
    272                              <1> .eofFound:
    273                              <1> ;Now we print the EOF message
@@ -594,49 +594,115 @@
    276 00000341 CD41                <1>     int 41h
    277                              <1> initBuffers:
    278                              <1> ;Now we setup the edit and command buffers
-   279 00000343 C605(52020000)FD    <1>     mov byte [workLine + line.bBufLen], lineLen
+   279 00000343 C605(56020000)FD    <1>     mov byte [workLine + line.bBufLen], lineLen
    280 0000034A C605(40010000)80    <1>     mov byte [cmdLine + line.bBufLen], halflineLen
    281 00000351 66C705(2A000000)01- <1>     mov word [curLineNum], 1    ;Start at line 1
    281 00000359 00                  <1>
    282                              <1> getCommand:
-   283                              <1> ;Now we install the Int 43h handler
-   284 0000035A 488D1556020000      <1>     lea rdx, i43h
-   285 00000361 B843250000          <1>     mov eax, 2543h  ;Set Interrupt handler for Int 43h
-   286 00000366 CD41                <1>     int 41h
-   287 00000368 B82A000000          <1>     mov eax, prompt
-   288 0000036D E836020000          <1>     call printChar
-   289 00000372 488D15(40010000)    <1>     lea rdx, cmdLine
-   290 00000379 B8000A0000          <1>     mov eax, 0A00h  ;Take buffered input.
-   291 0000037E CD41                <1>     int 41h
-   292 00000380 E821020000          <1>     call printLF 
-   293                              <1> ;Now we parse the command line!
-   294                              <1> ;NOTE: Multiple commands may be on the same command line.
-   295                              <1> ;Commands are terminated by a command letter (except in the
-   296                              <1> ; case of S and R where they may be followed by a string).
-   297                              <1> ;If we encounter a CR in the string parsing, then we are
-   298                              <1> ; finished with this command line. Else, we keep parsing the
-   299                              <1> ; same command line, until all the chars in the buffer 
-   300                              <1> ; have been processed and/or a CR has been hit.
-   301                              <1> parseCommand:
-   302                              <1> 
-   303                              <1> 
-   304                              <1>     
-   305                              <1> exitOk:
-   306                              <1> ;Let DOS take care of freeing all resources
-   307 00000385 B8004C0000          <1>     mov eax, 4C00h
-   308 0000038A CD41                <1>     int 41h
-   309                              <1> 
-   310                              <1> ;----Bad Exits----
-   311                              <1> badParmExit:
-   312 0000038C 488D15(06010000)    <1>     lea rdx, badParm    ;Bad number of parameters
-   313                              <1> badExitMsg:
-   314 00000393 4885D2              <1>     test rdx, rdx   ;Check if null ptr => Dont print on exit
-   315 00000396 7407                <1>     jz short badExit
-   316 00000398 B800090000          <1>     mov eax, 0900h
-   317 0000039D CD41                <1>     int 41h
-   318                              <1> badExit:
-   319 0000039F B8FF4C0000          <1>     mov eax, 4CFFh
-   320 000003A4 CD41                <1>     int 41h
+   283 0000035A 488D25(40060000)    <1>     lea rsp, stackTop   ;Reset the stack pointer
+   284 00000361 488D1533030000      <1>     lea rdx, i43h
+   285 00000368 B843250000          <1>     mov eax, 2543h  ;Set Interrupt handler for Int 43h
+   286 0000036D CD41                <1>     int 41h
+   287 0000036F B82A000000          <1>     mov eax, prompt
+   288 00000374 E800030000          <1>     call printChar
+   289 00000379 488D15(40010000)    <1>     lea rdx, cmdLine
+   290 00000380 B8000A0000          <1>     mov eax, 0A00h  ;Take buffered input.
+   291 00000385 CD41                <1>     int 41h
+   292 00000387 E8EB020000          <1>     call printLF 
+   293 0000038C 488D35(42010000)    <1>     lea rsi, qword [cmdLine + halfLine.pString] ;Point to the text of the line
+   294 00000393 488935(C2010000)    <1>     mov qword [charPtr], rsi
+   295                              <1> ;Now we parse the command line!
+   296                              <1> ;NOTE: Multiple commands may be on the same command line.
+   297                              <1> ;Commands are terminated by a command letter (except in the
+   298                              <1> ; case of S and R where they may be followed by a string).
+   299                              <1> ;If we encounter a CR in the string parsing, then we are
+   300                              <1> ; finished with this command line. Else, we keep parsing the
+   301                              <1> ; same command line, until all the chars in the buffer 
+   302                              <1> ; have been processed and/or a CR has been hit.
+   303                              <1> parseCommand:
+   304 0000039A 31C0                <1>     xor eax, eax
+   305 0000039C 8805(CA010000)      <1>     mov byte [argCnt], al
+   306 000003A2 488905(CB010000)    <1>     mov qword [argTbl], rax ;Clear the argument table
+   307 000003A9 8805(D3010000)      <1>     mov byte [qmarkSet], al
+   308 000003AF 488B35(C2010000)    <1>     mov rsi, qword [charPtr]    ;Get rsi to the right place in command line
+   309 000003B6 488D2D(CB010000)    <1>     lea rbp, argTbl
+   310                              <1> .parse:
+   311 000003BD FE05(CA010000)      <1>     inc byte [argCnt]   ;Parsing an argument
+   312 000003C3 E8E7010000          <1>     call parseEntry ;Returns in bx the word to store in the arg table
+   313 000003C8 0FB63D(CA010000)    <1>     movzx edi, byte [argCnt]
+   314 000003CF FFCF                <1>     dec edi ;Turn into offset
+   315 000003D1 66895C7D00          <1>     mov word [rbp + 2*rdi], bx  ;Store the 
+   316 000003D6 48FFCE              <1>     dec rsi ;rsi points at the first char past the argument
+   317 000003D9 E888020000          <1>     call skipSpaces ;Skip the spaces, rsi points at the first non space char
+   318 000003DE 3C2C                <1>     cmp al, "," ;Is the first char the argument separator?
+   319 000003E0 7503                <1>     jne short .notSep
+   320 000003E2 48FFC6              <1>     inc rsi ;Keep rsi ahead because ...
+   321                              <1> .notSep:
+   322 000003E5 48FFCE              <1>     dec rsi ;Move rsi back to the first non-space char
+   323 000003E8 E879020000          <1>     call skipSpaces ;Point rsi past first non-space char and get char
+   324 000003ED 803D(CA010000)04    <1>     cmp byte [argCnt], 4
+   325 000003F4 72C7                <1>     jb short .parse
+   326 000003F6 3C3F                <1>     cmp al, "?"
+   327 000003F8 750C                <1>     jne short .notQmark
+   328 000003FA C605(D3010000)FF    <1>     mov byte [qmarkSet], -1
+   329 00000401 E860020000          <1>     call skipSpaces ;Get the next char (must be a cmd char) in al
+   330                              <1> .notQmark:
+   331 00000406 3C61                <1>     cmp al, "a"
+   332 00000408 7202                <1>     jb short .noUC
+   333 0000040A 24DF                <1>     and al, 0DFh    ;Convert cmd char to upper case if LC 
+   334                              <1> .noUC:
+   335 0000040C 488D3D(00000000)    <1>     lea rdi, cmdLetterTable
+   336 00000413 B90F000000          <1>     mov ecx, cmdLetterTableL
+   337 00000418 F2AE                <1>     repne scasb
+   338 0000041A 0F8568020000        <1>     jne printComErr ;Print an error if char not in table
+   339                              <1> ;Now check the R/O permissions for the selected function
+   340                              <1> ;ecx has the offset into the table
+   341 00000420 488D2D(2D000000)    <1>     lea rbp, cmdRoTable
+   342 00000427 F7D9                <1>     neg ecx
+   343 00000429 81C10F000000        <1>     add ecx, cmdLetterTableL    ;Get L->R offset into table
+   344 0000042F F6440D00FF          <1>     test byte [rbp + rcx], -1   ;Test the flag
+   345 00000434 7513                <1>     jnz short execCmd
+   346 00000436 488D15(83010000)    <1>     lea rdx, badROcmd
+   347 0000043D B800090000          <1>     mov eax, 0900h
+   348 00000442 CD41                <1>     int 41h
+   349 00000444 E93F020000          <1>     jmp printComErr
+   350                              <1> execCmd:
+   351 00000449 488935(C2010000)    <1>     mov qword [charPtr], rsi
+   352 00000450 488D2D(0F000000)    <1>     lea rbp, cmdFcnTable
+   353 00000457 488D5C4D00          <1>     lea rbx, qword [rbp + 2*rcx]    ;Get word ptr into rbx
+   354 0000045C 4801EB              <1>     add rbx, rbp    ;Convert the word offset from cmdFcnTbl to pointer
+   355 0000045F FFD3                <1>     call rbx
+   356 00000461 488B35(C2010000)    <1>     mov rsi, qword [charPtr]
+   357 00000468 E8F9010000          <1>     call skipSpaces ;Now move to the "following command" or CR
+   358 0000046D 3C0D                <1>     cmp al, CR
+   359 0000046F 0F84E5FEFFFF        <1>     je getCommand   ;If CR, end of line. Get new command
+   360 00000475 3C1A                <1>     cmp al, EOF
+   361 00000477 7404                <1>     je short .eocChar
+   362 00000479 3C3B                <1>     cmp al, ";"
+   363 0000047B 7503                <1>     jne short .skipEocChar
+   364                              <1> .eocChar:
+   365 0000047D 48FFC6              <1>     inc rsi ;Move rsi ahead one to avoid the below...
+   366                              <1> .skipEocChar:
+   367 00000480 48FFCE              <1>     dec rsi ;Move rsi back to the first char of the new command
+   368 00000483 488935(C2010000)    <1>     mov qword [charPtr], rsi    ;Save the command line pointer
+   369 0000048A E90BFFFFFF          <1>     jmp parseCommand
+   370                              <1>     
+   371                              <1> exitOk:
+   372                              <1> ;Let DOS take care of freeing all resources
+   373 0000048F B8004C0000          <1>     mov eax, 4C00h
+   374 00000494 CD41                <1>     int 41h
+   375                              <1> 
+   376                              <1> ;----Bad Exits----
+   377                              <1> badParmExit:
+   378 00000496 488D15(06010000)    <1>     lea rdx, badParm    ;Bad number of parameters
+   379                              <1> badExitMsg:
+   380 0000049D 4885D2              <1>     test rdx, rdx   ;Check if null ptr => Dont print on exit
+   381 000004A0 7407                <1>     jz short badExit
+   382 000004A2 B800090000          <1>     mov eax, 0900h
+   383 000004A7 CD41                <1>     int 41h
+   384                              <1> badExit:
+   385 000004A9 B8FF4C0000          <1>     mov eax, 4CFFh
+   386 000004AE CD41                <1>     int 41h
     34                                  %include "./Source/edutils.asm"
      1                              <1> ;Utility functions for edlin go here
      2                              <1> 
@@ -645,39 +711,39 @@
      5                              <1> ;Input: rsi -> Source Ptr
      6                              <1> ;       al = Terminating char to search for
      7                              <1> ;Output: ecx = Number of chars instring including terminator
-     8 000003A6 31C9                <1>     xor ecx, ecx
-     9 000003A8 FFC9                <1>     dec ecx
-    10 000003AA 57                  <1>     push rdi
-    11 000003AB 4889F7              <1>     mov rdi, rsi
-    12 000003AE F2AE                <1>     repne scasb
-    13 000003B0 5F                  <1>     pop rdi
-    14 000003B1 F7D9                <1>     neg ecx ;Take 2's compliment to get number of chars including terminator
+     8 000004B0 31C9                <1>     xor ecx, ecx
+     9 000004B2 FFC9                <1>     dec ecx
+    10 000004B4 57                  <1>     push rdi
+    11 000004B5 4889F7              <1>     mov rdi, rsi
+    12 000004B8 F2AE                <1>     repne scasb
+    13 000004BA 5F                  <1>     pop rdi
+    14 000004BB F7D9                <1>     neg ecx ;Take 2's compliment to get number of chars including terminator
     15                              <1>     return
     13                              <2> %%_ret:
-    14 000003B3 C3                  <2>  ret
+    14 000004BD C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     16                              <1> 
     17                              <1> strcpy:
     18                              <1> ;Copies a string from one buffer to another
     19                              <1> ;Input: rsi -> Source Ptr
     20                              <1> ;       rdi -> Destination Ptr
-    21 000003B4 56                  <1>     push rsi
-    22 000003B5 57                  <1>     push rdi
-    23 000003B6 51                  <1>     push rcx
-    24 000003B7 B9FD000000          <1>     mov ecx, lineLen    ;Max number of chars in a string
+    21 000004BE 56                  <1>     push rsi
+    22 000004BF 57                  <1>     push rdi
+    23 000004C0 51                  <1>     push rcx
+    24 000004C1 B9FD000000          <1>     mov ecx, lineLen    ;Max number of chars in a string
     25                              <1> .lp:
-    26 000003BC E83B000000          <1>     call isCharEOL
-    27 000003C1 7405                <1>     je short .exit
-    28 000003C3 A4                  <1>     movsb   ;Move the char over, inc both pointers
-    29 000003C4 FFC9                <1>     dec ecx
-    30 000003C6 75F4                <1>     jnz short .lp
+    26 000004C6 E83B000000          <1>     call isCharEOL
+    27 000004CB 7405                <1>     je short .exit
+    28 000004CD A4                  <1>     movsb   ;Move the char over, inc both pointers
+    29 000004CE FFC9                <1>     dec ecx
+    30 000004D0 75F4                <1>     jnz short .lp
     31                              <1> .exit:
-    32 000003C8 59                  <1>     pop rcx
-    33 000003C9 5F                  <1>     pop rdi
-    34 000003CA 5E                  <1>     pop rsi
+    32 000004D2 59                  <1>     pop rcx
+    33 000004D3 5F                  <1>     pop rdi
+    34 000004D4 5E                  <1>     pop rsi
     35                              <1>     return
     13                              <2> %%_ret:
-    14 000003CB C3                  <2>  ret
+    14 000004D5 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     36                              <1> 
     37                              <1> strcpyASCIIZ:
@@ -685,18 +751,18 @@
     39                              <1> ;Pointers don't move.
     40                              <1> ;Input: rsi -> Source Ptr
     41                              <1> ;       rdi -> Destination Ptr
-    42 000003CC 56                  <1>     push rsi
-    43 000003CD 57                  <1>     push rdi
+    42 000004D6 56                  <1>     push rsi
+    43 000004D7 57                  <1>     push rdi
     44                              <1> .cpChar:
-    45 000003CE AC                  <1>     lodsb
-    46 000003CF AA                  <1>     stosb
-    47 000003D0 84C0                <1>     test al, al ;Was this a nul char?
-    48 000003D2 75FA                <1>     jnz .cpChar
-    49 000003D4 5F                  <1>     pop rdi
-    50 000003D5 5E                  <1>     pop rsi
+    45 000004D8 AC                  <1>     lodsb
+    46 000004D9 AA                  <1>     stosb
+    47 000004DA 84C0                <1>     test al, al ;Was this a nul char?
+    48 000004DC 75FA                <1>     jnz .cpChar
+    49 000004DE 5F                  <1>     pop rdi
+    50 000004DF 5E                  <1>     pop rsi
     51                              <1>     return
     13                              <2> %%_ret:
-    14 000003D6 C3                  <2>  ret
+    14 000004E0 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     52                              <1> 
     53                              <1> 
@@ -705,16 +771,16 @@
     56                              <1> ;Input: rsi -> Source Ptr
     57                              <1> ;       rdi -> Destination Ptr
     58                              <1> ;       ecx = Count of chars to copy
-    59 000003D7 56                  <1>     push rsi
-    60 000003D8 57                  <1>     push rdi
-    61 000003D9 51                  <1>     push rcx
-    62 000003DA F3A4                <1>     rep movsb
-    63 000003DC 59                  <1>     pop rcx
-    64 000003DD 5F                  <1>     pop rdi
-    65 000003DE 5E                  <1>     pop rsi
+    59 000004E1 56                  <1>     push rsi
+    60 000004E2 57                  <1>     push rdi
+    61 000004E3 51                  <1>     push rcx
+    62 000004E4 F3A4                <1>     rep movsb
+    63 000004E6 59                  <1>     pop rcx
+    64 000004E7 5F                  <1>     pop rdi
+    65 000004E8 5E                  <1>     pop rsi
     66                              <1>     return
     13                              <2> %%_ret:
-    14 000003DF C3                  <2>  ret
+    14 000004E9 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     67                              <1> 
     68                              <1> memset:
@@ -722,14 +788,14 @@
     70                              <1> ;Input: rdi -> Buffer to set to given value
     71                              <1> ;       al = Value to set the buffer to
     72                              <1> ;       rcx = Number of bytes in buffer
-    73 000003E0 51                  <1>     push rcx
-    74 000003E1 57                  <1>     push rdi
-    75 000003E2 F3AA                <1>     rep stosb
-    76 000003E4 5F                  <1>     pop rdi
-    77 000003E5 59                  <1>     pop rcx
+    73 000004EA 51                  <1>     push rcx
+    74 000004EB 57                  <1>     push rdi
+    75 000004EC F3AA                <1>     rep stosb
+    76 000004EE 5F                  <1>     pop rdi
+    77 000004EF 59                  <1>     pop rcx
     78                              <1>     return
     13                              <2> %%_ret:
-    14 000003E6 C3                  <2>  ret
+    14 000004F0 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     79                              <1> 
     80                              <1> findLineEnd:
@@ -737,9 +803,9 @@
     82                              <1> ;Input: rsi -> Start of the line find the end of
     83                              <1> ;Output: rsi -> Last char in the string (NOTE: LAST CHAR NOT PAST)
     84                              <1> ;Trashes: rcx
-    85 000003E7 B9FD000000          <1>     mov ecx, lineLen
+    85 000004F1 B9FD000000          <1>     mov ecx, lineLen
     86                              <1> .lp:
-    87 000003EC E80B000000          <1>     call isCharEOL  ;If ZF=ZE, then rsi points to EOL
+    87 000004F6 E80B000000          <1>     call isCharEOL  ;If ZF=ZE, then rsi points to EOL
     88                              <1>     rete
     49                              <2> cret e
     19                              <3> %%_base:
@@ -749,7 +815,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000003F1 74(E6)              <3>  j%+1 short retOff
+    26 000004FB 74(F0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -761,7 +827,7 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-    89 000003F3 FFC9                <1>     dec ecx
+    89 000004FD FFC9                <1>     dec ecx
     90                              <1>     retz    ;If ecx is now 0, means rsi points to the end of line (NO EOL CHAR)
     41                              <2> cret z
     19                              <3> %%_base:
@@ -771,7 +837,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000003F5 74(E6)              <3>  j%+1 short retOff
+    26 000004FF 74(F0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -783,14 +849,14 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-    91 000003F7 48FFC6              <1>     inc rsi
-    92 000003FA EBF0                <1>     jmp short .lp
+    91 00000501 48FFC6              <1>     inc rsi
+    92 00000504 EBF0                <1>     jmp short .lp
     93                              <1> 
     94                              <1> isCharEOL:
     95                              <1> ;Input: rsi -> Char/Word to analyse
     96                              <1> ;Output: ZF=ZE if char/word at rsi LF or CR,LF.
     97                              <1> ;        ZF=NZ if not
-    98 000003FC E811000000          <1>     call isCharEOF
+    98 00000506 E811000000          <1>     call isCharEOF
     99                              <1>     rete
     49                              <2> cret e
     19                              <3> %%_base:
@@ -800,7 +866,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 00000401 74(E6)              <3>  j%+1 short retOff
+    26 0000050B 74(F0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -812,7 +878,7 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   100 00000403 803E0A              <1>     cmp byte [rsi], LF
+   100 0000050D 803E0A              <1>     cmp byte [rsi], LF
    101                              <1>     rete
     49                              <2> cret e
     19                              <3> %%_base:
@@ -822,7 +888,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 00000406 74(E6)              <3>  j%+1 short retOff
+    26 00000510 74(F0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -834,7 +900,7 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   102 00000408 803E0D              <1>     cmp byte [rsi], CR
+   102 00000512 803E0D              <1>     cmp byte [rsi], CR
    103                              <1>     retne
     53                              <2> cret ne
     19                              <3> %%_base:
@@ -844,7 +910,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 0000040B 75(E6)              <3>  j%+1 short retOff
+    26 00000515 75(F0)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -856,20 +922,20 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   104 0000040D 807E010A            <1>     cmp byte [rsi + 1], LF
+   104 00000517 807E010A            <1>     cmp byte [rsi + 1], LF
    105                              <1>     return
     13                              <2> %%_ret:
-    14 00000411 C3                  <2>  ret
+    14 0000051B C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
    106                              <1> 
    107                              <1> isCharEOF:
    108                              <1> ;Input: rsi -> Char to check if it is ^Z
    109                              <1> ;Output: ZF=ZE if char at rsi is ^Z AND we are checking for EOFs
    110                              <1> ;        ZF=NZ if char at rsi is not ^Z or we are not checking for eof's
-   111 00000412 50                  <1>     push rax
-   112 00000413 8A05(04000000)      <1>     mov al, byte [noEofChar]
-   113 00000419 F6D0                <1>     not al  ;Invert the bits (1's compliment)
-   114 0000041B 58                  <1>     pop rax
+   111 0000051C 50                  <1>     push rax
+   112 0000051D 8A05(04000000)      <1>     mov al, byte [noEofChar]
+   113 00000523 F6D0                <1>     not al  ;Invert the bits (1's compliment)
+   114 00000525 58                  <1>     pop rax
    115                              <1>     retnz   ;Return if not checking for EOF
     45                              <2> cret nz
     19                              <3> %%_base:
@@ -879,7 +945,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 0000041C 75(11)              <3>  j%+1 short retOff
+    26 00000526 75(1B)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -891,10 +957,10 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   116 0000041E 803E1A              <1>     cmp byte [rsi], EOF ;Check if eof
+   116 00000528 803E1A              <1>     cmp byte [rsi], EOF ;Check if eof
    117                              <1>     return
     13                              <2> %%_ret:
-    14 00000421 C3                  <2>  ret
+    14 0000052B C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
    118                              <1> 
    119                              <1> searchTextForEOFChar:
@@ -904,31 +970,31 @@
    123                              <1> ; arena leave the embedded ^Z in situ (boo!)
    124                              <1> ;Return: ZF=ZE -> EOF found and left in situ
    125                              <1> ;        ZF=NZ -> No EOF char found
-   126 00000422 50                  <1>     push rax
-   127 00000423 51                  <1>     push rcx
-   128 00000424 57                  <1>     push rdi
-   129 00000425 488B3D(06000000)    <1>     mov rdi, qword [memPtr]
-   130 0000042C 31C9                <1>     xor ecx, ecx
-   131 0000042E 8B0D(16000000)      <1>     mov ecx, dword [textLen]  ;Go to the end of the text
-   132 00000434 B01A                <1>     mov al, EOF
-   133 00000436 F2AE                <1>     repne scasb ;Search the arena for a EOF char
-   134 00000438 7522                <1>     jne short .exit ;No ^Z found
-   135 0000043A 48FFCF              <1>     dec rdi ;Point rdi to the ^Z char
-   136 0000043D 807FFF0A            <1>     cmp byte [rdi - 1], LF  ;If the char before the ^Z is LF, exit ok
-   137 00000441 7419                <1>     je short .exit
-   138 00000443 483B3D(1A000000)    <1>     cmp rdi, qword [endOfArena] ;If ^Z is at the end of the arena, do nothing
-   139 0000044A 7410                <1>     je short .exit
-   140 0000044C C647010A            <1>     mov byte [rdi + 1], LF
-   141 00000450 C6070D              <1>     mov byte [rdi], CR      ;Overwrite the ^Z, so now no more ^Z
-   142 00000453 48FF05(16000000)    <1>     inc qword [textLen]     ;One more char in text
-   143 0000045A 31C9                <1>     xor ecx, ecx            ;EOF char found so clear ZF
+   126 0000052C 50                  <1>     push rax
+   127 0000052D 51                  <1>     push rcx
+   128 0000052E 57                  <1>     push rdi
+   129 0000052F 488B3D(06000000)    <1>     mov rdi, qword [memPtr]
+   130 00000536 31C9                <1>     xor ecx, ecx
+   131 00000538 8B0D(16000000)      <1>     mov ecx, dword [textLen]  ;Go to the end of the text
+   132 0000053E B01A                <1>     mov al, EOF
+   133 00000540 F2AE                <1>     repne scasb ;Search the arena for a EOF char
+   134 00000542 7522                <1>     jne short .exit ;No ^Z found
+   135 00000544 48FFCF              <1>     dec rdi ;Point rdi to the ^Z char
+   136 00000547 807FFF0A            <1>     cmp byte [rdi - 1], LF  ;If the char before the ^Z is LF, exit ok
+   137 0000054B 7419                <1>     je short .exit
+   138 0000054D 483B3D(1A000000)    <1>     cmp rdi, qword [endOfArena] ;If ^Z is at the end of the arena, do nothing
+   139 00000554 7410                <1>     je short .exit
+   140 00000556 C647010A            <1>     mov byte [rdi + 1], LF
+   141 0000055A C6070D              <1>     mov byte [rdi], CR      ;Overwrite the ^Z, so now no more ^Z
+   142 0000055D 48FF05(16000000)    <1>     inc qword [textLen]     ;One more char in text
+   143 00000564 31C9                <1>     xor ecx, ecx            ;EOF char found so clear ZF
    144                              <1> .exit:
-   145 0000045C 5F                  <1>     pop rdi
-   146 0000045D 59                  <1>     pop rcx
-   147 0000045E 58                  <1>     pop rax
+   145 00000566 5F                  <1>     pop rdi
+   146 00000567 59                  <1>     pop rcx
+   147 00000568 58                  <1>     pop rax
    148                              <1>     return
     13                              <2> %%_ret:
-    14 0000045F C3                  <2>  ret
+    14 00000569 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
    149                              <1> 
    150                              <1> getDecimalDwordLZ:
@@ -936,23 +1002,23 @@
    152                              <1> ; in the decimalised DWORD from the below function.
    153                              <1> ;Input: rcx = BCD packed DWORD (byte = ASCII digit)
    154                              <1> ;Output: rcx = BCD packed DORD with leading spaces
-   155 00000460 50                  <1>     push rax
-   156 00000461 4889C8              <1>     mov rax, rcx
-   157 00000464 31C9                <1>     xor ecx, ecx    ;Use as a counter for how many times we roll right
+   155 0000056A 50                  <1>     push rax
+   156 0000056B 4889C8              <1>     mov rax, rcx
+   157 0000056E 31C9                <1>     xor ecx, ecx    ;Use as a counter for how many times we roll right
    158                              <1> .lp:
-   159 00000466 3C30                <1>     cmp al, '0'     ;If not a zero, we are done
-   160 00000468 750C                <1>     jne short .swapBack
-   161 0000046A 48C1C008            <1>     rol rax, 8      ;Roll the upper byte low by 8 bits
-   162 0000046E 81C108000000        <1>     add ecx, 8      ;Increase counter by this many bits
-   163 00000474 EBF0                <1>     jmp short .lp
+   159 00000570 3C30                <1>     cmp al, '0'     ;If not a zero, we are done
+   160 00000572 750C                <1>     jne short .swapBack
+   161 00000574 48C1C008            <1>     rol rax, 8      ;Roll the upper byte low by 8 bits
+   162 00000578 81C108000000        <1>     add ecx, 8      ;Increase counter by this many bits
+   163 0000057E EBF0                <1>     jmp short .lp
    164                              <1> .swapBack:
-   165 00000476 48D3C8              <1>     ror rax, cl     ;Undo the left rolls
+   165 00000580 48D3C8              <1>     ror rax, cl     ;Undo the left rolls
    166                              <1> .exit:
-   167 00000479 4889C1              <1>     mov rcx, rax
-   168 0000047C 58                  <1>     pop rax
+   167 00000583 4889C1              <1>     mov rcx, rax
+   168 00000586 58                  <1>     pop rax
    169                              <1>     return
     13                              <2> %%_ret:
-    14 0000047D C3                  <2>  ret
+    14 00000587 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
    170                              <1> 
    171                              <1> getDecimalDword:
@@ -960,55 +1026,75 @@
    173                              <1> ;Gets the decimalised DWORD to print in rcx (at most 8 digits)
    174                              <1> ;Input: eax = DWORD to decimalise
    175                              <1> ;Output: rcx = BCD packed DWORD (byte = ASCII digit)
-   176 0000047E 31C9                <1>     xor ecx, ecx
-   177 00000480 31ED                <1>     xor ebp, ebp  ;Use bp as #of digits counter
-   178 00000482 BB0A000000          <1>     mov ebx, 0Ah  ;Divide by 10
+   176 00000588 31C9                <1>     xor ecx, ecx
+   177 0000058A 31ED                <1>     xor ebp, ebp  ;Use bp as #of digits counter
+   178 0000058C BB0A000000          <1>     mov ebx, 0Ah  ;Divide by 10
    179                              <1> .dwpfb0:
-   180 00000487 FFC5                <1>     inc ebp
-   181 00000489 48C1E108            <1>     shl rcx, 8    ;Space for next nybble
-   182 0000048D 31D2                <1>     xor edx, edx
-   183 0000048F 48F7F3              <1>     div rbx
-   184 00000492 80C230              <1>     add dl, '0'
-   185 00000495 80FA39              <1>     cmp dl, '9'
-   186 00000498 7603                <1>     jbe short .dwpfb1
-   187 0000049A 80C207              <1>     add dl, 'A'-'0'-10
+   180 00000591 FFC5                <1>     inc ebp
+   181 00000593 48C1E108            <1>     shl rcx, 8    ;Space for next nybble
+   182 00000597 31D2                <1>     xor edx, edx
+   183 00000599 48F7F3              <1>     div rbx
+   184 0000059C 80C230              <1>     add dl, '0'
+   185 0000059F 80FA39              <1>     cmp dl, '9'
+   186 000005A2 7603                <1>     jbe short .dwpfb1
+   187 000005A4 80C207              <1>     add dl, 'A'-'0'-10
    188                              <1> .dwpfb1:
-   189 0000049D 88D1                <1>     mov cl, dl    ;Save remainder byte
-   190 0000049F 4885C0              <1>     test rax, rax
-   191 000004A2 75E3                <1>     jnz short .dwpfb0
+   189 000005A7 88D1                <1>     mov cl, dl    ;Save remainder byte
+   190 000005A9 4885C0              <1>     test rax, rax
+   191 000005AC 75E3                <1>     jnz short .dwpfb0
    192                              <1>     return
     13                              <2> %%_ret:
-    14 000004A4 C3                  <2>  ret
+    14 000005AE C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
    193                              <1> 
-   194                              <1> ;skipSpaces:
-   195                              <1> ;Skips all the spaces in the command line
-   196                              <1> ;Input: rsi -> Buffer to skip spaces on
-   197                              <1> ;Output: rsi -> First non-space char on command line
-   198                              <1> ;    push rax
-   199                              <1> ;    push rcx
-   200                              <1> ;    push rdi
-   201                              <1> ;    mov rdi, rsi
-   202                              <1> ;    xor ecx, ecx
-   203                              <1> ;    dec ecx
-   204                              <1> ;    mov eax, SPC
-   205                              <1> ;    repne scasb
-   206                              <1> ;    dec rdi ;Point to the first non SPC char
-   207                              <1> ;    mov rsi, rdi
-   208                              <1> ;    pop rdi
-   209                              <1> ;    pop rcx
-   210                              <1> ;    pop rax
-   211                              <1> ;    return
-   212                              <1> 
-   213                              <1> skipSpaces:
-   214                              <1> ;Also skips tabs
-   215                              <1> ;Input: rsi must point to the start of the data string
-   216                              <1> ;Output: rsi points to the first non-space char
-   217 000004A5 803E20              <1>     cmp byte [rsi], " "
-   218 000004A8 7405                <1>     je short .skip    ;If equal to a space, skip it
-   219 000004AA 803E09              <1>     cmp byte [rsi], TAB
-   220                              <1>     retne   ;If not equal to a tab or space, return
-    53                              <2> cret ne
+   194                              <1> parseEntry:
+   195                              <1> ;Parses a single command line argument.
+   196                              <1> ;. means current line
+   197                              <1> ;+ means positive number offset from current line
+   198                              <1> ;- means negative number offset from current line
+   199                              <1> ;# means line after the last line in file ALWAYS.
+   200                              <1> ; This is represented in the argument var as the 
+   201                              <1> ; word 0FFFFh.
+   202                              <1> ;A naked number is interpreted as a line number 
+   203                              <1> ; directly.
+   204                              <1> ;Maximum input value per argument: 65534
+   205                              <1> ;--------------------------------------------
+   206                              <1> ;Input: rsi -> String to parse
+   207                              <1> ;Output: (e)bx = Value of argument
+   208                              <1> ;          rsi -> First char past the end of arg
+   209                              <1> ;--------------------------------------------
+   210 000005AF E8B2000000          <1>     call skipSpaces ;Move rsi past first non-space char and get al = First char
+   211 000005B4 3C2B                <1>     cmp al, "+" ;Positive offset from current line
+   212 000005B6 7446                <1>     je short .plus
+   213 000005B8 3C2D                <1>     cmp al, "-" ;Negative offset from current line
+   214 000005BA 7456                <1>     je short .minus
+   215 000005BC 3C2E                <1>     cmp al, "." ;Current line, advance ptr to command terminator
+   216 000005BE 7470                <1>     je short .dot
+   217 000005C0 3C23                <1>     cmp al, "#" ;Last line (-1), advance ptr to command terminator
+   218 000005C2 747A                <1>     je short .pound
+   219 000005C4 31DB                <1>     xor ebx, ebx
+   220 000005C6 31C9                <1>     xor ecx, ecx
+   221                              <1> .getArg:
+   222 000005C8 3C30                <1>     cmp al, "0"
+   223 000005CA 7225                <1>     jb short .endOfArg
+   224 000005CC 3C39                <1>     cmp al, "9"
+   225 000005CE 7721                <1>     ja short .endOfArg
+   226 000005D0 81FB99190000        <1>     cmp ebx, 6553
+   227 000005D6 0F83AC000000        <1>     jae printComErr
+   228 000005DC FFC9                <1>     dec ecx ;Indicate we have a valid digit
+   229 000005DE 2C30                <1>     sub al, "0"
+   230 000005E0 89DA                <1>     mov edx, ebx
+   231 000005E2 C1E202              <1>     shl edx, 2
+   232 000005E5 01DA                <1>     add edx, ebx
+   233 000005E7 D1E2                <1>     shl edx, 1
+   234 000005E9 0FBEC0              <1>     movsx eax, al     ;Sign extend al to eax
+   235 000005EC 01C2                <1>     add edx, eax
+   236 000005EE AC                  <1>     lodsb   ;Get the next char
+   237 000005EF EBD7                <1>     jmp short .getArg
+   238                              <1> .endOfArg:
+   239 000005F1 85C9                <1>     test ecx, ecx
+   240                              <1>     retz    ;If no char provided, exit silently
+    41                              <2> cret z
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
     21                              <3>  %ifdef retOff
@@ -1016,7 +1102,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 000004AD 75(A4)              <3>  j%+1 short retOff
+    26 000005F3 74(AE)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -1028,316 +1114,127 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   221                              <1> .skip:
-   222 000004AF 48FFC6              <1>     inc rsi
-   223 000004B2 EBF1                <1>     jmp short skipSpaces
-   224                              <1> 
-   225                              <1> parseEntry:
-   226                              <1> ;Parses a numeric command line argument.
-   227                              <1> ;. means current line
-   228                              <1> ;+ means positive number offset from current line
-   229                              <1> ;- means negative number offset from current line
-   230                              <1> ;# means line after the last line in file ALWAYS.
-   231                              <1> ; This is represented in the argument var as the 
-   232                              <1> ; word 0FFFFh.
-   233                              <1> ;A naked number is interpreted as a line number 
-   234                              <1> ; directly.
-   235                              <1> ;Maximum input value per argument: 65534
-   236                              <1> ;The first char ONLY may contain a special 
-   237                              <1> ; character. Any other char will result in 
-   238                              <1> ; an error condition. 
-   239                              <1> ;Maximum number of chars per argument: 6
-   240                              <1> ;An argument is terminated by a "," a 
-   241                              <1> ; command letter or a ?.
-   242                              <1> ;++++++++++++++++++++++++++++++++++++++++++
-   243                              <1> ;CAVEAT CAVEAT CAVEAT CAVEAT CAVEAT CAVEAT 
-   244                              <1> ;++++++++++++++++++++++++++++++++++++++++++
-   245                              <1> ;If a ? is encountered, it is a terminator
-   246                              <1> ; but also sets the "qmark" var to -1
-   247                              <1> ; to indicate to the function that might
-   248                              <1> ; use it that a qmark has been entered.
-   249                              <1> ;++++++++++++++++++++++++++++++++++++++++++
-   250                              <1> ;CAVEAT CAVEAT CAVEAT CAVEAT CAVEAT CAVEAT 
-   251                              <1> ;++++++++++++++++++++++++++++++++++++++++++
-   252                              <1> ;--------------------------------------------
-   253                              <1> ;Input: rdi -> Var to store the value in
-   254                              <1> ;       rsi -> First char of argument
-   255                              <1> ;Output: CF=NC:
-   256                              <1> ;           word [rdi] = Value to be used
-   257                              <1> ;           (e)ax = Value to be used
-   258                              <1> ;        CF=CY:
-   259                              <1> ;           Error condition, bad input at rsi
-   260                              <1> ;--------------------------------------------
-   261 000004B4 E800000000          <1>     call processArg
-   262                              <1> 
-   263                              <1> processArg:
-   264                              <1> ;Processes an argument
-   265 000004B9 E8C6000000          <1>     call readChar   ;Get the next char in al
-   266 000004BE E8AE000000          <1>     call isCharSpecial
-   267 000004C3 E820000000          <1>     call processSpecialChar
-   268 000004C8 7217                <1>     jc .exit
-   269 000004CA E88F000000          <1>     call isCharTerminal ;al has the char we are considering
-   270 000004CF 7510                <1>     jne short .notTerminal
-   271 000004D1 3C0D                <1>     cmp al, CR
-   272 000004D3 740C                <1>     je short .skipCmdLetter
-   273 000004D5 3C3B                <1>     cmp al, ";"
-   274 000004D7 7408                <1>     je short .skipCmdLetter
-   275 000004D9 24DF                <1>     and al, 0DFh    ;Convert to upper case
-   276 000004DB 8805(C4010000)      <1>     mov byte [cmdChar], al
-   277                              <1> .skipCmdLetter:
-   278                              <1>     
-   279                              <1> .notTerminal:
-   280                              <1> 
-   281                              <1> .exit:
-   282 000004E1 FE05(C3010000)      <1>     inc byte [argCnt]
-   283                              <1>     return
+   241 000005F5 85DB                <1>     test ebx, ebx
+   242 000005F7 0F848B000000        <1>     jz printComErr  ;Dont allow 0 as an argument
+   243                              <1>     return
     13                              <2> %%_ret:
-    14 000004E7 C3                  <2>  ret
+    14 000005FD C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   284                              <1> 
-   285                              <1> processSpecialChar:
-   286                              <1> ;Input: ZF=ZE => Char in al is special. Do processing
-   287                              <1> ;       ZF=NZ => Char in al is not special. Exit
-   288                              <1> ;Output: Appropriate flags/vars set for the char input
-   289                              <1> ;       CF=NC => Continue
-   290                              <1> ;       CF=CY => Argument processed, goto next command
-   291                              <1>     retne 
-    53                              <2> cret ne
-    19                              <3> %%_base:
-    20                              <3> %assign baseVar %%_base-$$
-    21                              <3>  %ifdef retOff
-    22                              <3>  %if (baseVar - retOff <= 126) && (baseVar > retOff)
-    23                              <3>  %ifdef currSegVBase
-    24                              <3>  j%+1 short (retOff+currSegVBase)
-    25                              <3>  %else
-    26 000004E8 75(E7)              <3>  j%+1 short retOff
-    27                              <3>  %endif
-    28                              <3>  %else
-    29                              <3>  j%-1 short %%a
-    30                              <3>  return
-    31                              <3> %%a:
-    32                              <3>  %endif
-    33                              <3>  %else
-    34                              <3>  j%-1 short %%a
-    35                              <3>  return
-    36                              <3> %%a:
-    37                              <3>  %endif
-   292 000004EA 50                  <1>     push rax
-   293 000004EB 53                  <1>     push rbx 
-   294 000004EC 51                  <1>     push rcx
-   295 000004ED 57                  <1>     push rdi
-   296 000004EE 488D3D5A000000      <1>     lea rdi, .specialTbl
-   297 000004F5 31C9                <1>     xor ecx, ecx
-   298 000004F7 F7D9                <1>     neg ecx 
-   299 000004F9 F2AE                <1>     repne scasb ;Decrement ecx until we find the char in table
-   300 000004FB F7D9                <1>     neg ecx     ;Get number of chars we advanced by
-   301 000004FD 488D3D50000000      <1>     lea rdi, .specialTbl2   ;Get the function table ptr
-   302 00000504 480FB71C4F          <1>     movzx rbx, word [rdi + 2*rcx]   ;rbx has the offset in it
-   303 00000509 4801FB              <1>     add rbx, rdi    ;Now add the offset from the base ptr to rbx
-   304 0000050C F8                  <1>     clc
-   305 0000050D FFD3                <1>     call rbx 
-   306 0000050F 5F                  <1>     pop rdi
-   307 00000510 59                  <1>     pop rcx
-   308 00000511 5B                  <1>     pop rbx
-   309 00000512 58                  <1>     pop rax
-   310                              <1>     return
+   244                              <1> .plus:
+   245 000005FE E844000000          <1>     call .validSpecial
+   246 00000603 E8A7FFFFFF          <1>     call parseEntry ;Now parse the entry again
+   247 00000608 0FB705(2A000000)    <1>     movzx eax, word [curLineNum]
+   248 0000060F 01C3                <1>     add ebx, eax    ;Only the low word is considered!!
+   249                              <1>     return
     13                              <2> %%_ret:
-    14 00000513 C3                  <2>  ret
+    14 00000611 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   311                              <1> .plus:
-   312 00000514 C605(C5010000)01    <1>     mov byte [relCur], 1    ;Positive offset from curline
-   313                              <1>     return
+   250                              <1> .minus:
+   251 00000612 E830000000          <1>     call .validSpecial
+   252 00000617 E893FFFFFF          <1>     call parseEntry ;Now parse the entry again, get result in ebx
+   253 0000061C 0FB705(2A000000)    <1>     movzx eax, word [curLineNum]
+   254 00000623 29D8                <1>     sub eax, ebx    ;Now get the differnece and ...
+   255 00000625 89C3                <1>     mov ebx, eax    ;save the difference in ebx
+   256 00000627 B801000000          <1>     mov eax, 1
+   257 0000062C 0F48D8              <1>     cmovs ebx, eax  ;If the difference is less than 0, return to line 1
+   258                              <1>     return
     13                              <2> %%_ret:
-    14 0000051B C3                  <2>  ret
+    14 0000062F C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   314                              <1> .minus:
-   315 0000051C C605(C5010000)FF    <1>     mov byte [relCur], -1   ;Negative offset from curline
-   316                              <1>     return
+   259                              <1> .dot:
+   260 00000630 E812000000          <1>     call .validSpecial
+   261 00000635 0FB71D(2A000000)    <1>     movzx ebx, word [curLineNum]    ;Goto current line (starts from 1)
+   262 0000063C AC                  <1>     lodsb
+   263                              <1>     return
     13                              <2> %%_ret:
-    14 00000523 C3                  <2>  ret
+    14 0000063D C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   317                              <1> .qmark:
-   318 00000524 C605(CE010000)FF    <1>     mov byte [qmarkSet], -1 ;Question mark set
-   319                              <1>     return
+   264                              <1> .pound:
+   265 0000063E E804000000          <1>     call .validSpecial
+   266 00000643 FFCB                <1>     dec ebx         ;Go to last line
+   267 00000645 AC                  <1>     lodsb
+   268                              <1>     return
     13                              <2> %%_ret:
-    14 0000052B C3                  <2>  ret
+    14 00000646 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   320                              <1> .dot:
-   321 0000052C 0FB705(2A000000)    <1>     movzx eax, word [curLineNum]    ;Goto current line
-   322 00000533 EB04                <1>     jmp short .storeLineNum
-   323                              <1> .pound:
-   324 00000535 31C0                <1>     xor eax, eax
-   325 00000537 FFC8                <1>     dec eax                 ;Go to last line
-   326                              <1> .storeLineNum:
-   327 00000539 488D3D(C6010000)    <1>     lea rdi, argTbl
-   328 00000540 0FB60D(C3010000)    <1>     movzx ecx, byte [argCnt]
-   329 00000547 4801CF              <1>     add rdi, rcx
-   330 0000054A 668907              <1>     mov word [rdi], ax
-   331 0000054D F9                  <1>     stc
-   332                              <1>     return
+   269                              <1> .validSpecial:
+   270                              <1> ;Returns if it is a valid case to do so. Else no
+   271 00000647 803D(CA010000)04    <1>     cmp byte [argCnt], 4    ;Argument 4 is for the count
+   272 0000064E 7438                <1>     je printComErr
+   273                              <1>     return
     13                              <2> %%_ret:
-    14 0000054E C3                  <2>  ret
+    14 00000650 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   333                              <1> .specialTbl:
-   334 0000054F 2B2D3F2E23          <1>     db "+-?.#"
-   335                              <1> .specialTbl2:
-   336 00000554 2C00                <1>     dw .plus - processSpecialChar
-   337 00000556 3400                <1>     dw .minus - processSpecialChar
-   338 00000558 3C00                <1>     dw .qmark - processSpecialChar
-   339 0000055A 4400                <1>     dw .dot - processSpecialChar
-   340 0000055C 4D00                <1>     dw .pound - processSpecialChar
-   341                              <1> 
-   342                              <1> isCharTerminal:
-   343 0000055E 51                  <1>     push rcx
-   344 0000055F 57                  <1>     push rdi
-   345 00000560 488D3D(00000000)    <1>     lea rdi, cmdLetterTable
-   346 00000567 B90F000000          <1>     mov ecx, cmdLetterTableL
-   347 0000056C F2AE                <1>     repne scasb ;Scan for the char
-   348 0000056E 5F                  <1>     pop rdi
-   349 0000056F 59                  <1>     pop rcx
-   350                              <1>     return
+   274                              <1> 
+   275                              <1> isCharCmd:
+   276                              <1> ;If ZF=ZE then char is a command char
+   277                              <1> ;If ZF=NZ then not command char.
+   278                              <1> ; If command char, ecx = entry in cmd table
+   279 00000651 57                  <1>     push rdi
+   280 00000652 488D3D(00000000)    <1>     lea rdi, cmdLetterTable
+   281 00000659 B90F000000          <1>     mov ecx, cmdLetterTableL
+   282 0000065E F2AE                <1>     repne scasb ;Scan for the char
+   283 00000660 5F                  <1>     pop rdi
+   284 00000661 9C                  <1>     pushfq
+   285 00000662 F7D9                <1>     neg ecx
+   286 00000664 9D                  <1>     popfq
+   287                              <1>     return
     13                              <2> %%_ret:
-    14 00000570 C3                  <2>  ret
+    14 00000665 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   351                              <1> isCharSpecial:
-   352 00000571 3C2B                <1>     cmp al, "+" ;Positive offset from current line
-   353                              <1>     rete
-    49                              <2> cret e
-    19                              <3> %%_base:
-    20                              <3> %assign baseVar %%_base-$$
-    21                              <3>  %ifdef retOff
-    22                              <3>  %if (baseVar - retOff <= 126) && (baseVar > retOff)
-    23                              <3>  %ifdef currSegVBase
-    24                              <3>  j%+1 short (retOff+currSegVBase)
-    25                              <3>  %else
-    26 00000573 74(70)              <3>  j%+1 short retOff
-    27                              <3>  %endif
-    28                              <3>  %else
-    29                              <3>  j%-1 short %%a
-    30                              <3>  return
-    31                              <3> %%a:
-    32                              <3>  %endif
-    33                              <3>  %else
-    34                              <3>  j%-1 short %%a
-    35                              <3>  return
-    36                              <3> %%a:
-    37                              <3>  %endif
-   354 00000575 3C2D                <1>     cmp al, "-" ;Negative offset from current line
-   355                              <1>     rete
-    49                              <2> cret e
-    19                              <3> %%_base:
-    20                              <3> %assign baseVar %%_base-$$
-    21                              <3>  %ifdef retOff
-    22                              <3>  %if (baseVar - retOff <= 126) && (baseVar > retOff)
-    23                              <3>  %ifdef currSegVBase
-    24                              <3>  j%+1 short (retOff+currSegVBase)
-    25                              <3>  %else
-    26 00000577 74(70)              <3>  j%+1 short retOff
-    27                              <3>  %endif
-    28                              <3>  %else
-    29                              <3>  j%-1 short %%a
-    30                              <3>  return
-    31                              <3> %%a:
-    32                              <3>  %endif
-    33                              <3>  %else
-    34                              <3>  j%-1 short %%a
-    35                              <3>  return
-    36                              <3> %%a:
-    37                              <3>  %endif
-   356 00000579 3C3F                <1>     cmp al, "?" ;Set qmark on (if already on, error line)
-   357                              <1>     rete
-    49                              <2> cret e
-    19                              <3> %%_base:
-    20                              <3> %assign baseVar %%_base-$$
-    21                              <3>  %ifdef retOff
-    22                              <3>  %if (baseVar - retOff <= 126) && (baseVar > retOff)
-    23                              <3>  %ifdef currSegVBase
-    24                              <3>  j%+1 short (retOff+currSegVBase)
-    25                              <3>  %else
-    26 0000057B 74(70)              <3>  j%+1 short retOff
-    27                              <3>  %endif
-    28                              <3>  %else
-    29                              <3>  j%-1 short %%a
-    30                              <3>  return
-    31                              <3> %%a:
-    32                              <3>  %endif
-    33                              <3>  %else
-    34                              <3>  j%-1 short %%a
-    35                              <3>  return
-    36                              <3> %%a:
-    37                              <3>  %endif
-   358 0000057D 3C2E                <1>     cmp al, "." ;Current line, advance ptr to command terminator
-   359                              <1>     rete
-    49                              <2> cret e
-    19                              <3> %%_base:
-    20                              <3> %assign baseVar %%_base-$$
-    21                              <3>  %ifdef retOff
-    22                              <3>  %if (baseVar - retOff <= 126) && (baseVar > retOff)
-    23                              <3>  %ifdef currSegVBase
-    24                              <3>  j%+1 short (retOff+currSegVBase)
-    25                              <3>  %else
-    26 0000057F 74(70)              <3>  j%+1 short retOff
-    27                              <3>  %endif
-    28                              <3>  %else
-    29                              <3>  j%-1 short %%a
-    30                              <3>  return
-    31                              <3> %%a:
-    32                              <3>  %endif
-    33                              <3>  %else
-    34                              <3>  j%-1 short %%a
-    35                              <3>  return
-    36                              <3> %%a:
-    37                              <3>  %endif
-   360 00000581 3C23                <1>     cmp al, "#" ;Last line (-1), advance ptr to command terminator
-   361                              <1>     return
+   288                              <1> 
+   289                              <1> skipSpaces:
+   290                              <1> ;Also skips tabs
+   291                              <1> ;Input: rsi must point to the start of the data string
+   292                              <1> ;Output: rsi points to the first non-space char
+   293                              <1> ;           al = First non-space char
+   294 00000666 AC                  <1>     lodsb
+   295 00000667 3C20                <1>     cmp al, " "
+   296 00000669 74FB                <1>     je short skipSpaces  
+   297 0000066B 3C09                <1>     cmp al, TAB
+   298 0000066D 74F7                <1>     je short skipSpaces
+   299                              <1>     return
     13                              <2> %%_ret:
-    14 00000583 C3                  <2>  ret
+    14 0000066F C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   362                              <1> 
-   363                              <1> readChar:
-   364                              <1> ;Reads the next char into al and zeros the upper 7 bytes
-   365                              <1> ;Also keeps track of the var.
-   366 00000584 56                  <1>     push rsi
-   367 00000585 488D35(40010000)    <1>     lea rsi, cmdLine
-   368 0000058C 0FB605(C2010000)    <1>     movzx eax, byte [charInLine]    ;Get the char in the line 
-   369 00000593 4801C6              <1>     add rsi, rax    ;Move rsi to that offset
-   370 00000596 AC                  <1>     lodsb   ;Get the char in al
-   371 00000597 FE05(C2010000)      <1>     inc byte [charInLine]
-   372 0000059D 5E                  <1>     pop rsi
-   373                              <1>     return
+   300                              <1> 
+   301                              <1> printCRLF:
+   302                              <1> ;Prints CRLF
+   303 00000670 B00D                <1>     mov al, CR
+   304 00000672 E802000000          <1>     call printChar
+   305                              <1> printLF:
+   306 00000677 B00A                <1>     mov al, LF
+   307                              <1> ;Just fall into the next function
+   308                              <1> printChar:
+   309                              <1> ;Input: al = Char to print
+   310 00000679 50                  <1>     push rax    ;To preserve the rest of eax
+   311 0000067A 52                  <1>     push rdx
+   312 0000067B 0FB6D0              <1>     movzx edx, al
+   313 0000067E B800020000          <1>     mov eax, 0200h
+   314 00000683 CD41                <1>     int 41h
+   315 00000685 5A                  <1>     pop rdx
+   316 00000686 58                  <1>     pop rax
+   317                              <1>     return
     13                              <2> %%_ret:
-    14 0000059E C3                  <2>  ret
+    14 00000687 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   374                              <1> 
-   375                              <1> printCRLF:
-   376                              <1> ;Prints CRLF
-   377 0000059F B00D                <1>     mov al, CR
-   378 000005A1 E802000000          <1>     call printChar
-   379                              <1> printLF:
-   380 000005A6 B00A                <1>     mov al, LF
-   381                              <1> ;Just fall into the next function
-   382                              <1> printChar:
-   383                              <1> ;Input: al = Char to print
-   384 000005A8 50                  <1>     push rax    ;To preserve the rest of eax
-   385 000005A9 52                  <1>     push rdx
-   386 000005AA 0FB6D0              <1>     movzx edx, al
-   387 000005AD B800020000          <1>     mov eax, 0200h
-   388 000005B2 CD41                <1>     int 41h
-   389 000005B4 5A                  <1>     pop rdx
-   390 000005B5 58                  <1>     pop rax
-   391                              <1>     return
-    13                              <2> %%_ret:
-    14 000005B6 C3                  <2>  ret
-    15                              <2> %assign retOff %%_ret-$$
-   392                              <1> ;---------------------------------------------------------------------------
-   393                              <1> ;                  !!!! IMPORTANT INT 43h HANDLER !!!!
-   394                              <1> ;---------------------------------------------------------------------------
-   395                              <1> i43h:
-   396                              <1> ;^C handler. Reset the stack pointer and jump to get command
-   397 000005B7 488D25(40060000)    <1>     lea rsp, stackTop
-   398 000005BE FC                  <1>     cld
-   399 000005BF E8DBFFFFFF          <1>     call printCRLF
-   400 000005C4 E991FDFFFF          <1>     jmp getCommand  ;Now jump to get the command
+   318                              <1> 
+   319                              <1> printComErr:
+   320                              <1> ;JUMP to this procedure and it jumps back to
+   321                              <1> ; the command loop resetting the stack!
+   322 00000688 488D15(1A010000)    <1>     lea rdx, badInput
+   323 0000068F B800090000          <1>     mov eax, 0900h
+   324 00000694 CD41                <1>     int 41h
+   325 00000696 E9BFFCFFFF          <1>     jmp getCommand
+   326                              <1> ;---------------------------------------------------------------------------
+   327                              <1> ;                  !!!! IMPORTANT INT 43h HANDLER !!!!
+   328                              <1> ;---------------------------------------------------------------------------
+   329                              <1> i43h:
+   330                              <1> ;^C handler. Reset the stack pointer and jump to get command
+   331 0000069B 488D25(40060000)    <1>     lea rsp, stackTop
+   332 000006A2 FC                  <1>     cld
+   333 000006A3 E8C8FFFFFF          <1>     call printCRLF
+   334 000006A8 E9ADFCFFFF          <1>     jmp getCommand  ;Now jump to get the command
     35                                  %include "./Source/edfunc.asm"
      1                              <1> ;This is where the main user selectable routines are
      2                              <1> ;All arguments specified are signed words
@@ -1454,21 +1351,21 @@
      5 00000009 4D5152535457        <1>
      6                              <1>     cmdLetterTableL equ $ - cmdLetterTable
      7                              <1> cmdFcnTable:
-     8 0000000F C905                <1>     dw editLine - progHeadPtr
-     9 00000011 C905                <1>     dw editLine - progHeadPtr
-    10 00000013 C905                <1>     dw appendLines - progHeadPtr
-    11 00000015 C905                <1>     dw copyLines - progHeadPtr
-    12 00000017 C905                <1>     dw deleteLines - progHeadPtr
-    13 00000019 C905                <1>     dw endEdit - progHeadPtr
-    14 0000001B C905                <1>     dw insertLine - progHeadPtr
-    15 0000001D C905                <1>     dw listLines - progHeadPtr
-    16 0000001F C905                <1>     dw pageLines - progHeadPtr
-    17 00000021 C905                <1>     dw moveLines - progHeadPtr
-    18 00000023 C905                <1>     dw quit - progHeadPtr
-    19 00000025 C905                <1>     dw replaceText - progHeadPtr
-    20 00000027 C905                <1>     dw searchText - progHeadPtr
-    21 00000029 C905                <1>     dw transferLines - progHeadPtr
-    22 0000002B C905                <1>     dw writeLines - progHeadPtr
+     8 0000000F (9E06)              <1>     dw editLine - cmdFcnTable
+     9 00000011 (9E06)              <1>     dw editLine - cmdFcnTable
+    10 00000013 (9E06)              <1>     dw appendLines - cmdFcnTable
+    11 00000015 (9E06)              <1>     dw copyLines - cmdFcnTable
+    12 00000017 (9E06)              <1>     dw deleteLines - cmdFcnTable
+    13 00000019 (9E06)              <1>     dw endEdit - cmdFcnTable
+    14 0000001B (9E06)              <1>     dw insertLine - cmdFcnTable
+    15 0000001D (9E06)              <1>     dw listLines - cmdFcnTable
+    16 0000001F (9E06)              <1>     dw pageLines - cmdFcnTable
+    17 00000021 (9E06)              <1>     dw moveLines - cmdFcnTable
+    18 00000023 (9E06)              <1>     dw quit - cmdFcnTable
+    19 00000025 (9E06)              <1>     dw replaceText - cmdFcnTable
+    20 00000027 (9E06)              <1>     dw searchText - cmdFcnTable
+    21 00000029 (9E06)              <1>     dw transferLines - cmdFcnTable
+    22 0000002B (9E06)              <1>     dw writeLines - cmdFcnTable
     23                              <1> cmdRoTable:
     24                              <1> ;Byte set if we can do this command in RO mode
     25 0000002D 00                  <1>     db 0    ;Insert
@@ -1532,6 +1429,10 @@
     14 00000170 696C652D2D72656E61- <1>
     14 00000179 6D652066696C650D0A- <1>
     14 00000182 24                  <1>
+    15 00000183 496E76616C6964206F- <1> badROcmd    db "Invalid operation: R/O file",CR,LF,"$"
+    15 0000018C 7065726174696F6E3A- <1>
+    15 00000195 20522F4F2066696C65- <1>
+    15 0000019E 0D0A24              <1>
     39                                  Segment .bss align=1 follows=.data nobits
     40                                  bssStart:
     41                                  %include "./Data/edbss.asm"
@@ -1571,25 +1472,22 @@
     34                              <1> ;Command line variables
     35 00000140 <res 82h>           <1> cmdLine     db halfLine_size dup (?)
     36                              <1> ;Arguments for parsing
-    37 000001C2 ??                  <1> charInLine  db ?    ;Offset into cmdLine of char we are studying
-    38 000001C3 ??                  <1> argCnt      db ?    ;Count of arguments in parsed command line
-    39 000001C4 ??                  <1> cmdChar     db ?    ;Command Letter 
-    40 000001C5 ??                  <1> relCur      db ?    ;Tells if rel curline. 0=no, 1=+, -1=-
-    41                              <1> ;Arguments are converted to signed words where appropriate
-    42                              <1> ; and parsed into here in the order they are encountered in.
-    43                              <1> ;
-    44                              <1> argTbl:
-    45 000001C6 ????                <1> arg1        dw ?
-    46 000001C8 ????                <1> arg2        dw ?
-    47 000001CA ????                <1> arg3        dw ?
-    48 000001CC ????                <1> arg4        dw ?
-    49 000001CE ??                  <1> qmarkSet    db ?    ;Set if question mark encountered
-    50 000001CF <res 82h>           <1> argString   db halfLine_size dup (?)    ;Used by search and replace only
-    51 00000251 ??                  <1> argPastEnd  db ?    ;0 -> normal, -1 -> Offset from end of mem (indicated by #)
-    52                              <1> 
-    53                              <1> ;The workLine gets preloaded with the original line before editing
-    54                              <1> ;workLine has type "line"
-    55 00000252 <res 100h>          <1> workLine    db 256 dup (?)  ;Line in which all editing takes place
+    37 000001C2 ????????????????    <1> charPtr     dq ?    ;Ptr to char for continuing processing
+    38 000001CA ??                  <1> argCnt      db ?    ;Count of arguments in parsed command line
+    39                              <1> ;Arguments are converted to signed words where appropriate
+    40                              <1> ; and parsed into here in the order they are encountered in.
+    41                              <1> ;
+    42                              <1> argTbl:
+    43 000001CB ????                <1> arg1        dw ?
+    44 000001CD ????                <1> arg2        dw ?
+    45 000001CF ????                <1> arg3        dw ?
+    46 000001D1 ????                <1> arg4        dw ?
+    47 000001D3 ??                  <1> qmarkSet    db ?    ;Set if question mark encountered
+    48 000001D4 <res 82h>           <1> argString   db halfLine_size dup (?)    ;Used by search and replace only
+    49                              <1> 
+    50                              <1> ;The workLine gets preloaded with the original line before editing
+    51                              <1> ;workLine has type "line"
+    52 00000256 <res 100h>          <1> workLine    db 256 dup (?)  ;Line in which all editing takes place
     42                                  bssLen equ ($ - bssStart)
     43                                  Segment .stack align=16 follows=.bss nobits
     44                                  ;Use a 200 QWORD stack

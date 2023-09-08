@@ -5,21 +5,21 @@ cmdLetterTable:
     db CR,";ACDEILPMQRSTW"
     cmdLetterTableL equ $ - cmdLetterTable
 cmdFcnTable:
-    dw editLine - progHeadPtr
-    dw editLine - progHeadPtr
-    dw appendLines - progHeadPtr
-    dw copyLines - progHeadPtr
-    dw deleteLines - progHeadPtr
-    dw endEdit - progHeadPtr
-    dw insertLine - progHeadPtr
-    dw listLines - progHeadPtr
-    dw pageLines - progHeadPtr
-    dw moveLines - progHeadPtr
-    dw quit - progHeadPtr
-    dw replaceText - progHeadPtr
-    dw searchText - progHeadPtr
-    dw transferLines - progHeadPtr
-    dw writeLines - progHeadPtr
+    dw editLine - cmdFcnTable
+    dw editLine - cmdFcnTable
+    dw appendLines - cmdFcnTable
+    dw copyLines - cmdFcnTable
+    dw deleteLines - cmdFcnTable
+    dw endEdit - cmdFcnTable
+    dw insertLine - cmdFcnTable
+    dw listLines - cmdFcnTable
+    dw pageLines - cmdFcnTable
+    dw moveLines - cmdFcnTable
+    dw quit - cmdFcnTable
+    dw replaceText - cmdFcnTable
+    dw searchText - cmdFcnTable
+    dw transferLines - cmdFcnTable
+    dw writeLines - cmdFcnTable
 cmdRoTable:
 ;Byte set if we can do this command in RO mode
     db 0    ;Insert

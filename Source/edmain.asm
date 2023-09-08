@@ -280,7 +280,7 @@ initBuffers:
     mov byte [cmdLine + line.bBufLen], halflineLen
     mov word [curLineNum], 1    ;Start at line 1
 getCommand:
-;Now we install the Int 43h handler
+    lea rsp, stackTop   ;Reset the stack pointer
     lea rdx, i43h
     mov eax, 2543h  ;Set Interrupt handler for Int 43h
     int 41h
@@ -290,6 +290,8 @@ getCommand:
     mov eax, 0A00h  ;Take buffered input.
     int 41h
     call printLF 
+    lea rsi, qword [cmdLine + halfLine.pString] ;Point to the text of the line
+    mov qword [charPtr], rsi
 ;Now we parse the command line!
 ;NOTE: Multiple commands may be on the same command line.
 ;Commands are terminated by a command letter (except in the
@@ -299,8 +301,72 @@ getCommand:
 ; same command line, until all the chars in the buffer 
 ; have been processed and/or a CR has been hit.
 parseCommand:
-
-
+    xor eax, eax
+    mov byte [argCnt], al
+    mov qword [argTbl], rax ;Clear the argument table
+    mov byte [qmarkSet], al
+    mov rsi, qword [charPtr]    ;Get rsi to the right place in command line
+    lea rbp, argTbl
+.parse:
+    inc byte [argCnt]   ;Parsing an argument
+    call parseEntry ;Returns in bx the word to store in the arg table
+    movzx edi, byte [argCnt]
+    dec edi ;Turn into offset
+    mov word [rbp + 2*rdi], bx  ;Store the 
+    dec rsi ;rsi points at the first char past the argument
+    call skipSpaces ;Skip the spaces, rsi points at the first non space char
+    cmp al, "," ;Is the first char the argument separator?
+    jne short .notSep
+    inc rsi ;Keep rsi ahead because ...
+.notSep:
+    dec rsi ;Move rsi back to the first non-space char
+    call skipSpaces ;Point rsi past first non-space char and get char
+    cmp byte [argCnt], 4
+    jb short .parse
+    cmp al, "?"
+    jne short .notQmark
+    mov byte [qmarkSet], -1
+    call skipSpaces ;Get the next char (must be a cmd char) in al
+.notQmark:
+    cmp al, "a"
+    jb short .noUC
+    and al, 0DFh    ;Convert cmd char to upper case if LC 
+.noUC:
+    lea rdi, cmdLetterTable
+    mov ecx, cmdLetterTableL
+    repne scasb
+    jne printComErr ;Print an error if char not in table
+;Now check the R/O permissions for the selected function
+;ecx has the offset into the table
+    lea rbp, cmdRoTable
+    neg ecx
+    add ecx, cmdLetterTableL    ;Get L->R offset into table
+    test byte [rbp + rcx], -1   ;Test the flag
+    jnz short execCmd
+    lea rdx, badROcmd
+    mov eax, 0900h
+    int 41h
+    jmp printComErr
+execCmd:
+    mov qword [charPtr], rsi
+    lea rbp, cmdFcnTable
+    lea rbx, qword [rbp + 2*rcx]    ;Get word ptr into rbx
+    add rbx, rbp    ;Convert the word offset from cmdFcnTbl to pointer
+    call rbx
+    mov rsi, qword [charPtr]
+    call skipSpaces ;Now move to the "following command" or CR
+    cmp al, CR
+    je getCommand   ;If CR, end of line. Get new command
+    cmp al, EOF
+    je short .eocChar
+    cmp al, ";"
+    jne short .skipEocChar
+.eocChar:
+    inc rsi ;Move rsi ahead one to avoid the below...
+.skipEocChar:
+    dec rsi ;Move rsi back to the first char of the new command
+    mov qword [charPtr], rsi    ;Save the command line pointer
+    jmp parseCommand
     
 exitOk:
 ;Let DOS take care of freeing all resources
