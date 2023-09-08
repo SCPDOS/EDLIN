@@ -312,7 +312,7 @@ parseCommand:
     call parseEntry ;Returns in bx the word to store in the arg table
     movzx edi, byte [argCnt]
     dec edi ;Turn into offset
-    mov word [rbp + 2*rdi], bx  ;Store the 
+    mov word [rbp + 2*rdi], bx  ;Store the argument
     dec rsi ;rsi points at the first char past the argument
     call skipSpaces ;Skip the spaces, rsi points at the first non space char
     cmp al, "," ;Is the first char the argument separator?
@@ -320,9 +320,9 @@ parseCommand:
     inc rsi ;Keep rsi ahead because ...
 .notSep:
     dec rsi ;Move rsi back to the first non-space char
-    call skipSpaces ;Point rsi past first non-space char and get char
     cmp byte [argCnt], 4
     jb short .parse
+    call skipSpaces
     cmp al, "?"
     jne short .notQmark
     mov byte [qmarkSet], -1
@@ -336,11 +336,13 @@ parseCommand:
     mov ecx, cmdLetterTableL
     repne scasb
     jne printComErr ;Print an error if char not in table
+    not ecx ;1's compliment to subtract 1 too
+    add ecx, cmdLetterTableL    ;Get L->R offset into table
 ;Now check the R/O permissions for the selected function
 ;ecx has the offset into the table
+    test byte [roFlag], -1  ;If this flag is not set, ignore r/o
+    jz short execCmd
     lea rbp, cmdRoTable
-    neg ecx
-    add ecx, cmdLetterTableL    ;Get L->R offset into table
     test byte [rbp + rcx], -1   ;Test the flag
     jnz short execCmd
     lea rdx, badROcmd
@@ -350,7 +352,7 @@ parseCommand:
 execCmd:
     mov qword [charPtr], rsi
     lea rbp, cmdFcnTable
-    lea rbx, qword [rbp + 2*rcx]    ;Get word ptr into rbx
+    movsx rbx, word [rbp + 2*rcx]    ;Get word ptr into rbx
     add rbx, rbp    ;Convert the word offset from cmdFcnTbl to pointer
     call rbx
     mov rsi, qword [charPtr]

@@ -14,6 +14,7 @@ appendLines:
 ;--------------------------------------------
 ;Invoked by: [n]A (number of bytes to read)
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 copyLines:
 ;Duplicates a line or a range of lines to a position specifed 
@@ -21,18 +22,22 @@ copyLines:
 ;--------------------------------------------
 ;Invoked by: [line],[line],line[,count]C
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 deleteLines:
 ;Deletes one or a range of lines
 ;--------------------------------------------
 ;Invoked by: [line][,line]D
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 editLine:
 ;Displays a line and allows it to be edited
 ;--------------------------------------------
 ;Invoked by: [line]
 ;--------------------------------------------
+    dec qword [charPtr] ;Adjust ptr to point to the CR or ;
+    jmp _unimplementedFunction
 
 endEdit:
 ;Inserts a EOF char at the end of the file if one not already present
@@ -41,6 +46,7 @@ endEdit:
 ;--------------------------------------------
 ;Invoked by: E
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 insertLine:
 ;Inserts a line
@@ -51,6 +57,7 @@ insertLine:
 ; UPPERCASE char is taken to be a control
 ; char. Else, we throw away the ^V from the 
 ; line before saving it.
+    jmp _unimplementedFunction
 
 listLines:
 ;Prints a line or a number of lines.
@@ -58,6 +65,7 @@ listLines:
 ;--------------------------------------------
 ;Invoked by: [line][,line]L
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 pageLines:
 ;Prints a page of lines
@@ -65,36 +73,42 @@ pageLines:
 ;--------------------------------------------
 ;Invoked by: [line][,line]P
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 moveLines:
 ;Moves a block of lines elsewhere (non overlapping moves only)
 ;--------------------------------------------
 ;Invoked by: [line][line],lineM
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 quit:
 ;Quits EDLIN, not saving work and deleting working file.
 ;--------------------------------------------
 ;Invoked by: Q
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 replaceText:
 ;Replaces all matching strings with specified string (NO REGEX)
 ;--------------------------------------------
 ;Invoked by: [line][,line][?]R[string][<F6>string]
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 searchText:
 ;Searches text for a string
 ;--------------------------------------------
 ;Invoked by: [line][,line][?]S[string]
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 transferLines:
 ;Writes the lines specified to the specified file
 ;--------------------------------------------
 ;Invoked by: [line]T[d:]filename
 ;--------------------------------------------
+    jmp _unimplementedFunction
 
 writeLines:
 ;Writes the current arena to disk. If no 
@@ -103,3 +117,4 @@ writeLines:
 ;--------------------------------------------
 ;Invoked by: [n]W (number of bytes to write)
 ;--------------------------------------------
+    jmp _unimplementedFunction

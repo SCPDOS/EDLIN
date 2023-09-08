@@ -223,22 +223,20 @@ parseEntry:
     jb short .endOfArg
     cmp al, "9"
     ja short .endOfArg
-    cmp ebx, 6553
+    cmp ebx, 0FFFFh/0Ah ;If we are gonna go above the max, fail now
     jae printComErr
     dec ecx ;Indicate we have a valid digit
     sub al, "0"
-    mov edx, ebx
-    shl edx, 2
-    add edx, ebx
-    shl edx, 1
-    movsx eax, al     ;Sign extend al to eax
-    add edx, eax
+    lea ebx, dword [4*ebx + ebx]    ;5*ebx
+    shl ebx, 1          ;2*5*ebx = 10*ebx
+    movsx eax, al       ;Sign extend al to eax
+    add ebx, eax
     lodsb   ;Get the next char
     jmp short .getArg
 .endOfArg:
     test ecx, ecx
-    retz    ;If no char provided, exit silently
-    test ebx, ebx
+    retz    ;If no char provided, exit silently. Var already 0
+    test ebx, ebx   
     jz printComErr  ;Dont allow 0 as an argument
     return
 .plus:
@@ -270,20 +268,6 @@ parseEntry:
 ;Returns if it is a valid case to do so. Else no
     cmp byte [argCnt], 4    ;Argument 4 is for the count
     je printComErr
-    return
-
-isCharCmd:
-;If ZF=ZE then char is a command char
-;If ZF=NZ then not command char.
-; If command char, ecx = entry in cmd table
-    push rdi
-    lea rdi, cmdLetterTable
-    mov ecx, cmdLetterTableL
-    repne scasb ;Scan for the char
-    pop rdi
-    pushfq
-    neg ecx
-    popfq
     return
 
 skipSpaces:
@@ -332,3 +316,11 @@ i43h:
     cld
     call printCRLF
     jmp getCommand  ;Now jump to get the command
+
+;Remove before finishing!
+_unimplementedFunction:
+    lea rdx, .str
+    mov eax, 0900h
+    int 41h
+    return
+.str:   db CR,LF,"EXCEPTION: UNIMPLEMENTED FUNCTION CALLED",CR,LF,"$"
