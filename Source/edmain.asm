@@ -207,13 +207,16 @@ createWorkingFile:
 ;Now open a new file with triple question mark extension
 ;rdi -> Path to file with $$$ (the working file)
     lea rdx, wkfile    ;Get a pointer to this filename
-    ;mov eax, 3C00h  ;Create file
     mov eax, 5B00h  ;Create file (atomic), prevent two edlins from editing same file
     xor ecx, ecx    ;Clear all file attributes (normal file)
     int 41h
-    jnc short .fileCreated
     lea rdx, badCreatStr    ;Creating the working file will fail if already exits
-    jmp badExitMsg          ;This prevents someone from ove
+    jc badExitMsg   ;This prevents someone from overriding the file
+    push rax
+    lea rdx, newStr
+    mov eax, 0900h
+    int 41h
+    pop rax
 .fileCreated:
     mov word [writeHdl], ax ;Store a pointer to the write handle
 ;Now the following:

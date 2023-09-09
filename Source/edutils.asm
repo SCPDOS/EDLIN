@@ -282,6 +282,19 @@ skipSpaces:
     je short skipSpaces
     return
 
+getPtrToStr:
+;Gets a pointer to the string number specified.
+;Input: eax = String number to get a pointer to
+;Output: rsi -> First byte of the string selected
+    push rcx
+    push rsi
+    mov rsi, qword [memPtr] ;Get a pointer to the area to read
+    
+.exit:
+    pop rsi
+    pop rcx
+    return
+
 printCRLF:
 ;Prints CRLF
     mov al, CR

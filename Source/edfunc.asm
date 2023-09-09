@@ -37,6 +37,7 @@ editLine:
 ;Invoked by: [line]
 ;--------------------------------------------
     dec qword [charPtr] ;Adjust ptr to point to the CR or ;
+    movzx eax, word [arg1]  ;Get the line number into eax
     jmp _unimplementedFunction
 
 endEdit:

@@ -13,3 +13,6 @@ badRealloc  db "Reallocation error",CR,LF,"$"
 badMemSize  db "Not enough memory to load file", CR,LF,"$"
 badFileExt  db "Cannot edit .BAK file--rename file",CR,LF,"$"
 badROcmd    db "Invalid operation: R/O file",CR,LF,"$"
+
+exitQuit    db "Abort edit (Y/N)? $"
+okString    db "O.K.? $"
