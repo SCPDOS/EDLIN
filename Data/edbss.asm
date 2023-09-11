@@ -16,7 +16,7 @@ textLen     dd ?    ;Number of chars in arena
 endOfArena  dq ?    ;Ptr to the last available byte in the arena
 curLinePtr  dq ?    ;Ptr to the start of the current line in arena
 curLineNum  dw ?    ;Word value for the current line number
-dirtyFlag   db ?    ;Flag set to indicate the buffer is dirty
+modFlag     db ?    ;Flag set to indicate the file was modified
 ;Backup is only deleted on exit or write, to make space for temp file.
 bkupDel     db ?    ;Flag to indicate that the backup was deleted
 

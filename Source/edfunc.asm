@@ -65,7 +65,7 @@ endEdit:
     jnz quit.roQuit
     call appendEOF  ;Append an EOF if appropriate.
     call delBkup
-    test byte [dirtyFlag], -1   ;If we are clean, delete $$$ and quit
+    call getModifiedStatus   ;If we are clean, delete $$$ and quit
     jz quit.roQuit
     ;Stage 2
     mov ecx, dword [textLen]    ;Get number of chars in the arena to write
@@ -76,7 +76,7 @@ endEdit:
     jc .writeError
     ;If not at EOF, we fill the buffer with more of the old file and
     ; write it to the temp file. This is ended when we reach an EOF 
-    ; condition on the original file.
+    ; condition on the original file. IE loop read/writing.
     ;Stage 3
     movzx ebx, word [readHdl]
     mov eax, 3E00h  ;Close the reading file!

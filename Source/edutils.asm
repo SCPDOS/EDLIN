@@ -116,8 +116,14 @@ isCharEOF:
     cmp byte [rsi], EOF ;Check if eof
     return
 
-markBufferDirty:
-    mov byte [dirtyFlag], -1
+markFileModified:
+    mov byte [modFlag], -1
+    return
+
+getModifiedStatus:
+;If returns ZF=ZE, file NOT modified.
+;Else, file modified.
+    test byte [modFlag], -1
     return
 
 appendEOF:
@@ -142,7 +148,7 @@ appendEOF:
     ;Else, add a single ^Z and exit
     mov byte [rdi], EOF
     inc dword [textLen]
-    call markBufferDirty
+    call markFileModified
     return
 
 searchTextForEOFChar:
@@ -185,7 +191,7 @@ searchTextForEOFChar:
     mov byte [rdi + 1], LF
     mov byte [rdi + 2], EOF
     add dword [textLen], 2     ;Two more chars in text
-    call markBufferDirty
+    call markFileModified
 .exit2:
     xor ecx, ecx            ;EOF char found so clear ZF
     jmp short .exit
@@ -199,7 +205,7 @@ delBkup:
 ; for some reason, might be problematic later but not a big issue.
     test byte [bkupDel], -1     ;If set, backup already deleted
     retnz
-    test byte [dirtyFlag], -1   ;If clear, buffer has not been modified.
+    call getModifiedStatus   ;If clear, buffer has not been modified.
     retz                        
     test byte [newFileFlag], -1 ;If the file is new then it has no backup!
     retnz
