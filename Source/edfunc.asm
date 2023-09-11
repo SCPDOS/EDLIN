@@ -67,7 +67,6 @@ endEdit:
     call delBkup
     test byte [dirtyFlag], -1   ;If we are clean, delete $$$ and quit
     jz quit.roQuit
-.newFile:
     ;Stage 2
     mov ecx, dword [textLen]    ;Get number of chars in the arena to write
     mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
@@ -75,6 +74,9 @@ endEdit:
     mov eax, 4000h
     int 41h
     jc .writeError
+    ;If not at EOF, we fill the buffer with more of the old file and
+    ; write it to the temp file. This is ended when we reach an EOF 
+    ; condition on the original file.
     ;Stage 3
     movzx ebx, word [readHdl]
     mov eax, 3E00h  ;Close the reading file!
