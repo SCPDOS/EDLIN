@@ -47,7 +47,90 @@ endEdit:
 ;--------------------------------------------
 ;Invoked by: E
 ;--------------------------------------------
-    jmp _unimplementedFunction
+;1) Append a final EOF to the file if doesnt have one and del bkup 
+;       if not yet done so.
+;2) Write file to temp file.
+;   |__>If this fails, return to command line (to allow abort).
+;3) Close the original file.
+;4) Close the temp file.
+;5) Rename OG file to .BAK.
+;   |__>If this fails, delete the original .BAK and try again.
+;       If it fails again, exit with .$$$ file. Print no disk space error.
+;6) Rename temp file to OG filename. 
+;   |__>If it fails, exit with .$$$ file. Print no disk space error.
+;7) Exit!
+;--------------------------------------------
+    ;Stage 1
+    test byte [roFlag], -1  ;If we are readonly, delete $$$ and quit
+    jnz quit.roQuit
+    call appendEOF  ;Append an EOF if appropriate.
+    call delBkup
+    test byte [dirtyFlag], -1   ;If we are clean, delete $$$ and quit
+    jz quit.roQuit
+.newFile:
+    ;Stage 2
+    mov ecx, dword [textLen]    ;Get number of chars in the arena to write
+    mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
+    movzx ebx, word [writeHdl]  ;Get the write handle
+    mov eax, 4000h
+    int 41h
+    jc .writeError
+    ;Stage 3
+    movzx ebx, word [readHdl]
+    mov eax, 3E00h  ;Close the reading file!
+    int 41h
+    ;Stage 4
+    movzx ebx, word [writeHdl]  ;Get the write handle
+    mov eax, 3E00h  ;Close the temp file!
+    int 41h
+    ;Stage 5
+    ;Use ecx as a flag, if rename fails with flag set, then
+    ; quit with temp name! Skip if this is a new file!
+    test byte [newFileFlag], -1  ;If this is new file, skip this!
+    jnz short .skipBkup
+    ;Now set the backup extension
+    mov rdi, qword [fileExtPtr]
+    mov eax, "BAK"
+    stosd
+    xor ecx, ecx
+.stg4:
+    lea rdx, pathspec
+    lea rdi, bkupfile
+    mov eax, 5600h
+    int 41h
+    jc short .badBkup
+    ;Stage 5
+.skipBkup:
+    mov eax, "$$$"  ;Always set this as triple dollar as this is saved name!
+    mov rdi, qword [fileExtPtr]
+    stosd
+    lea rdx, bkupfile
+    lea rdi, pathspec   ;Now name the temp file by the og name!
+    mov eax, 5600h
+    int 41h
+    jc short .badBkup2
+.exit:
+    retToDOS errOk ;Let DOS do cleanup of memory allocations!
+.writeError:
+    call .dskFull
+    retToDOS errDskFull
+.dskFull:
+    lea rdx, badDskFull ;Write disk full error, but return to prompt
+    mov eax, 0900h
+    int 41h
+    return
+.badBkup:
+    test ecx, ecx   ;If this is not our first time here, bkup exit!
+    jnz short .badBkup2
+    dec ecx
+    mov rdx, rdi    ;Try and delete the backup
+    mov eax, 4100h
+    int 41h
+    jmp short .stg4
+.badBkup2:
+;Since handles are now closed, we must exit with default filenames
+    call .writeError    ;Write disk full error, but then exit!
+    retToDOS errBadRen  ;Return to DOS, bad rename error
 
 insertLine:
 ;Inserts a line
@@ -88,7 +171,26 @@ quit:
 ;--------------------------------------------
 ;Invoked by: Q
 ;--------------------------------------------
-    jmp _unimplementedFunction
+    cmp byte [roFlag], -1   ;If the flag is clear, dont prompt, just quit.
+    je short .roQuit
+    lea rdx, exitQuit
+    mov eax, 0900h
+    int 41h
+    mov eax, 0C01h  ;Flush input buffer and read a single char from stdin
+    int 41h
+    movzx ebx, al
+    and ebx, 0DFh    ;Convert to upper case
+    cmp ebx, "Y"
+    jne printCRLF   ;Print CRLF and return via that return instruction
+    ;Delete the working file
+.roQuit:
+    mov rdi, qword [fileExtPtr]
+    mov eax, "$$$"
+    stosd
+    lea rdx, wkfile
+    mov eax, 4100h  ;Delete the file
+    int 41h
+    retToDOS errOk
 
 replaceText:
 ;Replaces all matching strings with specified string (NO REGEX)
@@ -118,4 +220,5 @@ writeLines:
 ;--------------------------------------------
 ;Invoked by: [n]W (number of bytes to write)
 ;--------------------------------------------
+;When invoked, must delete the backup if it not already deleted.
     jmp _unimplementedFunction

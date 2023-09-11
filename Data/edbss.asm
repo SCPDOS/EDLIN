@@ -10,11 +10,15 @@ eofReached  db ?    ;When we reach EOF for file on disk, set to -1, else 0
 ;Memory Related variables
 memPtr      dq ?    ;Ptr to the memory arena given by DOS
 arenaSize   dd ?    ;Size of the arena in bytes 
-fillSize    dd ?    ;Size of 3/4 of the arena in bytes
-textLen     dd ?    ;Number of chars in the arena
-endOfArena  dq ?    ;Ptr to the last byte in the arena
+fillSize    dd ?    ;Size of 3/4 of the arena in bytes (for append)
+freeSize    dd ?    ;Size of 1/4 of the arena in bytes (for write)
+textLen     dd ?    ;Number of chars in arena
+endOfArena  dq ?    ;Ptr to the last available byte in the arena
 curLinePtr  dq ?    ;Ptr to the start of the current line in arena
 curLineNum  dw ?    ;Word value for the current line number
+dirtyFlag   db ?    ;Flag set to indicate the buffer is dirty
+;Backup is only deleted on exit or write, to make space for temp file.
+bkupDel     db ?    ;Flag to indicate that the backup was deleted
 
 ;Don't jiggle these symbols, need dword to be together for -1
 readHdl     dw ?    ;Contain the file handle for the open file

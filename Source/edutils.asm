@@ -116,12 +116,44 @@ isCharEOF:
     cmp byte [rsi], EOF ;Check if eof
     return
 
+markBufferDirty:
+    mov byte [dirtyFlag], -1
+    return
+
+appendEOF:
+;If no EOF char found and we are at the EOF, add one!
+    test byte [newFileFlag], -1 ;New files always have their EOF loaded
+    jnz short .newFile
+    test byte [eofReached], -1  ;Only append an EOF if we reached the og EOF
+    retz
+    test byte [noEofChar], -1   ;If set, we ignore all embedded EOF chars
+    jnz short .searchAway
+.newFile:
+    call searchTextForEOFChar
+    retz    ;If ZF=ZE, exit, we are ok!
+.searchAway:
+    mov rdi, qword [memPtr]
+    xor ecx, ecx
+    mov ecx, dword [textLen]  ;Go to the end of the text
+    add rdi, rcx
+    mov rax, qword [endOfArena]    
+    sub rax, rdi    ;If this difference is 0, exit.
+    retz
+    ;Else, add a single ^Z and exit
+    mov byte [rdi], EOF
+    inc dword [textLen]
+    call markBufferDirty
+    return
+
 searchTextForEOFChar:
+;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+;NOTE: THIS FUNCTION MUST NOT BE CALLED IF WE ARE TO IGNORE EOF's!
+;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ;This function is to search for an EOF char in the text.
 ;If found, we check if the previous char is LF. If it isn't
 ; place a CR/LF with the CR on the ^Z. If no bytes left in
 ; arena leave the embedded ^Z in situ (boo!)
-;Return: ZF=ZE -> EOF found and left in situ
+;Return: ZF=ZE -> EOF found
 ;        ZF=NZ -> No EOF char found
     push rax
     push rcx
@@ -129,23 +161,63 @@ searchTextForEOFChar:
     mov rdi, qword [memPtr]
     xor ecx, ecx
     mov ecx, dword [textLen]  ;Go to the end of the text
+    jecxz .exitNotFound ;If the file has length no bytes, default
     mov al, EOF
     repne scasb ;Search the arena for a EOF char
-    jne short .exit ;No ^Z found
-    dec rdi ;Point rdi to the ^Z char
-    cmp byte [rdi - 1], LF  ;If the char before the ^Z is LF, exit ok
-    je short .exit
-    cmp rdi, qword [endOfArena] ;If ^Z is at the end of the arena, do nothing
-    je short .exit
-    mov byte [rdi + 1], LF
-    mov byte [rdi], CR      ;Overwrite the ^Z, so now no more ^Z
-    inc qword [textLen]     ;One more char in text
-    xor ecx, ecx            ;EOF char found so clear ZF
+    jz short .found ;^Z found or ecx was zero
 .exit:
     pop rdi
     pop rcx
     pop rax
     return
+.found:
+    dec rdi ;Point rdi to the ^Z char
+    cmp rdi, qword [memPtr] ;Are we the first char?
+    je short .firstChar
+    cmp byte [rdi - 1], LF  ;If the char before the ^Z is LF, exit ok
+    je short .exit
+    mov rbx, qword [endOfArena]
+    sub rbx, 2  ;Make space for two more chars (the LF and new ^Z)
+    cmp rdi, rbx ;If ^Z is at or near the end of the arena, do nothing
+    jae short .exit2
+.firstChar:
+    mov byte [rdi], CR      ;Overwrite the ^Z with a CR
+    mov byte [rdi + 1], LF
+    mov byte [rdi + 2], EOF
+    add dword [textLen], 2     ;Two more chars in text
+    call markBufferDirty
+.exit2:
+    xor ecx, ecx            ;EOF char found so clear ZF
+    jmp short .exit
+.exitNotFound:
+    xor ecx, ecx
+    inc ecx ;Clear the zero flag
+    jmp short .exit
+
+delBkup:
+;Finally, we delete the backup if it exists. If it doesn't delete
+; for some reason, might be problematic later but not a big issue.
+    test byte [bkupDel], -1     ;If set, backup already deleted
+    retnz
+    test byte [dirtyFlag], -1   ;If clear, buffer has not been modified.
+    retz                        
+    test byte [newFileFlag], -1 ;If the file is new then it has no backup!
+    retnz
+    push rax
+    push rdx
+    push rdi
+    mov rdi, qword [fileExtPtr]
+    mov eax, "BAK"
+    stosd
+    lea rdx, bkupfile
+    mov eax, 4100h
+    int 41h
+    pop rdi
+    pop rdx
+    pop rax
+    retc    ;If CF=CY, file not deleted (including if it doesnt exists).
+    mov byte [bkupDel], -1  ;Backup deleted now
+    return  ;Could overwrite first byte of this function with a ret 0:)
 
 getDecimalDwordLZ:
 ;Use this function to replace leading 0's with spaces
@@ -229,7 +301,7 @@ parseEntry:
     sub al, "0"
     lea ebx, dword [4*ebx + ebx]    ;5*ebx
     shl ebx, 1          ;2*5*ebx = 10*ebx
-    movsx eax, al       ;Sign extend al to eax
+    movzx eax, al
     add ebx, eax
     lodsb   ;Get the next char
     jmp short .getArg
@@ -293,6 +365,30 @@ getPtrToStr:
 .exit:
     pop rsi
     pop rcx
+    return
+
+writeFile:
+;Writes to file and shifts internal pointers correctly
+;Input: ecx = Number of chars to write
+;Output: CF=NC -> eax = Number of chars written
+;        CF=CY -> Hard Error, assume nothing written for safety
+    push rax
+    push rbx
+    push rdx
+    mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
+    movzx ebx, word [writeHdl]  ;Get the write handle
+    mov eax, 4000h
+    int 41h
+    jc short .exit
+    xor edx, edx
+    mov ebx, dword [textLen]    ;Get the number of chars in arena
+    sub ebx, eax    ;Get the number of chars left in the arena
+    cmovc ebx, edx  ;If carry set, something went wrong. Default to 0 chars 
+    mov dword [textLen], ebx
+.exit:
+    pop rdx
+    pop rbx
+    pop rax
     return
 
 printCRLF:

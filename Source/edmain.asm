@@ -45,8 +45,8 @@ getCmdTail:
 cmdTailParse:
     mov al, SPC ;Comparing against a space
 .searchLoop:
-    repe scasb  ;Search for the first non-space char
     jecxz .parseComplete    ;If we run out of chars, exit!
+    repe scasb  ;Search for the first non-space char
     cmp byte [rdi - 1], bl  ;Did we find a switchchar?
     jne short .notSwitch
     mov al, byte [rdi]      ;Get the char after the switch
@@ -69,7 +69,7 @@ cmdTailParse:
     inc rdi ;Move rdi to the char after the B
     dec ecx ;And decrement count of chars left
     jz short .parseComplete
-    jmp short .searchLoop   ;Now skip next lot of spaces
+    jmp short cmdTailParse   ;Now skip next lot of spaces
 .notSwitch:
     ;Thus rdi must point one char past the start of a filename. 
     ;If there is no filename, accept the pointer. 
@@ -145,9 +145,9 @@ nameCopy:
 .extFound:
     mov qword [fileExtPtr], rsi
 ;Now we have all the metadata for the filename we are working with
-    lea rdx, badFileExt
     mov eax, dword [rsi]
     cmp eax, "BAK"  ;Is this a bakup file?
+    lea rdx, badFileExt
     je badExitMsg   ;If yes, error!
     mov dword [rsi], "$$$"   ;Now we store working file $$$ extension 
 ;Now we check to make sure the path has no global filename chars
@@ -212,13 +212,13 @@ createWorkingFile:
     int 41h
     lea rdx, badCreatStr    ;Creating the working file will fail if already exits
     jc badExitMsg   ;This prevents someone from overriding the file
-    push rax
+    mov word [writeHdl], ax ;Store a pointer to the write handle
+    test byte [newFileFlag], -1 ;If set, this is a new file!
+    jz short .notNewFile
     lea rdx, newStr
     mov eax, 0900h
     int 41h
-    pop rax
-.fileCreated:
-    mov word [writeHdl], ax ;Store a pointer to the write handle
+.notNewFile:
 ;Now the following:
 ;1) Allocate max memory (1Mb max)
 ;2) If new file, goto 4. Print "new file" message
@@ -253,13 +253,15 @@ allocateMemory:
     dec rsi     ;Point rsi to the last char of the arena
     mov qword [endOfArena], rsi
     mov dword [arenaSize], ebx  ;Save number of bytes in arena here
-    test byte [newFileFlag], -1 ;If this is a new file, skip
-    jnz short initBuffers
     mov rsi, rax    ;Save the pointer to memory arena in rsi
     xor ecx, ecx    ;Zero the upper 32 bits
     lea ecx, dword [2*ebx + ebx]    ;Multiply ebx by 3 into ecx
-    shr ecx, 2  ;Divide by 4 to get # of bytes to fill ~75% of memory space
+    shr ecx, 2  ;Divide by 4 to get # of bytes to default fill by
     mov dword [fillSize], ecx   ;Save number of bytes to fill arena with
+    shr ebx, 2  ;Divide by 4 to get # of bytes to default free until
+    mov dword [freeSize], ebx
+    test byte [newFileFlag], -1 ;If this is set it is a new file, skip
+    jnz short initBuffers
     mov rdx, rax    ;Move the arena pointer into rdx
     mov eax, 3F00h
     movzx ebx, word [readHdl]  
@@ -277,6 +279,7 @@ allocateMemory:
     lea rdx, eofStr
     mov eax, 0900h
     int 41h
+    mov byte [eofReached], -1   ;Set that we are at the EOF
 initBuffers:
 ;Now we setup the edit and command buffers
     mov byte [workLine + line.bBufLen], lineLen

@@ -26,6 +26,7 @@ BITS 64
 
 %include "./Include/dosMacro.mac"
 %include "./Include/dosError.inc"
+%include "./Include/edError.inc"
 %include "./Include/edStruc.inc"
 %include "./Include/dosStruc.inc"
 Segment .text align=1 
