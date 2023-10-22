@@ -14,7 +14,6 @@ fillSize    dd ?    ;Size of 3/4 of the arena in bytes (for append)
 freeSize    dd ?    ;Size of 1/4 of the arena in bytes (for write)
 textLen     dd ?    ;Number of chars in arena
 endOfArena  dq ?    ;Ptr to the last available byte in the arena
-curLinePtr  dq ?    ;Ptr to the start of the current line in arena
 curLineNum  dw ?    ;Word value for the current line number
 modFlag     db ?    ;Flag set to indicate the file was modified
 ;Backup is only deleted on exit or write, to make space for temp file.
@@ -43,6 +42,7 @@ argCnt      db ?    ;Count of arguments in parsed command line
 ;Arguments are converted to signed words where appropriate
 ; and parsed into here in the order they are encountered in.
 ;
+;Any arguments which mean 0 wrt line numbers means current line
 argTbl:
 arg1        dw ?
 arg2        dw ?

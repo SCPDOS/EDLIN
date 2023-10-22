@@ -246,7 +246,6 @@ allocateMemory:
 .loadProgram:
 ;rax has pointer here
     mov qword [memPtr], rax
-    mov qword [curLinePtr], rax ;This is also where the first byte will go 
     mov rsi, rax
     shl ebx, 4  ;Multiply by 16 to get number of bytes
     add rsi, rbx

@@ -11,17 +11,17 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0               995  00000995  progbits  .text
-             995               995               B73  000001DE  progbits  .data
-             B73               B73               ECF  0000035C  nobits    .bss
-             ED0               ED0              1510  00000640  nobits    .stack
+               0                 0               A09  00000A09  progbits  .text
+             A09               A09               BE7  000001DE  progbits  .data
+             BE7               BE7               F3B  00000354  nobits    .bss
+             F40               F40              1580  00000640  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                 995
+length:                 A09
 start:                    0
 align:                    1
 follows:   not defined
@@ -33,21 +33,21 @@ vfollows:  not defined
 
 class:     progbits
 length:                 1DE
-start:                  995
+start:                  A09
 align:                    1
 follows:   .text
-vstart:                 995
+vstart:                 A09
 valign:    not defined
 vfollows:  not defined
 
 ---- Section .bss -------------------------------------------------------------
 
 class:     nobits
-length:                 35C
-start:                  B73
+length:                 354
+start:                  BE7
 align:                    1
 follows:   not defined
-vstart:                 B73
+vstart:                 BE7
 valign:                   1
 vfollows:  .data
 
@@ -55,10 +55,10 @@ vfollows:  .data
 
 class:     nobits
 length:                 640
-start:                  ED0
+start:                  F40
 align:                   10
 follows:   not defined
-vstart:                 ED0
+vstart:                 F40
 valign:                  10
 vfollows:  .bss
 
@@ -229,7 +229,7 @@ Value     Name
 00000070  netFCBShare
 00000080  noInherit
 0000000F  cmdLetterTableL
-0000035C  bssLen
+00000354  bssLen
 
 
 ---- Section .text ------------------------------------------------------------
@@ -267,204 +267,216 @@ Real              Virtual           Name
              2B0               2B0  allocateMemory
              2D2               2D2  allocateMemory.notEnoughMem
              2DE               2DE  allocateMemory.loadProgram
-             354               354  allocateMemory.eofFound
-             369               369  initBuffers
-             380               380  getCommand
-             3C0               3C0  parseCommand
-             3E3               3E3  parseCommand.parse
-             40B               40B  parseCommand.notSep
-             42C               42C  parseCommand.notQmark
-             432               432  parseCommand.noUC
-             478               478  execCmd
-             4AD               4AD  execCmd.eocChar
-             4B0               4B0  execCmd.skipEocChar
-             4BF               4BF  exitOk
-             4C6               4C6  badParmExit
-             4CD               4CD  badExitMsg
-             4D9               4D9  badExit
-             4E0               4E0  strlen
-             4ED               4ED  ..@17._ret
-             4EE               4EE  strcpy
-             4F6               4F6  strcpy.lp
-             502               502  strcpy.exit
-             505               505  ..@18._ret
-             506               506  strcpyASCIIZ
-             508               508  strcpyASCIIZ.cpChar
-             510               510  ..@19._ret
-             511               511  memmove
-             519               519  ..@20._ret
-             51A               51A  memset
-             520               520  ..@21._ret
-             521               521  findLineEnd
-             526               526  findLineEnd.lp
-             52B               52B  ..@23._base
-             52F               52F  ..@25._base
-             536               536  isCharEOL
-             53B               53B  ..@27._base
-             540               540  ..@29._base
-             545               545  ..@31._base
-             54B               54B  ..@32._ret
-             54C               54C  isCharEOF
-             556               556  ..@34._base
-             55B               55B  ..@35._ret
-             55C               55C  markBufferDirty
-             563               563  ..@36._ret
-             564               564  appendEOF
-             574               574  ..@38._base
-             57F               57F  appendEOF.newFile
-             584               584  ..@40._base
-             586               586  appendEOF.searchAway
-             5A2               5A2  ..@42._base
-             5B2               5B2  ..@43._ret
-             5B3               5B3  searchTextForEOFChar
-             5CE               5CE  searchTextForEOFChar.exit
-             5D1               5D1  ..@44._ret
-             5D2               5D2  searchTextForEOFChar.found
-             5F7               5F7  searchTextForEOFChar.firstChar
-             611               611  searchTextForEOFChar.exit2
-             615               615  searchTextForEOFChar.exitNotFound
-             61B               61B  delBkup
-             622               622  ..@46._base
-             62B               62B  ..@48._base
-             634               634  ..@50._base
-             657               657  ..@52._base
-             659               659  ..@53._ret
-             65A               65A  ..@52.a
-             661               661  ..@54._ret
-             662               662  getDecimalDwordLZ
-             668               668  getDecimalDwordLZ.lp
-             678               678  getDecimalDwordLZ.swapBack
-             67B               67B  getDecimalDwordLZ.exit
-             67F               67F  ..@55._ret
-             680               680  getDecimalDword
-             689               689  getDecimalDword.dwpfb0
-             69F               69F  getDecimalDword.dwpfb1
-             6A6               6A6  ..@56._ret
-             6A7               6A7  parseEntry
-             6C0               6C0  parseEntry.getArg
-             6E6               6E6  parseEntry.endOfArg
-             6E8               6E8  ..@58._base
-             6F2               6F2  ..@59._ret
-             6F3               6F3  parseEntry.plus
-             706               706  ..@60._ret
-             707               707  parseEntry.minus
-             724               724  ..@61._ret
-             725               725  parseEntry.dot
-             732               732  ..@62._ret
-             733               733  parseEntry.pound
-             73B               73B  ..@63._ret
-             73C               73C  parseEntry.validSpecial
-             745               745  ..@64._ret
-             746               746  skipSpaces
-             74F               74F  ..@65._ret
-             750               750  getPtrToStr
-             759               759  getPtrToStr.exit
-             75B               75B  ..@66._ret
-             75C               75C  writeFile
-             789               789  writeFile.exit
-             78C               78C  ..@67._ret
-             78D               78D  printCRLF
-             794               794  printLF
-             796               796  printChar
-             7A4               7A4  ..@68._ret
-             7A5               7A5  printComErr
-             7B8               7B8  i43h
-             7CA               7CA  _unimplementedFunction
-             7D8               7D8  ..@69._ret
-             7D9               7D9  _unimplementedFunction.str
-             806               806  appendLines
-             80B               80B  copyLines
-             810               810  deleteLines
-             815               815  editLine
-             828               828  endEdit
-             84C               84C  endEdit.newFile
-             89D               89D  endEdit.stg4
-             8B4               8B4  endEdit.skipBkup
-             8D8               8D8  endEdit.exit
-             8DF               8DF  endEdit.writeError
-             8EB               8EB  endEdit.dskFull
-             8F9               8F9  ..@72._ret
-             8FA               8FA  endEdit.badBkup
-             90C               90C  endEdit.badBkup2
-             918               918  insertLine
-             91D               91D  listLines
-             922               922  pageLines
-             927               927  moveLines
-             92C               92C  quit
-             95F               95F  quit.roQuit
-             981               981  replaceText
-             986               986  searchText
-             98B               98B  transferLines
-             990               990  writeLines
+             34D               34D  allocateMemory.eofFound
+             362               362  initBuffers
+             379               379  getCommand
+             3B9               3B9  parseCommand
+             3DC               3DC  parseCommand.parse
+             404               404  parseCommand.notSep
+             425               425  parseCommand.notQmark
+             42B               42B  parseCommand.noUC
+             471               471  execCmd
+             4A6               4A6  execCmd.eocChar
+             4A9               4A9  execCmd.skipEocChar
+             4B8               4B8  exitOk
+             4BF               4BF  badParmExit
+             4C6               4C6  badExitMsg
+             4D2               4D2  badExit
+             4D9               4D9  checkArgOrder
+             4DF               4DF  ..@18._base
+             4E1               4E1  ..@19._ret
+             4E2               4E2  ..@18.a
+             4E4               4E4  ..@21._base
+             4EB               4EB  findLine
+             4FE               4FE  findLine.lp
+             511               511  findLine.bad
+             514               514  findLine.eof
+             51F               51F  findLine.lf
+             526               526  findLine.exit
+             52A               52A  ..@22._ret
+             52B               52B  strlen
+             538               538  ..@23._ret
+             539               539  strcpy
+             541               541  strcpy.lp
+             54D               54D  strcpy.exit
+             550               550  ..@24._ret
+             551               551  strcpyASCIIZ
+             553               553  strcpyASCIIZ.cpChar
+             55B               55B  ..@25._ret
+             55C               55C  memmove
+             564               564  ..@26._ret
+             565               565  findLineEnd
+             56A               56A  findLineEnd.lp
+             56F               56F  ..@28._base
+             573               573  ..@30._base
+             57A               57A  isCharEOL
+             57F               57F  ..@32._base
+             584               584  ..@34._base
+             589               589  ..@36._base
+             58F               58F  ..@37._ret
+             590               590  isCharEOF
+             59A               59A  ..@39._base
+             59F               59F  ..@40._ret
+             5A0               5A0  markFileModified
+             5A7               5A7  ..@41._ret
+             5A8               5A8  getModifiedStatus
+             5AF               5AF  ..@42._ret
+             5B0               5B0  appendEOF
+             5C0               5C0  ..@44._base
+             5CB               5CB  appendEOF.newFile
+             5D0               5D0  ..@46._base
+             5D2               5D2  appendEOF.searchAway
+             5EE               5EE  ..@48._base
+             5FE               5FE  ..@49._ret
+             5FF               5FF  searchTextForEOFChar
+             61A               61A  searchTextForEOFChar.exit
+             61D               61D  ..@50._ret
+             61E               61E  searchTextForEOFChar.found
+             643               643  searchTextForEOFChar.firstChar
+             65D               65D  searchTextForEOFChar.exit2
+             661               661  searchTextForEOFChar.exitNotFound
+             667               667  delBkup
+             66E               66E  ..@52._base
+             675               675  ..@54._base
+             67E               67E  ..@56._base
+             6A1               6A1  ..@58._base
+             6A3               6A3  ..@59._ret
+             6A4               6A4  ..@58.a
+             6AB               6AB  ..@60._ret
+             6AC               6AC  getDecimalDwordLZ
+             6B2               6B2  getDecimalDwordLZ.lp
+             6C2               6C2  getDecimalDwordLZ.swapBack
+             6C5               6C5  getDecimalDwordLZ.exit
+             6C9               6C9  ..@61._ret
+             6CA               6CA  getDecimalDword
+             6D3               6D3  getDecimalDword.dwpfb0
+             6E9               6E9  getDecimalDword.dwpfb1
+             6F0               6F0  ..@62._ret
+             6F1               6F1  parseEntry
+             70A               70A  parseEntry.getArg
+             730               730  parseEntry.endOfArg
+             732               732  ..@64._base
+             73C               73C  ..@65._ret
+             73D               73D  parseEntry.plus
+             750               750  ..@66._ret
+             751               751  parseEntry.minus
+             76E               76E  ..@67._ret
+             76F               76F  parseEntry.dot
+             77C               77C  ..@68._ret
+             77D               77D  parseEntry.pound
+             785               785  ..@69._ret
+             786               786  parseEntry.validSpecial
+             78F               78F  ..@70._ret
+             790               790  skipSpaces
+             799               799  ..@71._ret
+             79A               79A  getPtrToStr
+             7A3               7A3  getPtrToStr.exit
+             7A5               7A5  ..@72._ret
+             7A6               7A6  writeFile
+             7D3               7D3  writeFile.exit
+             7D6               7D6  ..@73._ret
+             7D7               7D7  printCRLF
+             7DE               7DE  printLF
+             7E0               7E0  printChar
+             7EE               7EE  ..@74._ret
+             7EF               7EF  printComErr
+             7F6               7F6  printErr
+             802               802  i43h
+             814               814  _unimplementedFunction
+             822               822  ..@75._ret
+             823               823  _unimplementedFunction.str
+             850               850  appendLines
+             855               855  copyLines
+             85A               85A  deleteLines
+             85F               85F  editLine
+             894               894  editLine.curentLine
+             89E               89E  endEdit
+             911               911  endEdit.stg4
+             928               928  endEdit.skipBkup
+             94C               94C  endEdit.exit
+             953               953  endEdit.writeError
+             95F               95F  endEdit.dskFull
+             96D               96D  ..@78._ret
+             96E               96E  endEdit.badBkup
+             980               980  endEdit.badBkup2
+             98C               98C  insertLine
+             991               991  listLines
+             996               996  pageLines
+             99B               99B  moveLines
+             9A0               9A0  quit
+             9D3               9D3  quit.roQuit
+             9F5               9F5  replaceText
+             9FA               9FA  searchText
+             9FF               9FF  transferLines
+             A04               A04  writeLines
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-             995               995  cmdLetterTable
-             9A4               9A4  cmdFcnTable
-             9C2               9C2  cmdRoTable
-             9D1               9D1  newStr
-             9DC               9DC  eofStr
-             9F0               9F0  badVerStr
-             A06               A06  badDrvStr
-             A22               A22  badNameStr
-             A40               A40  badCreatStr
-             A5F               A5F  badOpenStr
-             A7C               A7C  badFileStr
-             A9E               A9E  badParm
-             AB2               AB2  badInput
-             AC0               AC0  badRealloc
-             AD5               AD5  badMemSize
-             AF6               AF6  badFileExt
-             B1B               B1B  badROcmd
-             B39               B39  badDskFull
-             B59               B59  exitQuit
-             B6C               B6C  okString
+             A09               A09  cmdLetterTable
+             A18               A18  cmdFcnTable
+             A36               A36  cmdRoTable
+             A45               A45  newStr
+             A50               A50  eofStr
+             A64               A64  badVerStr
+             A7A               A7A  badDrvStr
+             A96               A96  badNameStr
+             AB4               AB4  badCreatStr
+             AD3               AD3  badOpenStr
+             AF0               AF0  badFileStr
+             B12               B12  badParm
+             B26               B26  badInput
+             B34               B34  badRealloc
+             B49               B49  badMemSize
+             B6A               B6A  badFileExt
+             B8F               B8F  badROcmd
+             BAD               BAD  badDskFull
+             BCD               BCD  exitQuit
+             BE0               BE0  okString
 
 ---- Section .bss -------------------------------------------------------------
 
 Real              Virtual           Name
-             B73               B73  bssStart
-             B73               B73  pathSep
-             B74               B74  switchChar
-             B75               B75  roFlag
-             B76               B76  newFileFlag
-             B77               B77  noEofChar
-             B78               B78  eofReached
-             B79               B79  memPtr
-             B81               B81  arenaSize
-             B85               B85  fillSize
-             B89               B89  freeSize
-             B8D               B8D  textLen
-             B91               B91  endOfArena
-             B99               B99  curLinePtr
-             BA1               BA1  curLineNum
-             BA3               BA3  dirtyFlag
-             BA4               BA4  bkupDel
-             BA5               BA5  readHdl
-             BA7               BA7  writeHdl
-             BA9               BA9  pathspec
-             C29               C29  wkfile
-             C29               C29  bkupfile
-             CA9               CA9  tmpNamePtr
-             CA9               CA9  fileNamePtr
-             CB1               CB1  tmpNamePtr2
-             CB1               CB1  fileExtPtr
-             CB9               CB9  cmdLine
-             D3B               D3B  charPtr
-             D43               D43  argCnt
-             D44               D44  argTbl
-             D44               D44  arg1
-             D46               D46  arg2
-             D48               D48  arg3
-             D4A               D4A  arg4
-             D4C               D4C  qmarkSet
-             D4D               D4D  argString
-             DCF               DCF  workLine
+             BE7               BE7  bssStart
+             BE7               BE7  pathSep
+             BE8               BE8  switchChar
+             BE9               BE9  roFlag
+             BEA               BEA  newFileFlag
+             BEB               BEB  noEofChar
+             BEC               BEC  eofReached
+             BED               BED  memPtr
+             BF5               BF5  arenaSize
+             BF9               BF9  fillSize
+             BFD               BFD  freeSize
+             C01               C01  textLen
+             C05               C05  endOfArena
+             C0D               C0D  curLineNum
+             C0F               C0F  modFlag
+             C10               C10  bkupDel
+             C11               C11  readHdl
+             C13               C13  writeHdl
+             C15               C15  pathspec
+             C95               C95  wkfile
+             C95               C95  bkupfile
+             D15               D15  tmpNamePtr
+             D15               D15  fileNamePtr
+             D1D               D1D  tmpNamePtr2
+             D1D               D1D  fileExtPtr
+             D25               D25  cmdLine
+             DA7               DA7  charPtr
+             DAF               DAF  argCnt
+             DB0               DB0  argTbl
+             DB0               DB0  arg1
+             DB2               DB2  arg2
+             DB4               DB4  arg3
+             DB6               DB6  arg4
+             DB8               DB8  qmarkSet
+             DB9               DB9  argString
+             E3B               E3B  workLine
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-            1510              1510  stackTop
-            1510              1510  endOfProgram
+            1580              1580  stackTop
+            1580              1580  endOfProgram
 

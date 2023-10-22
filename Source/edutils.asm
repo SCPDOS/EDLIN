@@ -1,5 +1,62 @@
 ;Utility functions for edlin go here
 
+
+checkArgOrder:
+;Checks two arguments to ensure the second one is 
+; greater than the first.
+;Input: eax = first argument
+;       ebx = second argument
+;Output: If it returns, its ok. Else it resets the command loop
+    cmp ebx, 0
+    retz
+    cmp ebx, eax
+    reta
+    jmp printComErr
+
+findLine:
+;Given a line number, tries to find the actual line.
+;Works by checking for LF chars or CR, LF pairs. If a EOF char 
+; encountered, and EOF check turned off, it is ignored. Else, return
+; "line not found". Both 0 and 1 refer to the first line.
+;Input: eax = Line number
+;Output: CF=NC: rdi -> Ptr to the line
+;        CF=CY: Line not found. (i.e. beyond last line)
+    push rax
+    push rcx
+    push rdx
+    push rsi
+    mov edx, eax
+    mov rsi, qword [memPtr] ;Get the mem pointer
+    mov ecx, dword [textLen]    ;Number of chars in the arena
+.lp:
+    lodsb   ;Get the current byte
+    dec ecx ;One less char left
+    cmp al, LF
+    je short .lf
+    cmp al, CR
+    je short .lp
+    cmp al, EOF
+    je short .eof
+    test ecx, ecx   ;No chars left to read in the arena?
+    jnz short .lp
+.bad:
+    stc
+    jmp short .exit
+.eof:
+    test byte [noEofChar], -1
+    jnz short .lp
+    jmp short .bad
+.lf:
+    dec edx ;Decrement the number of lines we have left to search for
+    jnz short .lp
+    mov rdi, rsi    ;rsi points to the char after lf
+.exit:
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rax
+    return
+
 strlen:
 ;String length based on terminator in al
 ;Input: rsi -> Source Ptr
@@ -63,18 +120,6 @@ memmove:
     pop rcx
     pop rdi
     pop rsi
-    return
-
-memset:
-;Initialises a buffer to contain a particular value
-;Input: rdi -> Buffer to set to given value
-;       al = Value to set the buffer to
-;       rcx = Number of bytes in buffer
-    push rcx
-    push rdi
-    rep stosb
-    pop rdi
-    pop rcx
     return
 
 findLineEnd:
@@ -419,6 +464,7 @@ printComErr:
 ;JUMP to this procedure and it jumps back to
 ; the command loop resetting the stack!
     lea rdx, badInput
+printErr:
     mov eax, 0900h
     int 41h
     jmp getCommand

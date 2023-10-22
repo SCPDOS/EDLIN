@@ -37,7 +37,18 @@ editLine:
 ;Invoked by: [line]
 ;--------------------------------------------
     dec qword [charPtr] ;Adjust ptr to point to the CR or ;
+    lea rdx, getCommand
+    mov eax, 2543h  ;Set the int 43h handler for Interrupt 43h
+    int 41h
     movzx eax, word [arg1]  ;Get the line number into eax
+    test eax, eax   ;If we are on line 0, it means current line
+    jnz short .curentLine
+    movzx eax, word [curLineNum]
+    inc eax ;Go to the line after the current
+    movzx ebx, word [arg2]  ;Get the second argument
+    call checkArgOrder
+.curentLine:
+    call findLine   ;Gets ptr in rdi to the line number specified in eax
     jmp _unimplementedFunction
 
 endEdit:
