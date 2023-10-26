@@ -49,6 +49,14 @@ editLine:
     call checkArgOrder
 .curentLine:
     call findLine   ;Gets ptr in rdi to the line number specified in eax
+    mov word [curLineNum], bx   ;Adjust now the actual line number we are at
+    retnz   ;Return if we are NOT at the line we wanted to be at
+    ;rdi points to start of line to edit.
+    mov rsi, rdi
+    sub rsi, qword [memPtr] ;Get the number of bytes into the arena we are in
+    cmp esi, dword [textLen]    ;If it is equal, exit as the line doesnt exist
+    retz
+    
     jmp _unimplementedFunction
 
 endEdit:

@@ -1,5 +1,34 @@
 ;Utility functions for edlin go here
 
+loadBuffer:
+;Loads the working line into the buffer and
+; fixes the two work additional variables
+;Input: rdi -> Start of the line to load
+;Output: workLine = Loaded with the line.
+;        workLen = Length of the line before edit
+;        workEnd = Last char of the line loaded.
+    push rsi
+    push rdi
+    lea rsi, workLine
+    xchg rdi, rsi
+    add rdi, 2  ;Go to the actual string portion of the line struct
+    mov ecx, lineLen    ;Get max number of chars to xfr
+.lp:
+    inc ecx ;About to move a new char
+    call isCharEOL  ;If returns with ZF=ZE, then al has terminating char
+    lodsb
+    stosb
+    jnz short .lp
+    cmp al, CR
+    jne short .skipSpecial
+    inc cl
+    mov byte [rdi], LF  ;Store the extra LF
+.skipSpecial:
+    mov byte [workLen], cl
+    mov byte [workEnd], al
+    pop rdi
+    pop rsi
+    return
 
 checkArgOrder:
 ;Checks two arguments to ensure the second one is 
@@ -17,40 +46,41 @@ findLine:
 ;Given a line number, tries to find the actual line.
 ;Works by checking for LF chars or CR, LF pairs. If a EOF char 
 ; encountered, and EOF check turned off, it is ignored. Else, return
-; "line not found". Both 0 and 1 refer to the first line.
-;Input: eax = Line number
-;Output: CF=NC: rdi -> Ptr to the line
-;        CF=CY: Line not found. (i.e. beyond last line)
-    push rax
+; "line not found".
+;Input: eax = Line number, 0 means last line
+;Output: ZF=ZE: rdi -> Ptr to the line
+;               ebx = Actual line number we are at
+;               eax = Line number specified
+;        ZF=NZ: Line not found. (i.e. beyond last line)
+    push rax    ;Use as load var
     push rcx
-    push rdx
+    push rdx    
     push rsi
-    mov edx, eax
-    mov rsi, qword [memPtr] ;Get the mem pointer
+    mov edx, eax                ;Use as a comparator for line number
+    mov eax, -1
+    test edx, edx               ;Did we specify the last line?
+    cmovz edx, eax  ;If we specify 0, run to exhaust textLen chars
+    mov rsi, qword [memPtr]     ;Get the mem pointer
     mov ecx, dword [textLen]    ;Number of chars in the arena
+    xor ebx, ebx    ;Use as a counter for actual current line number
 .lp:
+    jecxz .exit ;If we have no chars left to read, exit now w/o touching ZF
     lodsb   ;Get the current byte
-    dec ecx ;One less char left
+    dec ecx ;One less char left to read
     cmp al, LF
     je short .lf
-    cmp al, CR
-    je short .lp
     cmp al, EOF
-    je short .eof
-    test ecx, ecx   ;No chars left to read in the arena?
-    jnz short .lp
-.bad:
-    stc
-    jmp short .exit
+    jne short .lp
 .eof:
     test byte [noEofChar], -1
     jnz short .lp
-    jmp short .bad
+    jmp short .exit ;Exit if we hit an embedded EOF char and are searching 
 .lf:
-    dec edx ;Decrement the number of lines we have left to search for
+    inc ebx         ;Go to next line
+    cmp ebx, edx    ;Are we at the line we want to be at?
     jnz short .lp
-    mov rdi, rsi    ;rsi points to the char after lf
 .exit:
+    mov rdi, rsi    ;rsi points to the char after lf
     pop rsi
     pop rdx
     pop rcx
