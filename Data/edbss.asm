@@ -54,5 +54,5 @@ argString   db halfLine_size dup (?)    ;Used by search and replace only
 ;The workLine gets preloaded with the original line before editing
 ;workLine has type "line"
 workLine    db 256 dup (?)  ;Line in which all editing takes place
-workLen     db 0    ;Line length before edit
-workEnd     db 0    ;Char which ended the line. 
+workLen     db ?    ;Line length before edit
+workEnd     db ?    ;Char which ended the line. 

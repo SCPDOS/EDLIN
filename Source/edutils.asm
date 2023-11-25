@@ -354,7 +354,7 @@ parseEntry:
 ; word 0FFFFh.
 ;A naked number is interpreted as a line number 
 ; directly.
-;Maximum input value per argument: 65534
+;Maximum input value per argument: 65529
 ;--------------------------------------------
 ;Input: rsi -> String to parse
 ;Output: (e)bx = Value of argument
