@@ -5,7 +5,7 @@ start:
 .cVersion:
     cld
     mov eax, 3000h  ;Get version number
-    int 41h
+    int 21h
     cmp al, byte [.vNum]
     jbe short okVersion
     lea rdx, badVerStr
@@ -23,12 +23,12 @@ okVersion:
     shr rbx, 4  ;Convert to paragraphs
     inc rbx     ;Add one more paragraph for good measure
     mov eax, 4A00h
-    int 41h
+    int 21h
     lea rdx, badRealloc
     jc badExitMsg
 ;One command line argument except for mandatory filename, /B=(binary read)
     mov eax, 3700h
-    int 41h
+    int 21h
     mov eax, "\"    ;Default pathsep
     mov ecx, "/"    ;Alternative pathsep
     cmp dl, "-"     ;Is the switch char default or alternative?
@@ -38,7 +38,7 @@ okVersion:
     mov byte [pathSep], al
 getCmdTail:
     mov eax, 6101h  ;Get parsed FCB and cmdtail for filename in rdx
-    int 41h
+    int 21h
 ;Now parse the command line, to get full command spec for filename.
     lea rdi, qword [rdx + cmdArgs.progTail]     ;Get ptr to tail
     movzx ecx, byte [rdx + cmdArgs.parmList]    ;Get number of chars in cmdline
@@ -99,7 +99,7 @@ nameCopy:
     lea rdi, pathspec
     mov rsi, rdi
     mov eax, 6000h  ;TRUENAME the filename
-    int 41h
+    int 21h
     jnc short .nameGood ;Name ok, proceed
     cmp al, errBadDrv
     jne short .genericError
@@ -172,11 +172,11 @@ fileOpen:
     lea rdx, pathspec
     mov ecx, dirIncFiles
     mov eax, 4E00h  ;Find First 
-    int 41h
+    int 21h
     jc .fileNotFound
 ;Check if file is read only
     mov eax, 2F00h  ;Get a pointer to the DTA in rbx
-    int 41h
+    int 21h
     movzx eax, byte [rbx + ffBlock.attribFnd]
     test al, dirReadOnly
     jz short .notReadOnly
@@ -187,7 +187,7 @@ fileOpen:
 ;File exists, lets open it, to read from
     mov eax, (3Dh << 8) | ReadAccess | denyWriteShare
     lea rdx, pathspec    ;Get the pointer to the working filename
-    int 41h         ;Open the file
+    int 21h         ;Open the file
     jnc short .backupOpened
 ;File failed to open
     lea rdx, badOpenStr
@@ -209,7 +209,7 @@ createWorkingFile:
     lea rdx, wkfile    ;Get a pointer to this filename
     mov eax, 5B00h  ;Create file (atomic), prevent two edlins from editing same file
     xor ecx, ecx    ;Clear all file attributes (normal file)
-    int 41h
+    int 21h
     lea rdx, badCreatStr    ;Creating the working file will fail if already exits
     jc badExitMsg   ;This prevents someone from overriding the file
     mov word [writeHdl], ax ;Store a pointer to the write handle
@@ -217,7 +217,7 @@ createWorkingFile:
     jz short .notNewFile
     lea rdx, newStr
     mov eax, 0900h
-    int 41h
+    int 21h
 .notNewFile:
 ;Now the following:
 ;1) Allocate max memory (1Mb max)
@@ -225,20 +225,20 @@ createWorkingFile:
 ;3) Else, fill up to 75% of arena according to table. If 
 ;    EOF reached (either due to no bytes left or ^Z (if enabled))
 ;    print "EOF reached message".
-;4) Install Int 43h handler
+;4) Install Int 23h handler
 ;5) Goto main loop
 allocateMemory:
     xor ebx, ebx
     mov ebx, 10000h ;Start trying to allocate at 1Mb
     mov eax, 4800h
-    int 41h
+    int 21h
     jnc short .loadProgram
     ;If the allocation failed, eax has max paragraphs
     cmp eax, 10h    ;If we have less than 256 bytes available, fail
     jb short .notEnoughMem
     mov ebx, eax    ;Get the number of paragraphs into ebx for request
     mov eax, 4800h
-    int 41h
+    int 21h
     jnc short .loadProgram
 .notEnoughMem:
     lea rdx, badMemSize
@@ -264,7 +264,7 @@ allocateMemory:
     mov rdx, rax    ;Move the arena pointer into rdx
     mov eax, 3F00h
     movzx ebx, word [readHdl]  
-    int 41h ;If it reads, it reads, if not, oh well.
+    int 21h ;If it reads, it reads, if not, oh well.
 ;Check now for EOF and setup end of text pointer
     mov dword [textLen], eax  ;Save number of chars read into eax
     cmp ecx, eax    ;If less bytes than ecx were read, EOF condition
@@ -277,7 +277,7 @@ allocateMemory:
 ;Now we print the EOF message
     lea rdx, eofStr
     mov eax, 0900h
-    int 41h
+    int 21h
     mov byte [eofReached], -1   ;Set that we are at the EOF
 initBuffers:
 ;Now we setup the edit and command buffers
@@ -287,13 +287,13 @@ initBuffers:
 getCommand:
     lea rsp, stackTop   ;Reset the stack pointer
     lea rdx, i43h
-    mov eax, 2543h  ;Set Interrupt handler for Int 43h
-    int 41h
+    mov eax, 2523h  ;Set Interrupt handler for Int 23h
+    int 21h
     mov eax, prompt
     call printChar
     lea rdx, cmdLine
     mov eax, 0A00h  ;Take buffered input.
-    int 41h
+    int 21h
     call printLF 
     lea rsi, qword [cmdLine + halfLine.pString] ;Point to the text of the line
     mov qword [charPtr], rsi
@@ -352,7 +352,7 @@ parseCommand:
     jnz short execCmd
     lea rdx, badROcmd
     mov eax, 0900h
-    int 41h
+    int 21h
     jmp printComErr
 execCmd:
     mov qword [charPtr], rsi
@@ -378,7 +378,7 @@ execCmd:
 exitOk:
 ;Let DOS take care of freeing all resources
     mov eax, 4C00h
-    int 41h
+    int 21h
 
 ;----Bad Exits----
 badParmExit:
@@ -387,7 +387,7 @@ badExitMsg:
     test rdx, rdx   ;Check if null ptr => Dont print on exit
     jz short badExit
     mov eax, 0900h
-    int 41h
+    int 21h
 badExit:
     mov eax, 4CFFh
-    int 41h
+    int 21h

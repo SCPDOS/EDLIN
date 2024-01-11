@@ -38,8 +38,8 @@ editLine:
 ;--------------------------------------------
     dec qword [charPtr] ;Adjust ptr to point to the CR or ;
     lea rdx, getCommand
-    mov eax, 2543h  ;Set the int 43h handler for Interrupt 43h
-    int 41h
+    mov eax, 2523h  ;Set the int 23h handler for Interrupt 43h
+    int 21h
     movzx eax, word [arg1]  ;Get the line number into eax
     test eax, eax   ;If we are on line 0, it means current line
     jnz short .curentLine
@@ -91,7 +91,7 @@ endEdit:
     mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
     movzx ebx, word [writeHdl]  ;Get the write handle
     mov eax, 4000h
-    int 41h
+    int 21h
     jc .writeError
     ;If not at EOF, we fill the buffer with more of the old file and
     ; write it to the temp file. This is ended when we reach an EOF 
@@ -99,11 +99,11 @@ endEdit:
     ;Stage 3
     movzx ebx, word [readHdl]
     mov eax, 3E00h  ;Close the reading file!
-    int 41h
+    int 21h
     ;Stage 4
     movzx ebx, word [writeHdl]  ;Get the write handle
     mov eax, 3E00h  ;Close the temp file!
-    int 41h
+    int 21h
     ;Stage 5
     ;Use ecx as a flag, if rename fails with flag set, then
     ; quit with temp name! Skip if this is a new file!
@@ -118,7 +118,7 @@ endEdit:
     lea rdx, pathspec
     lea rdi, bkupfile
     mov eax, 5600h
-    int 41h
+    int 21h
     jc short .badBkup
     ;Stage 5
 .skipBkup:
@@ -128,7 +128,7 @@ endEdit:
     lea rdx, bkupfile
     lea rdi, pathspec   ;Now name the temp file by the og name!
     mov eax, 5600h
-    int 41h
+    int 21h
     jc short .badBkup2
 .exit:
     retToDOS errOk ;Let DOS do cleanup of memory allocations!
@@ -138,7 +138,7 @@ endEdit:
 .dskFull:
     lea rdx, badDskFull ;Write disk full error, but return to prompt
     mov eax, 0900h
-    int 41h
+    int 21h
     return
 .badBkup:
     test ecx, ecx   ;If this is not our first time here, bkup exit!
@@ -146,7 +146,7 @@ endEdit:
     dec ecx
     mov rdx, rdi    ;Try and delete the backup
     mov eax, 4100h
-    int 41h
+    int 21h
     jmp short .stg4
 .badBkup2:
 ;Since handles are now closed, we must exit with default filenames
@@ -196,9 +196,9 @@ quit:
     je short .roQuit
     lea rdx, exitQuit
     mov eax, 0900h
-    int 41h
+    int 21h
     mov eax, 0C01h  ;Flush input buffer and read a single char from stdin
-    int 41h
+    int 21h
     movzx ebx, al
     and ebx, 0DFh    ;Convert to upper case
     cmp ebx, "Y"
@@ -210,7 +210,7 @@ quit:
     stosd
     lea rdx, wkfile
     mov eax, 4100h  ;Delete the file
-    int 41h
+    int 21h
     retToDOS errOk
 
 replaceText:

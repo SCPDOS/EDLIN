@@ -163,7 +163,7 @@
     47                              <1> 
     48                              <1> errFilExist equ 80  ;File already exists
     49                              <1> errDirExist equ 82  ;Directory already exists
-    50                              <1> errFI44     equ 83  ;Fail on INT 44h
+    50                              <1> errFI44     equ 83  ;Fail on Int 24h
     51                              <1> errRedir    equ 84  ;Too many levels of redirection
     52                              <1> errDupRedir equ 85  ;Trying to redirect a redirection
     53                              <1> errBadPass  equ 86  ;Bad password
@@ -331,7 +331,7 @@
      5                              <1> .cVersion:
      6 00000003 FC                  <1>     cld
      7 00000004 B800300000          <1>     mov eax, 3000h  ;Get version number
-     8 00000009 CD41                <1>     int 41h
+     8 00000009 CD21                <1>     int 21h
      9 0000000B 3A05F1FFFFFF        <1>     cmp al, byte [.vNum]
     10 00000011 760C                <1>     jbe short okVersion
     11 00000013 488D15(5B000000)    <1>     lea rdx, badVerStr
@@ -350,12 +350,12 @@
     23 00000045 48C1EB04            <1>     shr rbx, 4  ;Convert to paragraphs
     24 00000049 48FFC3              <1>     inc rbx     ;Add one more paragraph for good measure
     25 0000004C B8004A0000          <1>     mov eax, 4A00h
-    26 00000051 CD41                <1>     int 41h
+    26 00000051 CD21                <1>     int 21h
     27 00000053 488D15(2B010000)    <1>     lea rdx, badRealloc
     28 0000005A 0F8266040000        <1>     jc badExitMsg
     29                              <1> ;One command line argument except for mandatory filename, /B=(binary read)
     30 00000060 B800370000          <1>     mov eax, 3700h
-    31 00000065 CD41                <1>     int 41h
+    31 00000065 CD21                <1>     int 21h
     32 00000067 B85C000000          <1>     mov eax, "\"    ;Default pathsep
     33 0000006C B92F000000          <1>     mov ecx, "/"    ;Alternative pathsep
     34 00000071 80FA2D              <1>     cmp dl, "-"     ;Is the switch char default or alternative?
@@ -365,7 +365,7 @@
     38 0000007F 8805(00000000)      <1>     mov byte [pathSep], al
     39                              <1> getCmdTail:
     40 00000085 B801610000          <1>     mov eax, 6101h  ;Get parsed FCB and cmdtail for filename in rdx
-    41 0000008A CD41                <1>     int 41h
+    41 0000008A CD21                <1>     int 21h
     42                              <1> ;Now parse the command line, to get full command spec for filename.
     43 0000008C 488D7A25            <1>     lea rdi, qword [rdx + cmdArgs.progTail]     ;Get ptr to tail
     44 00000090 0FB64A24            <1>     movzx ecx, byte [rdx + cmdArgs.parmList]    ;Get number of chars in cmdline
@@ -428,7 +428,7 @@
     99 00000129 488D3D(2E000000)    <1>     lea rdi, pathspec
    100 00000130 4889FE              <1>     mov rsi, rdi
    101 00000133 B800600000          <1>     mov eax, 6000h  ;TRUENAME the filename
-   102 00000138 CD41                <1>     int 41h
+   102 00000138 CD21                <1>     int 21h
    103 0000013A 731D                <1>     jnc short .nameGood ;Name ok, proceed
    104 0000013C 3C0F                <1>     cmp al, errBadDrv
    105 0000013E 750C                <1>     jne short .genericError
@@ -502,11 +502,11 @@
    172 0000020D 488D15(2E000000)    <1>     lea rdx, pathspec
    173 00000214 B906000000          <1>     mov ecx, dirIncFiles
    174 00000219 B8004E0000          <1>     mov eax, 4E00h  ;Find First 
-   175 0000021E CD41                <1>     int 41h
+   175 0000021E CD21                <1>     int 21h
    176 00000220 723B                <1>     jc .fileNotFound
    177                              <1> ;Check if file is read only
    178 00000222 B8002F0000          <1>     mov eax, 2F00h  ;Get a pointer to the DTA in rbx
-   179 00000227 CD41                <1>     int 41h
+   179 00000227 CD21                <1>     int 21h
    180 00000229 0FB64315            <1>     movzx eax, byte [rbx + ffBlock.attribFnd]
    181 0000022D A801                <1>     test al, dirReadOnly
    182 0000022F 7407                <1>     jz short .notReadOnly
@@ -517,7 +517,7 @@
    187                              <1> ;File exists, lets open it, to read from
    188 00000238 B8203D0000          <1>     mov eax, (3Dh << 8) | ReadAccess | denyWriteShare
    189 0000023D 488D15(2E000000)    <1>     lea rdx, pathspec    ;Get the pointer to the working filename
-   190 00000244 CD41                <1>     int 41h         ;Open the file
+   190 00000244 CD21                <1>     int 21h         ;Open the file
    191 00000246 730C                <1>     jnc short .backupOpened
    192                              <1> ;File failed to open
    193 00000248 488D15(CA000000)    <1>     lea rdx, badOpenStr
@@ -539,7 +539,7 @@
    209 00000275 488D15(AE000000)    <1>     lea rdx, wkfile    ;Get a pointer to this filename
    210 0000027C B8005B0000          <1>     mov eax, 5B00h  ;Create file (atomic), prevent two edlins from editing same file
    211 00000281 31C9                <1>     xor ecx, ecx    ;Clear all file attributes (normal file)
-   212 00000283 CD41                <1>     int 41h
+   212 00000283 CD21                <1>     int 21h
    213 00000285 488D15(AB000000)    <1>     lea rdx, badCreatStr    ;Creating the working file will fail if already exits
    214 0000028C 0F8234020000        <1>     jc badExitMsg   ;This prevents someone from overriding the file
    215 00000292 668905(2C000000)    <1>     mov word [writeHdl], ax ;Store a pointer to the write handle
@@ -547,7 +547,7 @@
    217 000002A0 740E                <1>     jz short .notNewFile
    218 000002A2 488D15(3C000000)    <1>     lea rdx, newStr
    219 000002A9 B800090000          <1>     mov eax, 0900h
-   220 000002AE CD41                <1>     int 41h
+   220 000002AE CD21                <1>     int 21h
    221                              <1> .notNewFile:
    222                              <1> ;Now the following:
    223                              <1> ;1) Allocate max memory (1Mb max)
@@ -555,20 +555,20 @@
    225                              <1> ;3) Else, fill up to 75% of arena according to table. If 
    226                              <1> ;    EOF reached (either due to no bytes left or ^Z (if enabled))
    227                              <1> ;    print "EOF reached message".
-   228                              <1> ;4) Install Int 43h handler
+   228                              <1> ;4) Install Int 23h handler
    229                              <1> ;5) Goto main loop
    230                              <1> allocateMemory:
    231 000002B0 31DB                <1>     xor ebx, ebx
    232 000002B2 BB00000100          <1>     mov ebx, 10000h ;Start trying to allocate at 1Mb
    233 000002B7 B800480000          <1>     mov eax, 4800h
-   234 000002BC CD41                <1>     int 41h
+   234 000002BC CD21                <1>     int 21h
    235 000002BE 731E                <1>     jnc short .loadProgram
    236                              <1>     ;If the allocation failed, eax has max paragraphs
    237 000002C0 3D10000000          <1>     cmp eax, 10h    ;If we have less than 256 bytes available, fail
    238 000002C5 720B                <1>     jb short .notEnoughMem
    239 000002C7 89C3                <1>     mov ebx, eax    ;Get the number of paragraphs into ebx for request
    240 000002C9 B800480000          <1>     mov eax, 4800h
-   241 000002CE CD41                <1>     int 41h
+   241 000002CE CD21                <1>     int 21h
    242 000002D0 730C                <1>     jnc short .loadProgram
    243                              <1> .notEnoughMem:
    244 000002D2 488D15(40010000)    <1>     lea rdx, badMemSize
@@ -594,7 +594,7 @@
    264 00000322 4889C2              <1>     mov rdx, rax    ;Move the arena pointer into rdx
    265 00000325 B8003F0000          <1>     mov eax, 3F00h
    266 0000032A 0FB71D(2A000000)    <1>     movzx ebx, word [readHdl]  
-   267 00000331 CD41                <1>     int 41h ;If it reads, it reads, if not, oh well.
+   267 00000331 CD21                <1>     int 21h ;If it reads, it reads, if not, oh well.
    268                              <1> ;Check now for EOF and setup end of text pointer
    269 00000333 8905(1A000000)      <1>     mov dword [textLen], eax  ;Save number of chars read into eax
    270 00000339 39C1                <1>     cmp ecx, eax    ;If less bytes than ecx were read, EOF condition
@@ -607,7 +607,7 @@
    277                              <1> ;Now we print the EOF message
    278 0000034D 488D15(47000000)    <1>     lea rdx, eofStr
    279 00000354 B800090000          <1>     mov eax, 0900h
-   280 00000359 CD41                <1>     int 41h
+   280 00000359 CD21                <1>     int 21h
    281 0000035B C605(05000000)FF    <1>     mov byte [eofReached], -1   ;Set that we are at the EOF
    282                              <1> initBuffers:
    283                              <1> ;Now we setup the edit and command buffers
@@ -618,13 +618,13 @@
    287                              <1> getCommand:
    288 00000379 488D25(40060000)    <1>     lea rsp, stackTop   ;Reset the stack pointer
    289 00000380 488D15BB040000      <1>     lea rdx, i43h
-   290 00000387 B843250000          <1>     mov eax, 2543h  ;Set Interrupt handler for Int 43h
-   291 0000038C CD41                <1>     int 41h
+   290 00000387 B823250000          <1>     mov eax, 2523h  ;Set Interrupt handler for Int 23h
+   291 0000038C CD21                <1>     int 21h
    292 0000038E B82A000000          <1>     mov eax, prompt
    293 00000393 E888040000          <1>     call printChar
    294 00000398 488D15(3E010000)    <1>     lea rdx, cmdLine
    295 0000039F B8000A0000          <1>     mov eax, 0A00h  ;Take buffered input.
-   296 000003A4 CD41                <1>     int 41h
+   296 000003A4 CD21                <1>     int 21h
    297 000003A6 E873040000          <1>     call printLF 
    298 000003AB 488D35(40010000)    <1>     lea rsi, qword [cmdLine + halfLine.pString] ;Point to the text of the line
    299 000003B2 488935(C0010000)    <1>     mov qword [charPtr], rsi
@@ -683,7 +683,7 @@
    352 0000045C 7513                <1>     jnz short execCmd
    353 0000045E 488D15(86010000)    <1>     lea rdx, badROcmd
    354 00000465 B800090000          <1>     mov eax, 0900h
-   355 0000046A CD41                <1>     int 41h
+   355 0000046A CD21                <1>     int 21h
    356 0000046C E9BE030000          <1>     jmp printComErr
    357                              <1> execCmd:
    358 00000471 488935(C0010000)    <1>     mov qword [charPtr], rsi
@@ -709,7 +709,7 @@
    378                              <1> exitOk:
    379                              <1> ;Let DOS take care of freeing all resources
    380 000004B8 B8004C0000          <1>     mov eax, 4C00h
-   381 000004BD CD41                <1>     int 41h
+   381 000004BD CD21                <1>     int 21h
    382                              <1> 
    383                              <1> ;----Bad Exits----
    384                              <1> badParmExit:
@@ -718,10 +718,10 @@
    387 000004C6 4885D2              <1>     test rdx, rdx   ;Check if null ptr => Dont print on exit
    388 000004C9 7407                <1>     jz short badExit
    389 000004CB B800090000          <1>     mov eax, 0900h
-   390 000004D0 CD41                <1>     int 41h
+   390 000004D0 CD21                <1>     int 21h
    391                              <1> badExit:
    392 000004D2 B8FF4C0000          <1>     mov eax, 4CFFh
-   393 000004D7 CD41                <1>     int 41h
+   393 000004D7 CD21                <1>     int 21h
     35                                  %include "./Source/edutils.asm"
      1                              <1> ;Utility functions for edlin go here
      2                              <1> 
@@ -1334,7 +1334,7 @@
    292 000006CF AB                  <1>     stosd
    293 000006D0 488D15(AE000000)    <1>     lea rdx, bkupfile
    294 000006D7 B800410000          <1>     mov eax, 4100h
-   295 000006DC CD41                <1>     int 41h
+   295 000006DC CD21                <1>     int 21h
    296 000006DE 5F                  <1>     pop rdi
    297 000006DF 5A                  <1>     pop rdx
    298 000006E0 58                  <1>     pop rax
@@ -1528,7 +1528,7 @@
     15                              <2> %assign retOff %%_ret-$$
    420                              <1> .validSpecial:
    421                              <1> ;Returns if it is a valid case to do so. Else no
-   422 000007C6 803D(C8010000)04    <1>     cmp byte [argCnt], 4    ;Argument 4 is for the count
+   422 000007C6 803D(C8010000)04    <1>     cmp byte [argCnt], 4    ;Argument 2 is for the count
    423 000007CD 7460                <1>     je printComErr
    424                              <1>     return
     13                              <2> %%_ret:
@@ -1577,7 +1577,7 @@
    459 000007E9 488B15(06000000)    <1>     mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
    460 000007F0 0FB71D(2C000000)    <1>     movzx ebx, word [writeHdl]  ;Get the write handle
    461 000007F7 B800400000          <1>     mov eax, 4000h
-   462 000007FC CD41                <1>     int 41h
+   462 000007FC CD21                <1>     int 21h
    463 000007FE 7213                <1>     jc short .exit
    464 00000800 31D2                <1>     xor edx, edx
    465 00000802 8B1D(1A000000)      <1>     mov ebx, dword [textLen]    ;Get the number of chars in arena
@@ -1606,7 +1606,7 @@
    485 00000821 52                  <1>     push rdx
    486 00000822 0FB6D0              <1>     movzx edx, al
    487 00000825 B800020000          <1>     mov eax, 0200h
-   488 0000082A CD41                <1>     int 41h
+   488 0000082A CD21                <1>     int 21h
    489 0000082C 5A                  <1>     pop rdx
    490 0000082D 58                  <1>     pop rax
    491                              <1>     return
@@ -1620,10 +1620,10 @@
    496 0000082F 488D15(1D010000)    <1>     lea rdx, badInput
    497                              <1> printErr:
    498 00000836 B800090000          <1>     mov eax, 0900h
-   499 0000083B CD41                <1>     int 41h
+   499 0000083B CD21                <1>     int 21h
    500 0000083D E937FBFFFF          <1>     jmp getCommand
    501                              <1> ;---------------------------------------------------------------------------
-   502                              <1> ;                  !!!! IMPORTANT INT 43h HANDLER !!!!
+   502                              <1> ;                  !!!! IMPORTANT Int 23h HANDLER !!!!
    503                              <1> ;---------------------------------------------------------------------------
    504                              <1> i43h:
    505                              <1> ;^C handler. Reset the stack pointer and jump to get command
@@ -1636,7 +1636,7 @@
    512                              <1> _unimplementedFunction:
    513 00000854 488D1508000000      <1>     lea rdx, .str
    514 0000085B B800090000          <1>     mov eax, 0900h
-   515 00000860 CD41                <1>     int 41h
+   515 00000860 CD21                <1>     int 21h
    516                              <1>     return
     13                              <2> %%_ret:
     14 00000862 C3                  <2>  ret
@@ -1687,8 +1687,8 @@
     38                              <1> ;--------------------------------------------
     39 0000089F 48FF0D(C0010000)    <1>     dec qword [charPtr] ;Adjust ptr to point to the CR or ;
     40 000008A6 488D15CCFAFFFF      <1>     lea rdx, getCommand
-    41 000008AD B843250000          <1>     mov eax, 2543h  ;Set the int 43h handler for Interrupt 43h
-    42 000008B2 CD41                <1>     int 41h
+    41 000008AD B823250000          <1>     mov eax, 2523h  ;Set the int 23h handler for Interrupt 43h
+    42 000008B2 CD21                <1>     int 21h
     43 000008B4 0FB705(C9010000)    <1>     movzx eax, word [arg1]  ;Get the line number into eax
     44 000008BB 85C0                <1>     test eax, eax   ;If we are on line 0, it means current line
     45 000008BD 7515                <1>     jnz short .curentLine
@@ -1783,7 +1783,7 @@
     91 00000922 488B15(06000000)    <1>     mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
     92 00000929 0FB71D(2C000000)    <1>     movzx ebx, word [writeHdl]  ;Get the write handle
     93 00000930 B800400000          <1>     mov eax, 4000h
-    94 00000935 CD41                <1>     int 41h
+    94 00000935 CD21                <1>     int 21h
     95 00000937 7276                <1>     jc .writeError
     96                              <1>     ;If not at EOF, we fill the buffer with more of the old file and
     97                              <1>     ; write it to the temp file. This is ended when we reach an EOF 
@@ -1791,11 +1791,11 @@
     99                              <1>     ;Stage 3
    100 00000939 0FB71D(2A000000)    <1>     movzx ebx, word [readHdl]
    101 00000940 B8003E0000          <1>     mov eax, 3E00h  ;Close the reading file!
-   102 00000945 CD41                <1>     int 41h
+   102 00000945 CD21                <1>     int 21h
    103                              <1>     ;Stage 4
    104 00000947 0FB71D(2C000000)    <1>     movzx ebx, word [writeHdl]  ;Get the write handle
    105 0000094E B8003E0000          <1>     mov eax, 3E00h  ;Close the temp file!
-   106 00000953 CD41                <1>     int 41h
+   106 00000953 CD21                <1>     int 21h
    107                              <1>     ;Stage 5
    108                              <1>     ;Use ecx as a flag, if rename fails with flag set, then
    109                              <1>     ; quit with temp name! Skip if this is a new file!
@@ -1810,7 +1810,7 @@
    118 0000096D 488D15(2E000000)    <1>     lea rdx, pathspec
    119 00000974 488D3D(AE000000)    <1>     lea rdi, bkupfile
    120 0000097B B800560000          <1>     mov eax, 5600h
-   121 00000980 CD41                <1>     int 41h
+   121 00000980 CD21                <1>     int 21h
    122 00000982 7246                <1>     jc short .badBkup
    123                              <1>     ;Stage 5
    124                              <1> .skipBkup:
@@ -1820,7 +1820,7 @@
    128 00000991 488D15(AE000000)    <1>     lea rdx, bkupfile
    129 00000998 488D3D(2E000000)    <1>     lea rdi, pathspec   ;Now name the temp file by the og name!
    130 0000099F B800560000          <1>     mov eax, 5600h
-   131 000009A4 CD41                <1>     int 41h
+   131 000009A4 CD21                <1>     int 21h
    132 000009A6 7234                <1>     jc short .badBkup2
    133                              <1> .exit:
    134                              <1>     retToDOS errOk ;Let DOS do cleanup of memory allocations!
@@ -1834,7 +1834,7 @@
    138                              <1> .dskFull:
    139 000009BB 488D15(A4010000)    <1>     lea rdx, badDskFull ;Write disk full error, but return to prompt
    140 000009C2 B800090000          <1>     mov eax, 0900h
-   141 000009C7 CD41                <1>     int 41h
+   141 000009C7 CD21                <1>     int 21h
    142                              <1>     return
     13                              <2> %%_ret:
     14 000009C9 C3                  <2>  ret
@@ -1845,7 +1845,7 @@
    146 000009CE FFC9                <1>     dec ecx
    147 000009D0 4889FA              <1>     mov rdx, rdi    ;Try and delete the backup
    148 000009D3 B800410000          <1>     mov eax, 4100h
-   149 000009D8 CD41                <1>     int 41h
+   149 000009D8 CD21                <1>     int 21h
    150 000009DA EB91                <1>     jmp short .stg4
    151                              <1> .badBkup2:
    152                              <1> ;Since handles are now closed, we must exit with default filenames
@@ -1897,9 +1897,9 @@
    196 00000A03 742A                <1>     je short .roQuit
    197 00000A05 488D15(C4010000)    <1>     lea rdx, exitQuit
    198 00000A0C B800090000          <1>     mov eax, 0900h
-   199 00000A11 CD41                <1>     int 41h
+   199 00000A11 CD21                <1>     int 21h
    200 00000A13 B8010C0000          <1>     mov eax, 0C01h  ;Flush input buffer and read a single char from stdin
-   201 00000A18 CD41                <1>     int 41h
+   201 00000A18 CD21                <1>     int 21h
    202 00000A1A 0FB6D8              <1>     movzx ebx, al
    203 00000A1D 81E3DF000000        <1>     and ebx, 0DFh    ;Convert to upper case
    204 00000A23 81FB59000000        <1>     cmp ebx, "Y"
@@ -1911,7 +1911,7 @@
    210 00000A3B AB                  <1>     stosd
    211 00000A3C 488D15(AE000000)    <1>     lea rdx, wkfile
    212 00000A43 B800410000          <1>     mov eax, 4100h  ;Delete the file
-   213 00000A48 CD41                <1>     int 41h
+   213 00000A48 CD21                <1>     int 21h
    214                              <1>     retToDOS errOk
     86 00000A4A B8004C0000          <2>  mov eax, 04C00h | %1
     87 00000A4F CD41                <2>  int 41h

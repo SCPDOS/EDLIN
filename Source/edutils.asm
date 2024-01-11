@@ -292,7 +292,7 @@ delBkup:
     stosd
     lea rdx, bkupfile
     mov eax, 4100h
-    int 41h
+    int 21h
     pop rdi
     pop rdx
     pop rax
@@ -419,7 +419,7 @@ parseEntry:
     return
 .validSpecial:
 ;Returns if it is a valid case to do so. Else no
-    cmp byte [argCnt], 4    ;Argument 4 is for the count
+    cmp byte [argCnt], 4    ;Argument 2 is for the count
     je printComErr
     return
 
@@ -459,7 +459,7 @@ writeFile:
     mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
     movzx ebx, word [writeHdl]  ;Get the write handle
     mov eax, 4000h
-    int 41h
+    int 21h
     jc short .exit
     xor edx, edx
     mov ebx, dword [textLen]    ;Get the number of chars in arena
@@ -485,7 +485,7 @@ printChar:
     push rdx
     movzx edx, al
     mov eax, 0200h
-    int 41h
+    int 21h
     pop rdx
     pop rax
     return
@@ -496,10 +496,10 @@ printComErr:
     lea rdx, badInput
 printErr:
     mov eax, 0900h
-    int 41h
+    int 21h
     jmp getCommand
 ;---------------------------------------------------------------------------
-;                  !!!! IMPORTANT INT 43h HANDLER !!!!
+;                  !!!! IMPORTANT Int 23h HANDLER !!!!
 ;---------------------------------------------------------------------------
 i43h:
 ;^C handler. Reset the stack pointer and jump to get command
@@ -512,6 +512,6 @@ i43h:
 _unimplementedFunction:
     lea rdx, .str
     mov eax, 0900h
-    int 41h
+    int 21h
     return
 .str:   db CR,LF,"EXCEPTION: UNIMPLEMENTED FUNCTION CALLED",CR,LF,"$"
