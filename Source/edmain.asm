@@ -286,7 +286,7 @@ initBuffers:
     mov word [curLineNum], 1    ;Start at line 1
 getCommand:
     lea rsp, stackTop   ;Reset the stack pointer
-    lea rdx, i43h
+    lea rdx, i23h
     mov eax, 2523h  ;Set Interrupt handler for Int 23h
     int 21h
     mov eax, prompt

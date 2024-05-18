@@ -501,7 +501,7 @@ printErr:
 ;---------------------------------------------------------------------------
 ;                  !!!! IMPORTANT Int 23h HANDLER !!!!
 ;---------------------------------------------------------------------------
-i43h:
+i23h:
 ;^C handler. Reset the stack pointer and jump to get command
     lea rsp, stackTop
     cld

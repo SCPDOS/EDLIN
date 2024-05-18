@@ -111,7 +111,7 @@
     84                              <1> ;A macro for returning to dos
     85                              <1> %macro retToDOS 1
     86                              <1>     mov eax, 04C00h | %1
-    87                              <1>     int 41h
+    87                              <1>     int 21h
     88                              <1> %endmacro
     28                                  %include "./Include/dosError.inc"
      1                              <1> ;DOS Error codes
@@ -617,7 +617,7 @@
    286 00000378 00                  <1>
    287                              <1> getCommand:
    288 00000379 488D25(40060000)    <1>     lea rsp, stackTop   ;Reset the stack pointer
-   289 00000380 488D15BB040000      <1>     lea rdx, i43h
+   289 00000380 488D15BB040000      <1>     lea rdx, i23h
    290 00000387 B823250000          <1>     mov eax, 2523h  ;Set Interrupt handler for Int 23h
    291 0000038C CD21                <1>     int 21h
    292 0000038E B82A000000          <1>     mov eax, prompt
@@ -1625,7 +1625,7 @@
    501                              <1> ;---------------------------------------------------------------------------
    502                              <1> ;                  !!!! IMPORTANT Int 23h HANDLER !!!!
    503                              <1> ;---------------------------------------------------------------------------
-   504                              <1> i43h:
+   504                              <1> i23h:
    505                              <1> ;^C handler. Reset the stack pointer and jump to get command
    506 00000842 488D25(40060000)    <1>     lea rsp, stackTop
    507 00000849 FC                  <1>     cld
@@ -1687,7 +1687,7 @@
     38                              <1> ;--------------------------------------------
     39 0000089F 48FF0D(C0010000)    <1>     dec qword [charPtr] ;Adjust ptr to point to the CR or ;
     40 000008A6 488D15CCFAFFFF      <1>     lea rdx, getCommand
-    41 000008AD B823250000          <1>     mov eax, 2523h  ;Set the int 23h handler for Interrupt 43h
+    41 000008AD B823250000          <1>     mov eax, 2523h  ;Set the int 23h handler
     42 000008B2 CD21                <1>     int 21h
     43 000008B4 0FB705(C9010000)    <1>     movzx eax, word [arg1]  ;Get the line number into eax
     44 000008BB 85C0                <1>     test eax, eax   ;If we are on line 0, it means current line
@@ -1825,12 +1825,12 @@
    133                              <1> .exit:
    134                              <1>     retToDOS errOk ;Let DOS do cleanup of memory allocations!
     86 000009A8 B8004C0000          <2>  mov eax, 04C00h | %1
-    87 000009AD CD41                <2>  int 41h
+    87 000009AD CD21                <2>  int 21h
    135                              <1> .writeError:
    136 000009AF E807000000          <1>     call .dskFull
    137                              <1>     retToDOS errDskFull
     86 000009B4 B8024C0000          <2>  mov eax, 04C00h | %1
-    87 000009B9 CD41                <2>  int 41h
+    87 000009B9 CD21                <2>  int 21h
    138                              <1> .dskFull:
    139 000009BB 488D15(A4010000)    <1>     lea rdx, badDskFull ;Write disk full error, but return to prompt
    140 000009C2 B800090000          <1>     mov eax, 0900h
@@ -1852,7 +1852,7 @@
    153 000009DC E8CEFFFFFF          <1>     call .writeError    ;Write disk full error, but then exit!
    154                              <1>     retToDOS errBadRen  ;Return to DOS, bad rename error
     86 000009E1 B8014C0000          <2>  mov eax, 04C00h | %1
-    87 000009E6 CD41                <2>  int 41h
+    87 000009E6 CD21                <2>  int 21h
    155                              <1> 
    156                              <1> insertLine:
    157                              <1> ;Inserts a line
@@ -1914,12 +1914,12 @@
    213 00000A48 CD21                <1>     int 21h
    214                              <1>     retToDOS errOk
     86 00000A4A B8004C0000          <2>  mov eax, 04C00h | %1
-    87 00000A4F CD41                <2>  int 41h
+    87 00000A4F CD21                <2>  int 21h
    215                              <1> 
    216                              <1> replaceText:
    217                              <1> ;Replaces all matching strings with specified string (NO REGEX)
    218                              <1> ;--------------------------------------------
-   219                              <1> ;Invoked by: [line][,line][?]R[string][<F6>string]
+   219                              <1> ;Invoked by: [line][,line][?]R[string]<EOF>[string]
    220                              <1> ;--------------------------------------------
    221 00000A51 E9FEFDFFFF          <1>     jmp _unimplementedFunction
    222                              <1> 

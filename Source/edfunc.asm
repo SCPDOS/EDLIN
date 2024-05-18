@@ -38,7 +38,7 @@ editLine:
 ;--------------------------------------------
     dec qword [charPtr] ;Adjust ptr to point to the CR or ;
     lea rdx, getCommand
-    mov eax, 2523h  ;Set the int 23h handler for Interrupt 43h
+    mov eax, 2523h  ;Set the int 23h handler
     int 21h
     movzx eax, word [arg1]  ;Get the line number into eax
     test eax, eax   ;If we are on line 0, it means current line
@@ -216,7 +216,7 @@ quit:
 replaceText:
 ;Replaces all matching strings with specified string (NO REGEX)
 ;--------------------------------------------
-;Invoked by: [line][,line][?]R[string][<F6>string]
+;Invoked by: [line][,line][?]R[string]<EOF>[string]
 ;--------------------------------------------
     jmp _unimplementedFunction
 

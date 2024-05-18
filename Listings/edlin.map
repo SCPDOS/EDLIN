@@ -382,7 +382,7 @@ Real              Virtual           Name
              82E               82E  ..@74._ret
              82F               82F  printComErr
              836               836  printErr
-             842               842  i43h
+             842               842  i23h
              854               854  _unimplementedFunction
              862               862  ..@75._ret
              863               863  _unimplementedFunction.str

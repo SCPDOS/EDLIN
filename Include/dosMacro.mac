@@ -84,5 +84,5 @@ xchg bx, bx
 ;A macro for returning to dos
 %macro retToDOS 1
     mov eax, 04C00h | %1
-    int 41h
+    int 21h
 %endmacro
