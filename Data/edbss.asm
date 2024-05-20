@@ -1,7 +1,5 @@
 pathSep     db ?    ;Default \, Alternative /
 switchChar  db ?    ;Default /, Alternative -
-
-;All variables that dont need initialisation go here
 roFlag      db ?    ;Flag is set if file is read-only. Cannot edit the file.
 newFileFlag db ?    ;Flag indicating the file being made is new (when set, above flag meaningless)
 noEofChar   db ?    ;Flag is set if we are not to check for ^Z chars found in the file
@@ -12,9 +10,12 @@ memPtr      dq ?    ;Ptr to the memory arena given by DOS
 arenaSize   dd ?    ;Size of the arena in bytes 
 fillSize    dd ?    ;Size of 3/4 of the arena in bytes (for append)
 freeSize    dd ?    ;Size of 1/4 of the arena in bytes (for write)
+
+;Editor state vars!
 textLen     dd ?    ;Number of chars in arena
 endOfArena  dq ?    ;Ptr to the last available byte in the arena
 curLineNum  dw ?    ;Word value for the current line number
+
 modFlag     db ?    ;Flag set to indicate the file was modified
 ;Backup is only deleted on exit or write, to make space for temp file.
 bkupDel     db ?    ;Flag to indicate that the backup was deleted

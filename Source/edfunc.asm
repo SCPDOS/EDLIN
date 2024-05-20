@@ -6,15 +6,25 @@
 
 appendLines:
 ;If the file is not fully loaded in arena, allows you to load 
-; the next portion into the arena. Reads byte by byte from 
-; the file until the desired number of CRLF's have
-; been hit (inefficient?) or (appropriate) EOF condition.
-;If no n specified, we write the first 1/4 of the arena 
-; and shift the rest of the lines up.
+; the next portion into the arena. Essentially ignores the 
+; input and always fills up to the 3/4 limit.
 ;--------------------------------------------
 ;Invoked by: [n]A (number of bytes to read)
 ;--------------------------------------------
     jmp _unimplementedFunction
+    
+    test byte [eofReached], -1
+    retnz   ;Return if we are already at the end of the file!
+    mov ecx, dword [fillSize]    
+    sub ecx, dword [textLen]
+    retbe   ;If ecx is leq 0, return!
+    push rcx        ;Else, ecx has the char count for the read!
+    mov ecx, dword [textLen]
+    call lenToPtr   ;Turn textLen into a ptr in edx
+    pop rcx
+    movzx ebx, word [readHdl]
+    mov eax, 3F00h
+    int 21h
 
 copyLines:
 ;Duplicates a line or a range of lines to a position specifed 

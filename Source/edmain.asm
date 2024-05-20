@@ -374,11 +374,6 @@ execCmd:
     dec rsi ;Move rsi back to the first char of the new command
     mov qword [charPtr], rsi    ;Save the command line pointer
     jmp parseCommand
-    
-exitOk:
-;Let DOS take care of freeing all resources
-    mov eax, 4C00h
-    int 21h
 
 ;----Bad Exits----
 badParmExit:

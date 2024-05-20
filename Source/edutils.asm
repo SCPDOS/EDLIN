@@ -498,6 +498,15 @@ printErr:
     mov eax, 0900h
     int 21h
     jmp getCommand
+
+lenToPtr:
+;Converts a length into a pointer
+;Input: ecx = Offset into arena
+;Output: rdx = Ptr to the offset in the arena
+    mov rdx, qword [memPtr]
+    or ecx, ecx
+    add rdx, rcx
+    return
 ;---------------------------------------------------------------------------
 ;                  !!!! IMPORTANT Int 23h HANDLER !!!!
 ;---------------------------------------------------------------------------
