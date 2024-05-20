@@ -11,7 +11,7 @@ start:
     lea rdx, badVerStr
     jmp badExitMsg
 okVersion:
-;Initialise the BSS and to 0
+;Initialise the BSS to 0
     lea rdi, section..bss.start
     mov rcx, bssLen
     xor eax, eax
@@ -259,31 +259,14 @@ allocateMemory:
     mov dword [fillSize], ecx   ;Save number of bytes to fill arena with
     shr ebx, 2  ;Divide by 4 to get # of bytes to default free until
     mov dword [freeSize], ebx
-    test byte [newFileFlag], -1 ;If this is set it is a new file, skip
-    jnz short initBuffers
-    mov rdx, rax    ;Move the arena pointer into rdx
-    mov eax, 3F00h
-    movzx ebx, word [readHdl]  
-    int 21h ;If it reads, it reads, if not, oh well.
-;Check now for EOF and setup end of text pointer
-    mov dword [textLen], eax  ;Save number of chars read into eax
-    cmp ecx, eax    ;If less bytes than ecx were read, EOF condition
-    jne short .eofFound
-    test byte [noEofChar], -1   ;Avoid searching for ^Z?
-    jz short initBuffers
-    call searchTextForEOFChar
-    jnz short initBuffers
-.eofFound:
-;Now we print the EOF message
-    lea rdx, eofStr
-    mov eax, 0900h
-    int 21h
-    mov byte [eofReached], -1   ;Set that we are at the EOF
-initBuffers:
 ;Now we setup the edit and command buffers
     mov byte [workLine + line.bBufLen], lineLen
     mov byte [cmdLine + line.bBufLen], halflineLen
     mov word [curLineNum], 1    ;Start at line 1
+    mov qword [curLinePtr], rax
+    mov byte [rax], EOF ;Store an EOF at the start of the buffer!
+    mov qword [eofPtr], rax
+    call appendLines
 getCommand:
     lea rsp, stackTop   ;Reset the stack pointer
     lea rdx, i23h

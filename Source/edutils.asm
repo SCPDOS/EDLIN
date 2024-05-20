@@ -59,13 +59,12 @@ findLine:
     mov edx, eax                ;Use as a comparator for line number
     mov eax, -1
     test edx, edx               ;Did we specify the last line?
-    cmovz edx, eax  ;If we specify 0, run to exhaust textLen chars
+    cmovz edx, eax  ;If we specify 0, run to exhaust arenaSize
     mov rsi, qword [memPtr]     ;Get the mem pointer
-    mov ecx, dword [textLen]    ;Number of chars in the arena
+    mov ecx, dword [arenaSize]
     xor ebx, ebx    ;Use as a counter for actual current line number
 .lp:
     jecxz .exit ;If we have no chars left to read, exit now w/o touching ZF
-    lodsb   ;Get the current byte
     dec ecx ;One less char left to read
     cmp al, LF
     je short .lf
@@ -201,79 +200,7 @@ getModifiedStatus:
     test byte [modFlag], -1
     return
 
-appendEOF:
-;If no EOF char found and we are at the EOF, add one!
-    test byte [newFileFlag], -1 ;New files always have their EOF loaded
-    jnz short .newFile
-    test byte [eofReached], -1  ;Only append an EOF if we reached the og EOF
-    retz
-    test byte [noEofChar], -1   ;If set, we ignore all embedded EOF chars
-    jnz short .searchAway
-.newFile:
-    call searchTextForEOFChar
-    retz    ;If ZF=ZE, exit, we are ok!
-.searchAway:
-    mov rdi, qword [memPtr]
-    xor ecx, ecx
-    mov ecx, dword [textLen]  ;Go to the end of the text
-    add rdi, rcx
-    mov rax, qword [endOfArena]    
-    sub rax, rdi    ;If this difference is 0, exit.
-    retz
-    ;Else, add a single ^Z and exit
-    mov byte [rdi], EOF
-    inc dword [textLen]
-    call markFileModified
-    return
 
-searchTextForEOFChar:
-;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-;NOTE: THIS FUNCTION MUST NOT BE CALLED IF WE ARE TO IGNORE EOF's!
-;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-;This function is to search for an EOF char in the text.
-;If found, we check if the previous char is LF. If it isn't
-; place a CR/LF with the CR on the ^Z. If no bytes left in
-; arena leave the embedded ^Z in situ (boo!)
-;Return: ZF=ZE -> EOF found
-;        ZF=NZ -> No EOF char found
-    push rax
-    push rcx
-    push rdi
-    mov rdi, qword [memPtr]
-    xor ecx, ecx
-    mov ecx, dword [textLen]  ;Go to the end of the text
-    jecxz .exitNotFound ;If the file has length no bytes, default
-    mov al, EOF
-    repne scasb ;Search the arena for a EOF char
-    jz short .found ;^Z found or ecx was zero
-.exit:
-    pop rdi
-    pop rcx
-    pop rax
-    return
-.found:
-    dec rdi ;Point rdi to the ^Z char
-    cmp rdi, qword [memPtr] ;Are we the first char?
-    je short .firstChar
-    cmp byte [rdi - 1], LF  ;If the char before the ^Z is LF, exit ok
-    je short .exit
-    mov rbx, qword [endOfArena]
-    sub rbx, 2  ;Make space for two more chars (the LF and new ^Z)
-    cmp rdi, rbx ;If ^Z is at or near the end of the arena, do nothing
-    jae short .exit2
-.firstChar:
-    mov byte [rdi], CR      ;Overwrite the ^Z with a CR
-    mov byte [rdi + 1], LF
-    mov byte [rdi + 2], EOF
-    add dword [textLen], 2     ;Two more chars in text
-    call markFileModified
-.exit2:
-    xor ecx, ecx            ;EOF char found so clear ZF
-    jmp short .exit
-.exitNotFound:
-    xor ecx, ecx
-    inc ecx ;Clear the zero flag
-    jmp short .exit
 
 delBkup:
 ;Finally, we delete the backup if it exists. If it doesn't delete
@@ -446,30 +373,6 @@ getPtrToStr:
 .exit:
     pop rsi
     pop rcx
-    return
-
-writeFile:
-;Writes to file and shifts internal pointers correctly
-;Input: ecx = Number of chars to write
-;Output: CF=NC -> eax = Number of chars written
-;        CF=CY -> Hard Error, assume nothing written for safety
-    push rax
-    push rbx
-    push rdx
-    mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
-    movzx ebx, word [writeHdl]  ;Get the write handle
-    mov eax, 4000h
-    int 21h
-    jc short .exit
-    xor edx, edx
-    mov ebx, dword [textLen]    ;Get the number of chars in arena
-    sub ebx, eax    ;Get the number of chars left in the arena
-    cmovc ebx, edx  ;If carry set, something went wrong. Default to 0 chars 
-    mov dword [textLen], ebx
-.exit:
-    pop rdx
-    pop rbx
-    pop rax
     return
 
 printCRLF:

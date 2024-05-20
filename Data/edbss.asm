@@ -1,3 +1,5 @@
+;WE SET ALL VARS TO 0 ON STARTUP!
+
 pathSep     db ?    ;Default \, Alternative /
 switchChar  db ?    ;Default /, Alternative -
 roFlag      db ?    ;Flag is set if file is read-only. Cannot edit the file.
@@ -12,9 +14,10 @@ fillSize    dd ?    ;Size of 3/4 of the arena in bytes (for append)
 freeSize    dd ?    ;Size of 1/4 of the arena in bytes (for write)
 
 ;Editor state vars!
-textLen     dd ?    ;Number of chars in arena
+curLineNum  dw ?    ;Word value for the current line number (1 based)
+curLinePtr  dq ?    ;Pointer to the current line
+eofPtr      dq ?    ;Pointer to the EOF char in the buffer
 endOfArena  dq ?    ;Ptr to the last available byte in the arena
-curLineNum  dw ?    ;Word value for the current line number
 
 modFlag     db ?    ;Flag set to indicate the file was modified
 ;Backup is only deleted on exit or write, to make space for temp file.

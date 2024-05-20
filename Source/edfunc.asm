@@ -11,17 +11,12 @@ appendLines:
 ;--------------------------------------------
 ;Invoked by: [n]A (number of bytes to read)
 ;--------------------------------------------
-    jmp _unimplementedFunction
-    
     test byte [eofReached], -1
     retnz   ;Return if we are already at the end of the file!
     mov ecx, dword [fillSize]    
     sub ecx, dword [textLen]
     retbe   ;If ecx is leq 0, return!
-    push rcx        ;Else, ecx has the char count for the read!
-    mov ecx, dword [textLen]
-    call lenToPtr   ;Turn textLen into a ptr in edx
-    pop rcx
+    
     movzx ebx, word [readHdl]
     mov eax, 3F00h
     int 21h
@@ -92,7 +87,7 @@ endEdit:
     ;Stage 1
     test byte [roFlag], -1  ;If we are readonly, delete $$$ and quit
     jnz quit.roQuit
-    call appendEOF  ;Append an EOF if appropriate.
+    ;call appendEOF  ;Append an EOF if appropriate.
     call delBkup
     call getModifiedStatus   ;If we are clean, delete $$$ and quit
     jz quit.roQuit
