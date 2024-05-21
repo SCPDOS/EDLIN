@@ -13,13 +13,29 @@ appendLines:
 ;--------------------------------------------
     test byte [eofReached], -1
     retnz   ;Return if we are already at the end of the file!
-    mov ecx, dword [fillSize]    
-    sub ecx, dword [textLen]
-    retbe   ;If ecx is leq 0, return!
-    
+    mov ecx, dword [fillSize]
+    add rcx, qword [memPtr] ;rcx points to the fill point
+    mov rdx, qword [curLinePtr]
+    sub rcx, rdx    ;Get the number of bytes left to read
+    retbe   ;If we are past this point or equal, do nothing!
     movzx ebx, word [readHdl]
     mov eax, 3F00h
     int 21h
+    jc .readErr
+    cmp eax, ecx
+    je .notEof
+    mov byte [eofReached], -1   ;If we read less bytes, must have hit EOF
+    lea rdx, eofStr
+    mov eax, 0900h  ;Print string!
+    int 21h
+.notEof:
+    ;rax has the number of bytes we have read
+    mov rdi, rax
+    add rdi, qword [curLinePtr] ;Point to the last byte we read
+    cmp word [rdi - 1], 0D0Ah   ;Was the last byte a CR,LF
+
+.readErr:
+    return  ;For now do nothing
 
 copyLines:
 ;Duplicates a line or a range of lines to a position specifed 
