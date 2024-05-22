@@ -203,6 +203,7 @@ fileOpen:
     jne badExitMsg
 ;Error was file not found so we can make the file!
     mov byte [newFileFlag], -1  ;Set the new file flag!
+    mov byte [eofReached], -1   ;Setup that we at eof
 createWorkingFile:
 ;Now open a new file with triple question mark extension
 ;rdi -> Path to file with $$$ (the working file)
@@ -252,6 +253,8 @@ allocateMemory:
     dec rsi     ;Point rsi to the last char of the arena
     mov qword [endOfArena], rsi
     mov dword [arenaSize], ebx  ;Save number of bytes in arena here
+    test byte [newFileFlag], -1 ;We skip setting the 1/4 and 3/4 markers 
+    jnz .newFile
     mov rsi, rax    ;Save the pointer to memory arena in rsi
     xor ecx, ecx    ;Zero the upper 32 bits
     lea ecx, dword [2*ebx + ebx]    ;Multiply ebx by 3 into ecx
@@ -260,6 +263,7 @@ allocateMemory:
     add qword [fillPtr], rax   ;Turn into offset from start of arena
     shr ebx, 2  ;Divide by 4 to get # of bytes to default free until
     mov dword [freeCnt], ebx   ;Save number of bytes to free from the arena
+.newFile:
 ;Now we setup the edit and command buffers
     mov byte [workLine + line.bBufLen], lineLen
     mov byte [cmdLine + line.bBufLen], halflineLen
@@ -271,6 +275,8 @@ allocateMemory:
 ; file! Since we are appending, we setup as if the user typed in an arg. 
 ;arg1 is already zero due to BSS zeroing
     mov byte [argCnt], 1    ;Default to one argument! arg1 = 0 means load to 3/4!
+    test byte [newFileFlag], -1
+    jnz getCommand
     mov byte [noAppendErr], -1
     call appendLines
     mov byte [noAppendErr], 0

@@ -11,8 +11,8 @@ appendLines:
 ;--------------------------------------------
 ;Invoked by: [n]A (number of bytes to read)
 ;--------------------------------------------
-    cmp byte [argCnt], 1
-    jne printComErr
+    ;cmp byte [argCnt], 1
+    ;jne printComErr
     test byte [eofReached], -1
     retnz   ;Return if we are already at the end of the file!
     mov rdx, qword [eofPtr]
@@ -29,7 +29,6 @@ appendLines:
     movzx ebx, word [readHdl]
     mov eax, 3F00h
     int 21h
-    retc
     cmp eax, ecx
     je .notEof
     ;Check this is really the eof (by trying to read one more byte)
@@ -157,24 +156,10 @@ endEdit:
 ;--------------------------------------------
 ;Invoked by: E
 ;--------------------------------------------
-;1) Append a final EOF to the file if doesnt have one and del bkup 
-;       if not yet done so.
-;2) Write file to temp file.
-;   |__>If this fails, return to command line (to allow abort).
-;3) Close the original file.
-;4) Close the temp file.
-;5) Rename OG file to .BAK.
-;   |__>If this fails, delete the original .BAK and try again.
-;       If it fails again, exit with .$$$ file. Print no disk space error.
-;6) Rename temp file to OG filename. 
-;   |__>If it fails, exit with .$$$ file. Print no disk space error.
-;7) Exit!
-;--------------------------------------------
-    ;Stage 1
-    cmp byte [argCnt], 1
-    jne printComErr
-    cmp byte [arg1], 0
-    jne printArgError
+    ;cmp byte [argCnt], 1
+    ;jne printComErr
+    ;cmp byte [arg1], 0
+    ;jne printArgError
     test byte [roFlag], -1  ;If we are readonly, delete $$$ and quit
     jnz quit.roQuit
     mov byte [noAppendErr], -1  ;Suppress errors again
@@ -182,39 +167,33 @@ endEdit:
     mov ebx, -1             ;Write out max lines
     call writeLines.goFindLine
     test byte [eofReached], -1  ;Are we at EOF yet?
-    jnz .writeDone
-    ;Else we need to append again
-    mov byte [argCnt], 1
-    mov word [arg1], -1    ;Now read max lines
+    jnz .writeDone  ;If yes, we are done writing to disk
+    mov byte [argCnt], 1    ;Else we keep reading the file
+    mov word [arg1], -1     ;Now fill the arena with lines
     call appendLines
-    jmp short .writeLp
-.writeDone: ;If so, add the EOF char to the file!
-    mov rdx, qword [eofPtr]
+    jmp short .writeLp      ;And write them out again
+.writeDone:
+    mov rdx, qword [eofPtr] ;Now write out the EOF char to the file
     mov ecx, 1
     movzx ebx, word [writeHdl]
     mov eax, 4000h
     int 21h
-    ;Stage 3
     movzx ebx, word [readHdl]
     mov eax, 3E00h  ;Close the reading file!
     int 21h
-    ;Stage 4
     movzx ebx, word [writeHdl]  ;Get the write handle
     mov eax, 3E00h  ;Close the temp file!
     int 21h
-    ;Stage 5
     test byte [newFileFlag], -1  ;If this is new file, skip this!
     jnz short .skipBkup
     ;Now set the backup extension
     mov rdi, qword [fileExtPtr]
     mov eax, "BAK"
     stosd
-.stg4:
     lea rdx, pathspec
     lea rdi, bkupfile
     mov eax, 5600h
     int 21h
-    ;Stage 5
 .skipBkup:
     mov eax, "$$$"  ;Always set this as triple dollar as this is saved name!
     mov rdi, qword [fileExtPtr]
@@ -314,8 +293,8 @@ writeLines:
 ;Invoked by: [n]W (number of bytes to write)
 ;--------------------------------------------
 ;When invoked, must delete the backup if it not already deleted.
-    cmp byte [argCnt], 1
-    ja printComErr
+    ;cmp byte [argCnt], 1
+    ;ja printComErr
     movzx ebx, word [arg1]
     test ebx, ebx
     jnz .goFindLine
