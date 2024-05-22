@@ -314,15 +314,11 @@ parseCommand:
     movzx edi, byte [argCnt]
     dec edi ;Turn into offset
     mov word [rbp + 2*rdi], bx  ;Store the argument
-    dec rsi ;rsi points at the first char past the argument
-    call skipSpaces ;Skip the spaces, rsi points at the first non space char
+    dec rsi     ;Go back to the first char past the argument
+    call skipSpaces ;Skip spaces
     cmp al, "," ;Is the first char the argument separator?
-    jne short .notSep
-    inc rsi ;Keep rsi ahead because ...
-.notSep:
-    dec rsi ;Move rsi back to the first non-space char
-    cmp byte [argCnt], 4
-    jb short .parse
+    je .parse
+    dec rsi ;Move rsi back to the non comma char
     call skipSpaces
     cmp al, "?"
     jne short .notQmark
