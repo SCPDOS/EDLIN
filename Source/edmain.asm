@@ -256,9 +256,10 @@ allocateMemory:
     xor ecx, ecx    ;Zero the upper 32 bits
     lea ecx, dword [2*ebx + ebx]    ;Multiply ebx by 3 into ecx
     shr ecx, 2  ;Divide by 4 to get # of bytes to default fill by
-    mov dword [fillSize], ecx   ;Save number of bytes to fill arena with
+    mov dword [fillPtr], ecx   ;Save number of bytes to fill arena with
+    add qword [fillPtr], rax   ;Turn into offset from start of arena
     shr ebx, 2  ;Divide by 4 to get # of bytes to default free until
-    mov dword [freeSize], ebx
+    mov dword [freeCnt], ebx   ;Save number of bytes to free from the arena
 ;Now we setup the edit and command buffers
     mov byte [workLine + line.bBufLen], lineLen
     mov byte [cmdLine + line.bBufLen], halflineLen
@@ -266,7 +267,13 @@ allocateMemory:
     mov qword [curLinePtr], rax
     mov byte [rax], EOF ;Store an EOF at the start of the buffer!
     mov qword [eofPtr], rax
+;Nice trick, ensure we dont print any errors on append when initially loading the
+; file! Since we are appending, we setup as if the user typed in an arg. 
+;arg1 is already zero due to BSS zeroing
+    mov byte [argCnt], 1    ;Default to one argument! arg1 = 0 means load to 3/4!
+    mov byte [noAppendErr], -1
     call appendLines
+    mov byte [noAppendErr], 0
 getCommand:
     lea rsp, stackTop   ;Reset the stack pointer
     lea rdx, i23h

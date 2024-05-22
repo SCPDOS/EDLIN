@@ -20,6 +20,8 @@ SPC equ 20h ;Printable  | ASCII Space
 ;This last one is NEVER printed with a caret as it is a console control char
 DEL equ 7Fh ;^?         | ASCII Rubout (Del char and dec cursor)
 
+CRLF equ 0A0Dh
+
 asciiCaret  equ 20h ;Used to check which chars need to be printed with caret
 ;Extended Ascii Codes
 eF1     equ 3Bh ;F1 second byte

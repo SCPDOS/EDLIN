@@ -1,34 +1,30 @@
 ;Utility functions for edlin go here
 
-loadBuffer:
-;Loads the working line into the buffer and
-; fixes the two work additional variables
-;Input: rdi -> Start of the line to load
-;Output: workLine = Loaded with the line.
-;        workLen = Length of the line before edit
-;        workEnd = Last char of the line loaded.
-    push rsi
-    push rdi
-    lea rsi, workLine
-    xchg rdi, rsi
-    add rdi, 2  ;Go to the actual string portion of the line struct
-    mov ecx, lineLen    ;Get max number of chars to xfr
-.lp:
-    inc ecx ;About to move a new char
-    call isCharEOL  ;If returns with ZF=ZE, then al has terminating char
-    lodsb
-    stosb
-    jnz short .lp
-    cmp al, CR
-    jne short .skipSpecial
-    inc cl
-    mov byte [rdi], LF  ;Store the extra LF
-.skipSpecial:
-    mov byte [workLen], cl
-    mov byte [workEnd], al
-    pop rdi
-    pop rsi
+printString:
+    mov eax, 0900h
+    int 21h
     return
+printMemErr:
+    lea rdx, badMemSize
+    jmp short printErr
+printComErr:
+;JUMP to this procedure and it jumps back to
+; the command loop resetting the stack!
+    lea rdx, badInput
+printErr:
+    call printString
+    jmp getCommand
+
+;The below "Fail" units are a class of Edlin terminating functions
+badReadFail:
+    lea rdx, badRead
+    call printString
+    retToDOS errBadRead
+
+fullDiskFail:
+    lea rdx, badDskFull ;Write disk full error, but return to prompt
+    call printString
+    retToDOS errDskFull
 
 checkArgOrder:
 ;Checks two arguments to ensure the second one is 
@@ -44,47 +40,52 @@ checkArgOrder:
 
 findLine:
 ;Given a line number, tries to find the actual line.
-;Works by checking for LF chars or CR, LF pairs. If a EOF char 
-; encountered, and EOF check turned off, it is ignored. Else, return
-; "line not found".
-;Input: eax = Line number, 0 means last line
+;Input: ebx = Line number to search for, 0 means exhaust all chars!
 ;Output: ZF=ZE: rdi -> Ptr to the line
 ;               ebx = Actual line number we are at
 ;               eax = Line number specified
 ;        ZF=NZ: Line not found. (i.e. beyond last line)
-    push rax    ;Use as load var
-    push rcx
-    push rdx    
-    push rsi
-    mov edx, eax                ;Use as a comparator for line number
-    mov eax, -1
-    test edx, edx               ;Did we specify the last line?
-    cmovz edx, eax  ;If we specify 0, run to exhaust arenaSize
-    mov rsi, qword [memPtr]     ;Get the mem pointer
-    mov ecx, dword [arenaSize]
-    xor ebx, ebx    ;Use as a counter for actual current line number
+    movzx edx, word [curLineNum]    ;Line to start counting from
+    mov rdi, qword [curLinePtr]     ;Pointer to this line
+    cmp ebx, edx
+    rete    ;If we are already at the line we want to be at, return!
+    ja .prepSearch  
+    test ebx, ebx   ;Are we in the goto last line case?
+    jz .prepSearch
+;Else, we start scanning from the start of the arena!
+    mov edx, 1
+    mov rdi, qword [memPtr] 
+    cmp ebx, edx
+    rete    ;If we want to find line 1, here we are!
+.prepSearch:
+    mov rcx, qword [eofPtr]
+    sub rcx, rdi    ;Turn ecx into count of chars left in buffer to scan
+findLineCore:
+;Finds a line but from a presetup position as opposed to the global state!
+;Input: rdi -> Line to check if it is terminated by a LF
+;       ecx = Number of chars to check on
+;       edx = Offset of line count to search for (line counter)
+;       ebx = Count of lines to search for (0 means exhaust chars)
+;Output:
+;       al = LF
+;       ZF=ZE: We read bx lines. rdi -> Past LF which terminated line
+;       ZF=NZ: Ran out of chars
+    mov eax, LF
 .lp:
-    jecxz .exit ;If we have no chars left to read, exit now w/o touching ZF
-    dec ecx ;One less char left to read
-    cmp al, LF
-    je short .lf
-    cmp al, EOF
-    jne short .lp
-.eof:
-    test byte [noEofChar], -1
-    jnz short .lp
-    jmp short .exit ;Exit if we hit an embedded EOF char and are searching 
-.lf:
-    inc ebx         ;Go to next line
-    cmp ebx, edx    ;Are we at the line we want to be at?
-    jnz short .lp
+    jecxz .exit ;Return w/o setting flags if we have no more chars left!
+    repne scasb
+    inc edx
+    cmp edx, ebx    ;Have we gone past bx lines yet?
+    jne .lp    ;Scan the next line if not!!
 .exit:
-    mov rdi, rsi    ;rsi points to the char after lf
-    pop rsi
-    pop rdx
-    pop rcx
-    pop rax
     return
+
+delBak:
+;Deletes the backup file! Callable once only!
+    test byte [bakDel], -1
+    retnz
+    mov byte [bakDel], -1   ;No longer callable
+
 
 strlen:
 ;String length based on terminator in al
@@ -109,7 +110,7 @@ strcpy:
     push rcx
     mov ecx, lineLen    ;Max number of chars in a string
 .lp:
-    call isCharEOL
+    cmp byte [rsi], LF
     je short .exit
     movsb   ;Move the char over, inc both pointers
     dec ecx
@@ -151,44 +152,69 @@ memmove:
     pop rsi
     return
 
-findLineEnd:
-;Returns in rsi a pointer to the end of the line
-;Input: rsi -> Start of the line find the end of
-;Output: rsi -> Last char in the string (NOTE: LAST CHAR NOT PAST)
-;Trashes: rcx
-    mov ecx, lineLen
-.lp:
-    call isCharEOL  ;If ZF=ZE, then rsi points to EOL
-    rete
-    dec ecx
-    retz    ;If ecx is now 0, means rsi points to the end of line (NO EOL CHAR)
-    inc rsi
-    jmp short .lp
-
-isCharEOL:
-;Input: rsi -> Char/Word to analyse
-;Output: ZF=ZE if char/word at rsi LF or CR,LF.
-;        ZF=NZ if not
-    call isCharEOF
-    rete
-    cmp byte [rsi], LF
-    rete
-    cmp byte [rsi], CR
-    retne
-    cmp byte [rsi + 1], LF
+checkEOF:
+;Checks if we are at the EOF or if we hit an EOF char in the file.
+;Input: ecx = Count of bytes
+;       rdi -> Ptr to the start of the region we just read into memory
+;       r10 = Original requested byte count
+;Output: ZF=ZE => Found EOF in file (or ecx = 0)
+;        ZF=NZ => No EOF found in file!
+;       ecx = Count of relevant bytes in the buffer
+    test byte [noEofChar], -1   ;If set, binary semantics!
+    jnz .binScan
+;Here we scan for ^Z char
+    push rdi
+    push rcx
+    mov eax, EOF
+    test ecx, ecx   ;If ecx is 0, skip the scan! Pretend we hit an EOF
+    jz .ascNoEof
+    repne scasb
+    jne .ascNoEof
+    pushfq
+    inc ecx         ;Increment by 1 to include the ptr to the EOF char itself!
+    popfq
+.ascNoEof:
+    mov edi, ecx    ;Save the byte count in edi (rdi)
+    pop rcx         ;Get back the original byte count!
+    pushfq
+    sub ecx, edi    ;Get the number of chars into the string we are 
+    popfq
+    pop rdi
+.niceExit:
+    retnz               ;If we are here and ZF=NZ, exit as no EOF hit
+;Now we adjust the end of the file, if the end of the file was a ^Z
+; so that if the last char was not an LF, we add a CRLF pair
+    pushfq
+    push rdi
+    add rdi, rcx    ;Go the the end of the buffer
+    dec rdi
+    cmp qword [memPtr], rdi ;Are we at the head of the buffer?
+    je .putCRLF ;If so, forcefully place a CRLF pair
+    cmp byte [rdi], LF
+    je .exit
+.putCRLF:
+    mov word [rdi + 1], CRLF
+    add ecx, 2  ;We added two chars to the count
+.exit:
+    pop rdi
+    popfq
     return
-
-isCharEOF:
-;Input: rsi -> Char to check if it is ^Z
-;Output: ZF=ZE if char at rsi is ^Z AND we are checking for EOFs
-;        ZF=NZ if char at rsi is not ^Z or we are not checking for eof's
-    push rax
-    mov al, byte [noEofChar]
-    not al  ;Invert the bits (1's compliment)
-    pop rax
-    retnz   ;Return if not checking for EOF
-    cmp byte [rsi], EOF ;Check if eof
+.binScan:
+;Here we deal with binary semantics
+    cmp ecx, r10d   ;If we read less bytes than desired, check if an EOF present!
+    jb .binLess
+    xor eax, eax
+    inc eax         ;Clear ZF
     return
+.binLess:
+    jecxz .binEofExit ;If ecx = 0, just adjust end and exit!
+    cmp byte [rdi + rcx], EOF   ;Was this byte an EOF char?
+    jne .binEofExit
+    dec ecx             ;Drop it from the count.
+.binEofExit:
+    xor eax, eax
+    jmp short .niceExit
+
 
 markFileModified:
     mov byte [modFlag], -1
@@ -200,17 +226,18 @@ getModifiedStatus:
     test byte [modFlag], -1
     return
 
-
-
 delBkup:
 ;Finally, we delete the backup if it exists. If it doesn't delete
 ; for some reason, might be problematic later but not a big issue.
+;If returns with CF=CY, know that the backup didn't delete...
+;Preserves all registers!
     test byte [bkupDel], -1     ;If set, backup already deleted
     retnz
     call getModifiedStatus   ;If clear, buffer has not been modified.
     retz                        
     test byte [newFileFlag], -1 ;If the file is new then it has no backup!
     retnz
+    mov byte [bkupDel], -1      ;Now deleting backup
     push rax
     push rdx
     push rdi
@@ -223,9 +250,11 @@ delBkup:
     pop rdi
     pop rdx
     pop rax
-    retc    ;If CF=CY, file not deleted (including if it doesnt exists).
-    mov byte [bkupDel], -1  ;Backup deleted now
-    return  ;Could overwrite first byte of this function with a ret 0:)
+    retnc  ;Could overwrite first byte of this function with a ret 0:)
+    ;I like my idea... but no, we need the flag.
+    lea rdx, badBackDel
+    call printString
+    retToDOS errBadBak
 
 getDecimalDwordLZ:
 ;Use this function to replace leading 0's with spaces
@@ -393,23 +422,6 @@ printChar:
     pop rax
     return
 
-printComErr:
-;JUMP to this procedure and it jumps back to
-; the command loop resetting the stack!
-    lea rdx, badInput
-printErr:
-    mov eax, 0900h
-    int 21h
-    jmp getCommand
-
-lenToPtr:
-;Converts a length into a pointer
-;Input: ecx = Offset into arena
-;Output: rdx = Ptr to the offset in the arena
-    mov rdx, qword [memPtr]
-    or ecx, ecx
-    add rdx, rcx
-    return
 ;---------------------------------------------------------------------------
 ;                  !!!! IMPORTANT Int 23h HANDLER !!!!
 ;---------------------------------------------------------------------------

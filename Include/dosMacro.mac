@@ -77,6 +77,14 @@ cret a
 cret na
 %endmacro
 
+%macro retbe 0
+cret be
+%endmacro
+
+%macro retae 0
+cret ae
+%endmacro
+
 %macro breakpoint 0
 xchg bx, bx
 %endmacro
