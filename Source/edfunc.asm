@@ -171,27 +171,29 @@ endEdit:
 ;7) Exit!
 ;--------------------------------------------
     ;Stage 1
+    cmp byte [argCnt], 1
+    jne printComErr
+    cmp byte [arg1], 0
+    jne printArgError
     test byte [roFlag], -1  ;If we are readonly, delete $$$ and quit
     jnz quit.roQuit
-    ;call appendEOF  ;Append an EOF if appropriate.
-    call delBkup
-    call getModifiedStatus   ;If we are clean, delete $$$ and quit
-    jz quit.roQuit
-    ;Stage 2
-;BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! 
-;BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! 
-;BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! 
-    mov rdx, qword [memPtr]     ;Get the ptr to the start of the text
-    movzx ebx, word [writeHdl]  ;Get the write handle
+    mov byte [noAppendErr], -1  ;Suppress errors again
+.writeLp:
+    mov ebx, -1             ;Write out max lines
+    call writeLines.goFindLine
+    test byte [eofReached], -1  ;Are we at EOF yet?
+    jnz .writeDone
+    ;Else we need to append again
+    mov byte [argCnt], 1
+    mov word [arg1], -1    ;Now read max lines
+    call appendLines
+    jmp short .writeLp
+.writeDone: ;If so, add the EOF char to the file!
+    mov rdx, qword [eofPtr]
+    mov ecx, 1
+    movzx ebx, word [writeHdl]
     mov eax, 4000h
     int 21h
-    jc fullDiskFail
-;BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! 
-;BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! 
-;BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! BROKEN! 
-    ;If not at EOF, we fill the buffer with more of the old file and
-    ; write it to the temp file. This is ended when we reach an EOF 
-    ; condition on the original file. IE loop read/writing.
     ;Stage 3
     movzx ebx, word [readHdl]
     mov eax, 3E00h  ;Close the reading file!
@@ -201,15 +203,12 @@ endEdit:
     mov eax, 3E00h  ;Close the temp file!
     int 21h
     ;Stage 5
-    ;Use ecx as a flag, if rename fails with flag set, then
-    ; quit with temp name! Skip if this is a new file!
     test byte [newFileFlag], -1  ;If this is new file, skip this!
     jnz short .skipBkup
     ;Now set the backup extension
     mov rdi, qword [fileExtPtr]
     mov eax, "BAK"
     stosd
-    xor ecx, ecx
 .stg4:
     lea rdx, pathspec
     lea rdi, bkupfile
@@ -315,7 +314,7 @@ writeLines:
 ;Invoked by: [n]W (number of bytes to write)
 ;--------------------------------------------
 ;When invoked, must delete the backup if it not already deleted.
-    cmp byte [argCnt]
+    cmp byte [argCnt], 1
     ja printComErr
     movzx ebx, word [arg1]
     test ebx, ebx

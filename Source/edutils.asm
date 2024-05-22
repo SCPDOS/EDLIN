@@ -4,6 +4,9 @@ printString:
     mov eax, 0900h
     int 21h
     return
+printArgError:
+    lea rdx, badInput
+    jmp short printErr
 printMemErr:
     lea rdx, badMemSize
     jmp short printErr
@@ -79,13 +82,6 @@ findLineCore:
     jne .lp    ;Scan the next line if not!!
 .exit:
     return
-
-delBak:
-;Deletes the backup file! Callable once only!
-    test byte [bakDel], -1
-    retnz
-    mov byte [bakDel], -1   ;No longer callable
-
 
 strlen:
 ;String length based on terminator in al
@@ -318,20 +314,20 @@ parseEntry:
 ;--------------------------------------------
     call skipSpaces ;Move rsi past first non-space char and get al = First char
     cmp al, "+" ;Positive offset from current line
-    je short .plus
+    je .plus
     cmp al, "-" ;Negative offset from current line
-    je short .minus
+    je .minus
     cmp al, "." ;Current line, advance ptr to command terminator
-    je short .dot
+    je .dot
     cmp al, "#" ;Last line (-1), advance ptr to command terminator
-    je short .pound
+    je .pound
     xor ebx, ebx
     xor ecx, ecx
 .getArg:
     cmp al, "0"
-    jb short .endOfArg
+    jb .endOfArg
     cmp al, "9"
-    ja short .endOfArg
+    ja .endOfArg
     cmp ebx, 0FFFFh/0Ah ;If we are gonna go above the max, fail now
     jae printComErr
     dec ecx ;Indicate we have a valid digit
