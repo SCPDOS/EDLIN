@@ -11,10 +11,10 @@ appendLines:
 ;--------------------------------------------
 ;Invoked by: [n]A (number of bytes to read)
 ;--------------------------------------------
-    ;cmp byte [argCnt], 1
-    ;jne printComErr
+    cmp byte [argCnt], 1
+    jne printComErr
     test byte [eofReached], -1
-    retnz   ;Return if we are already at the end of the file!
+    jnz .outEofStr   ;Print the eof reached string
     mov rdx, qword [eofPtr]
     cmp byte [arg1], 0          ;Arg <> 0 means we fill the arena
     jne .argGiven
@@ -156,10 +156,10 @@ endEdit:
 ;--------------------------------------------
 ;Invoked by: E
 ;--------------------------------------------
-    ;cmp byte [argCnt], 1
-    ;jne printComErr
-    ;cmp byte [arg1], 0
-    ;jne printArgError
+    cmp byte [argCnt], 1
+    jne printComErr
+    cmp byte [arg1], 0
+    jne printArgError
     test byte [roFlag], -1  ;If we are readonly, delete $$$ and quit
     jnz quit.roQuit
     mov byte [noAppendErr], -1  ;Suppress errors again
@@ -293,8 +293,8 @@ writeLines:
 ;Invoked by: [n]W (number of bytes to write)
 ;--------------------------------------------
 ;When invoked, must delete the backup if it not already deleted.
-    ;cmp byte [argCnt], 1
-    ;ja printComErr
+    cmp byte [argCnt], 1
+    ja printComErr
     movzx ebx, word [arg1]
     test ebx, ebx
     jnz .goFindLine

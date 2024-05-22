@@ -11,17 +11,17 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0               B40  00000B40  progbits  .text
-             B40               B40               D6E  0000022E  progbits  .data
-             D6E               D6E              10D5  00000367  nobits    .bss
-            10E0              10E0              1720  00000640  nobits    .stack
+               0                 0               B78  00000B78  progbits  .text
+             B78               B78               DA6  0000022E  progbits  .data
+             DA6               DA6              110D  00000367  nobits    .bss
+            1110              1110              1750  00000640  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                 B40
+length:                 B78
 start:                    0
 align:                    1
 follows:   not defined
@@ -33,10 +33,10 @@ vfollows:  not defined
 
 class:     progbits
 length:                 22E
-start:                  B40
+start:                  B78
 align:                    1
 follows:   .text
-vstart:                 B40
+vstart:                 B78
 valign:    not defined
 vfollows:  not defined
 
@@ -44,10 +44,10 @@ vfollows:  not defined
 
 class:     nobits
 length:                 367
-start:                  D6E
+start:                  DA6
 align:                    1
 follows:   not defined
-vstart:                 D6E
+vstart:                 DA6
 valign:                   1
 vfollows:  .data
 
@@ -55,10 +55,10 @@ vfollows:  .data
 
 class:     nobits
 length:                 640
-start:                 10E0
+start:                 1110
 align:                   10
 follows:   not defined
-vstart:                10E0
+vstart:                1110
 valign:                  10
 vfollows:  .bss
 
@@ -373,119 +373,118 @@ Real              Virtual           Name
              7B2               7B2  ..@62._ret
              7B3               7B3  _unimplementedFunction.str
              7E0               7E0  appendLines
-             7E7               7E7  ..@64._base
-             800               800  ..@66._base
-             802               802  appendLines.argGiven
-             84B               84B  appendLines.notEofInc
-             84D               84D  appendLines.notEof
-             86A               86A  appendLines.noSetEof
-             896               896  appendLines.fndLine
-             8BB               8BB  appendLines.findPrevLine
-             8D1               8D1  appendLines.lineOk
-             90E               90E  appendLines.noIgnore
-             919               919  ..@67._ret
-             91A               91A  appendLines.outEofStr
-             926               926  ..@68._ret
-             927               927  appendLines.checkEnd
-             937               937  ..@70._base
-             93E               93E  copyLines
-             943               943  deleteLines
-             948               948  editLine
-             962               962  endEdit
-             976               976  endEdit.writeLp
-             9A0               9A0  endEdit.writeDone
-             A01               A01  endEdit.skipBkup
-             A2A               A2A  insertLine
-             A2F               A2F  listLines
-             A34               A34  pageLines
-             A39               A39  moveLines
-             A3E               A3E  quit
-             A71               A71  quit.roQuit
-             A93               A93  replaceText
-             A98               A98  searchText
-             A9D               A9D  transferLines
-             AA2               AA2  writeLines
-             ABD               ABD  ..@74._base
-             ABF               ABF  ..@75._ret
-             AC0               AC0  ..@74.a
-             AC7               AC7  ..@77._base
-             AD7               AD7  writeLines.goFindLine
-             ADE               ADE  writeLines.prepWrite
-             B3F               B3F  ..@78._ret
+             811               811  ..@64._base
+             813               813  appendLines.argGiven
+             85C               85C  appendLines.notEofInc
+             85E               85E  appendLines.notEof
+             87B               87B  appendLines.noSetEof
+             8A7               8A7  appendLines.fndLine
+             8CC               8CC  appendLines.findPrevLine
+             8E2               8E2  appendLines.lineOk
+             91F               91F  appendLines.noIgnore
+             92A               92A  ..@65._ret
+             92B               92B  appendLines.outEofStr
+             937               937  ..@66._ret
+             938               938  appendLines.checkEnd
+             948               948  ..@68._base
+             94F               94F  copyLines
+             954               954  deleteLines
+             959               959  editLine
+             973               973  endEdit
+             9A1               9A1  endEdit.writeLp
+             9CB               9CB  endEdit.writeDone
+             A2C               A2C  endEdit.skipBkup
+             A55               A55  insertLine
+             A5A               A5A  listLines
+             A5F               A5F  pageLines
+             A64               A64  moveLines
+             A69               A69  quit
+             A9C               A9C  quit.roQuit
+             ABE               ABE  replaceText
+             AC3               AC3  searchText
+             AC8               AC8  transferLines
+             ACD               ACD  writeLines
+             AF5               AF5  ..@72._base
+             AF7               AF7  ..@73._ret
+             AF8               AF8  ..@72.a
+             AFF               AFF  ..@75._base
+             B0F               B0F  writeLines.goFindLine
+             B16               B16  writeLines.prepWrite
+             B77               B77  ..@76._ret
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-             B40               B40  cmdLetterTable
-             B4F               B4F  cmdFcnTable
-             B6D               B6D  cmdRoTable
-             B7C               B7C  newStr
-             B87               B87  eofStr
-             B9B               B9B  badVerStr
-             BB1               BB1  badDrvStr
-             BCD               BCD  badNameStr
-             BEB               BEB  badCreatStr
-             C0A               C0A  badOpenStr
-             C27               C27  badFileStr
-             C49               C49  badBackDel
-             C73               C73  badParm
-             C87               C87  badInput
-             C95               C95  badRealloc
-             CAA               CAA  badMemSize
-             CCB               CCB  badFileExt
-             CF0               CF0  badROcmd
-             D0E               D0E  badDskFull
-             D2E               D2E  badRead
-             D54               D54  exitQuit
-             D67               D67  okString
+             B78               B78  cmdLetterTable
+             B87               B87  cmdFcnTable
+             BA5               BA5  cmdRoTable
+             BB4               BB4  newStr
+             BBF               BBF  eofStr
+             BD3               BD3  badVerStr
+             BE9               BE9  badDrvStr
+             C05               C05  badNameStr
+             C23               C23  badCreatStr
+             C42               C42  badOpenStr
+             C5F               C5F  badFileStr
+             C81               C81  badBackDel
+             CAB               CAB  badParm
+             CBF               CBF  badInput
+             CCD               CCD  badRealloc
+             CE2               CE2  badMemSize
+             D03               D03  badFileExt
+             D28               D28  badROcmd
+             D46               D46  badDskFull
+             D66               D66  badRead
+             D8C               D8C  exitQuit
+             D9F               D9F  okString
 
 ---- Section .bss -------------------------------------------------------------
 
 Real              Virtual           Name
-             D6E               D6E  bssStart
-             D6E               D6E  pathSep
-             D6F               D6F  switchChar
-             D70               D70  roFlag
-             D71               D71  newFileFlag
-             D72               D72  noEofChar
-             D73               D73  eofReached
-             D74               D74  arenaSize
-             D78               D78  freeCnt
-             D7C               D7C  memPtr
-             D84               D84  fillPtr
-             D8C               D8C  curLineNum
-             D8E               D8E  curLinePtr
-             D96               D96  eofPtr
-             D9E               D9E  endOfArena
-             DA6               DA6  modFlag
-             DA7               DA7  bkupDel
-             DA8               DA8  readHdl
-             DAA               DAA  writeHdl
-             DAC               DAC  pathspec
-             E2C               E2C  wkfile
-             E2C               E2C  bkupfile
-             EAC               EAC  tmpNamePtr
-             EAC               EAC  fileNamePtr
-             EB4               EB4  tmpNamePtr2
-             EB4               EB4  fileExtPtr
-             EBC               EBC  cmdLine
-             F3E               F3E  charPtr
-             F46               F46  argCnt
-             F47               F47  argTbl
-             F47               F47  arg1
-             F49               F49  arg2
-             F4B               F4B  arg3
-             F4D               F4D  arg4
-             F4F               F4F  qmarkSet
-             F50               F50  argString
-             FD2               FD2  noAppendErr
-             FD3               FD3  workLine
-            10D3              10D3  workLen
-            10D4              10D4  workEnd
+             DA6               DA6  bssStart
+             DA6               DA6  pathSep
+             DA7               DA7  switchChar
+             DA8               DA8  roFlag
+             DA9               DA9  newFileFlag
+             DAA               DAA  noEofChar
+             DAB               DAB  eofReached
+             DAC               DAC  arenaSize
+             DB0               DB0  freeCnt
+             DB4               DB4  memPtr
+             DBC               DBC  fillPtr
+             DC4               DC4  curLineNum
+             DC6               DC6  curLinePtr
+             DCE               DCE  eofPtr
+             DD6               DD6  endOfArena
+             DDE               DDE  modFlag
+             DDF               DDF  bkupDel
+             DE0               DE0  readHdl
+             DE2               DE2  writeHdl
+             DE4               DE4  pathspec
+             E64               E64  wkfile
+             E64               E64  bkupfile
+             EE4               EE4  tmpNamePtr
+             EE4               EE4  fileNamePtr
+             EEC               EEC  tmpNamePtr2
+             EEC               EEC  fileExtPtr
+             EF4               EF4  cmdLine
+             F76               F76  charPtr
+             F7E               F7E  argCnt
+             F7F               F7F  argTbl
+             F7F               F7F  arg1
+             F81               F81  arg2
+             F83               F83  arg3
+             F85               F85  arg4
+             F87               F87  qmarkSet
+             F88               F88  argString
+            100A              100A  noAppendErr
+            100B              100B  workLine
+            110B              110B  workLen
+            110C              110C  workEnd
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-            1720              1720  stackTop
-            1720              1720  endOfProgram
+            1750              1750  stackTop
+            1750              1750  endOfProgram
 
