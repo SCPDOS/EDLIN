@@ -260,7 +260,6 @@ insertLine:
     inc ebx                     ;Go to next line :)
     jmp short .inLp
 .inBad:
-    breakpoint
     call .cleanInsert
     jmp printMemErr
 .cleanInsert: 

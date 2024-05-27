@@ -11,9 +11,9 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0               D33  00000D33  progbits  .text
-             D33               D33               F58  00000225  progbits  .data
-             F58               F58              12BF  00000367  nobits    .bss
+               0                 0               D2B  00000D2B  progbits  .text
+             D2B               D2B               F50  00000225  progbits  .data
+             F50               F50              12B7  00000367  nobits    .bss
             12C0              12C0              1900  00000640  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
@@ -21,7 +21,7 @@ Vstart            Start             Stop              Length    Class     Name
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                 D33
+length:                 D2B
 start:                    0
 align:                    1
 follows:   not defined
@@ -33,10 +33,10 @@ vfollows:  not defined
 
 class:     progbits
 length:                 225
-start:                  D33
+start:                  D2B
 align:                    1
 follows:   .text
-vstart:                 D33
+vstart:                 D2B
 valign:    not defined
 vfollows:  not defined
 
@@ -44,10 +44,10 @@ vfollows:  not defined
 
 class:     nobits
 length:                 367
-start:                  F58
+start:                  F50
 align:                    1
 follows:   not defined
-vstart:                 F58
+vstart:                 F50
 valign:                   1
 vfollows:  .data
 
@@ -382,124 +382,124 @@ Real              Virtual           Name
              931               931  copyLines
              936               936  deleteLines
              93B               93B  editLine
-             968               968  editLine.notNext
-             97B               97B  ..@69._base
-             984               984  ..@71._base
-             986               986  endEdit
-             9B4               9B4  endEdit.writeLp
-             9DE               9DE  endEdit.writeDone
-             A3F               A3F  endEdit.skipBkup
-             A68               A68  insertLine
-             A95               A95  insertLine.notNext
-             AA8               AA8  insertLine.inLp
-             AF6               AF6  insertLine.inBad
-             B03               B03  insertLine.cleanInsert
-             B38               B38  ..@74._ret
-             B39               B39  listLines
-             B3E               B3E  pageLines
-             B43               B43  moveLines
-             B48               B48  quit
-             B7B               B7B  quit.roQuit
-             B9D               B9D  replaceText
-             BA2               BA2  searchText
-             BA7               BA7  transferLines
-             BAC               BAC  writeLines
-             BD4               BD4  ..@77._base
-             BD6               BD6  ..@78._ret
-             BD7               BD7  ..@77.a
-             BDE               BDE  ..@80._base
-             BEE               BEE  writeLines.goFindLine
-             BF5               BF5  writeLines.prepWrite
+             963               963  editLine.notNext
+             976               976  ..@69._base
+             97F               97F  ..@71._base
+             981               981  endEdit
+             9AF               9AF  endEdit.writeLp
+             9D9               9D9  endEdit.writeDone
+             A3A               A3A  endEdit.skipBkup
+             A63               A63  insertLine
+             A90               A90  insertLine.notNext
+             AA3               AA3  insertLine.inLp
+             AF1               AF1  insertLine.inBad
+             AFB               AFB  insertLine.cleanInsert
+             B30               B30  ..@73._ret
+             B31               B31  listLines
+             B36               B36  pageLines
+             B3B               B3B  moveLines
+             B40               B40  quit
+             B73               B73  quit.roQuit
+             B95               B95  replaceText
+             B9A               B9A  searchText
+             B9F               B9F  transferLines
+             BA4               BA4  writeLines
+             BCC               BCC  ..@76._base
+             BCE               BCE  ..@77._ret
+             BCF               BCF  ..@76.a
+             BD6               BD6  ..@79._base
+             BE6               BE6  writeLines.goFindLine
+             BED               BED  writeLines.prepWrite
+             C4E               C4E  ..@80._ret
+             C4F               C4F  printString
              C56               C56  ..@81._ret
-             C57               C57  printString
-             C5E               C5E  ..@82._ret
-             C5F               C5F  printSpace
-             C63               C63  printCRLF
-             C6A               C6A  printLF
-             C6C               C6C  printChar
-             C7A               C7A  ..@83._ret
-             C7B               C7B  printLineNum
-             C9B               C9B  printNum
-             CD1               CD1  ..@84._ret
-             CD2               CD2  printNum.doCompute
-             CD8               CD8  printNum.printDig
-             CE6               CE6  printNum.pDigOk
-             CEA               CEA  printArgError
-             CF3               CF3  printMemErr
-             CFC               CFC  printComErr
-             D03               D03  printErr
-             D0D               D0D  badReadFail
-             D20               D20  fullDiskFail
+             C57               C57  printSpace
+             C5B               C5B  printCRLF
+             C62               C62  printLF
+             C64               C64  printChar
+             C72               C72  ..@82._ret
+             C73               C73  printLineNum
+             C93               C93  printNum
+             CC9               CC9  ..@83._ret
+             CCA               CCA  printNum.doCompute
+             CD0               CD0  printNum.printDig
+             CDE               CDE  printNum.pDigOk
+             CE2               CE2  printArgError
+             CEB               CEB  printMemErr
+             CF4               CF4  printComErr
+             CFB               CFB  printErr
+             D05               D05  badReadFail
+             D18               D18  fullDiskFail
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-             D33               D33  cmdLetterTable
-             D42               D42  cmdFcnTable
-             D60               D60  cmdRoTable
-             D6F               D6F  newStr
-             D7A               D7A  eofStr
-             D8E               D8E  badVerStr
-             DA4               DA4  badDrvStr
-             DC0               DC0  badNameStr
-             DDE               DDE  badCreatStr
-             DFD               DFD  badOpenStr
-             E1A               E1A  badFileStr
-             E3C               E3C  badBackDel
-             E66               E66  badParm
-             E7A               E7A  badInput
-             E88               E88  badRealloc
-             E9D               E9D  badMemFull
-             EB5               EB5  badFileExt
-             EDA               EDA  badROcmd
-             EF8               EF8  badDskFull
-             F18               F18  badRead
-             F3E               F3E  exitQuit
-             F51               F51  okString
+             D2B               D2B  cmdLetterTable
+             D3A               D3A  cmdFcnTable
+             D58               D58  cmdRoTable
+             D67               D67  newStr
+             D72               D72  eofStr
+             D86               D86  badVerStr
+             D9C               D9C  badDrvStr
+             DB8               DB8  badNameStr
+             DD6               DD6  badCreatStr
+             DF5               DF5  badOpenStr
+             E12               E12  badFileStr
+             E34               E34  badBackDel
+             E5E               E5E  badParm
+             E72               E72  badInput
+             E80               E80  badRealloc
+             E95               E95  badMemFull
+             EAD               EAD  badFileExt
+             ED2               ED2  badROcmd
+             EF0               EF0  badDskFull
+             F10               F10  badRead
+             F36               F36  exitQuit
+             F49               F49  okString
 
 ---- Section .bss -------------------------------------------------------------
 
 Real              Virtual           Name
-             F58               F58  bssStart
-             F58               F58  pathSep
-             F59               F59  switchChar
-             F5A               F5A  roFlag
-             F5B               F5B  newFileFlag
-             F5C               F5C  noEofChar
-             F5D               F5D  eofReached
-             F5E               F5E  arenaSize
-             F62               F62  freeCnt
-             F66               F66  memPtr
-             F6E               F6E  fillPtr
-             F76               F76  curLineNum
-             F78               F78  curLinePtr
-             F80               F80  eofPtr
-             F88               F88  endOfArena
-             F90               F90  modFlag
-             F91               F91  bkupDel
-             F92               F92  readHdl
-             F94               F94  writeHdl
-             F96               F96  pathspec
-            1016              1016  wkfile
-            1016              1016  bkupfile
-            1096              1096  tmpNamePtr
-            1096              1096  fileNamePtr
-            109E              109E  tmpNamePtr2
-            109E              109E  fileExtPtr
-            10A6              10A6  cmdLine
-            1128              1128  charPtr
-            1130              1130  argCnt
-            1131              1131  argTbl
-            1131              1131  arg1
-            1133              1133  arg2
-            1135              1135  arg3
-            1137              1137  arg4
-            1139              1139  qmarkSet
-            113A              113A  argString
-            11BC              11BC  noAppendErr
-            11BD              11BD  workLine
-            12BD              12BD  workLen
-            12BE              12BE  workEnd
+             F50               F50  bssStart
+             F50               F50  pathSep
+             F51               F51  switchChar
+             F52               F52  roFlag
+             F53               F53  newFileFlag
+             F54               F54  noEofChar
+             F55               F55  eofReached
+             F56               F56  arenaSize
+             F5A               F5A  freeCnt
+             F5E               F5E  memPtr
+             F66               F66  fillPtr
+             F6E               F6E  curLineNum
+             F70               F70  curLinePtr
+             F78               F78  eofPtr
+             F80               F80  endOfArena
+             F88               F88  modFlag
+             F89               F89  bkupDel
+             F8A               F8A  readHdl
+             F8C               F8C  writeHdl
+             F8E               F8E  pathspec
+            100E              100E  wkfile
+            100E              100E  bkupfile
+            108E              108E  tmpNamePtr
+            108E              108E  fileNamePtr
+            1096              1096  tmpNamePtr2
+            1096              1096  fileExtPtr
+            109E              109E  cmdLine
+            1120              1120  charPtr
+            1128              1128  argCnt
+            1129              1129  argTbl
+            1129              1129  arg1
+            112B              112B  arg2
+            112D              112D  arg3
+            112F              112F  arg4
+            1131              1131  qmarkSet
+            1132              1132  argString
+            11B4              11B4  noAppendErr
+            11B5              11B5  workLine
+            12B5              12B5  workLen
+            12B6              12B6  workEnd
 
 ---- Section .stack -----------------------------------------------------------
 
