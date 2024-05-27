@@ -153,11 +153,32 @@ editLine:
     inc ebx ;and go to the next line
 .notNext:
     call findLine   ;rdi points to the end of memory selected line
+    ;If we return with ZF set, we proceed because we found the line,
+    ; else we simply return!
     mov word [curLineNum], dx
     mov qword [curLinePtr], rdi
     retnz   ;If the line specified was past the end, we return now
     cmp rdi, qword [eofPtr]
     rete    ;Return if these are equal!
+    mov rsi, rdi    ;Save the current line ptr on the stack
+    push rsi
+    call stufBuf    ;Stuff the line pointed to by rsi into the buffer
+    pop rsi         ;Get back the curLinePtr in rsi
+    mov dword [workLen], edx    ;Store the real length into the var
+    call printLine      
+    call printLineNum
+    lea rdx, workLine
+    mov eax, 0A00h  ;Edit magic woo
+    int 21h
+    call printLF
+    cmp byte [rdx + 1], 0   ;If just a CR input, return with no edit!
+    retz
+    lea rsi, qword [rdx + 2]    ;Go to the string portion immediately
+    call doCmdChar
+    mov rdi, qword [curLinePtr] ;Point to the line we have edited
+    movzx ecx, byte [rdx + 1]   ;Get the adjusted string length in ecx
+    mov edx, dword [workLen]    ;Get the old line length in edx
+    jmp replaceLine
 
 endEdit:
 ;Inserts a EOF char at the end of the file if one not already present
@@ -237,7 +258,7 @@ insertLine:
 .inLp:
     call setLineVars
     call printLineNum
-    lea rdx, editLine
+    lea rdx, workLine
     mov eax, 0A00h  ;Full on edit mode
     int 21h
     call printLF
@@ -263,7 +284,7 @@ insertLine:
     call .cleanInsert
     jmp printMemErr
 .cleanInsert: 
-;Undo the space we made in memory!! 
+;Move the lines after the insertion point back to where they need to be :)
     mov rsi, qword [eofPtr] 
     mov rdi, qword [curLinePtr]
     mov rcx, qword [endOfArena]
@@ -279,19 +300,83 @@ insertLine:
 
 listLines:
 ;Prints a line or a number of lines.
-;Defaults to from current line print 23 lines
+;Defaults to from current line print 23 lines.
+;Doesnt change the current line!
 ;--------------------------------------------
 ;Invoked by: [line][,line]L
 ;--------------------------------------------
-    jmp _unimplementedFunction
+    cmp byte [argCnt], 2
+    ja printComErr
+    movzx ebx, word [arg1]
+    test ebx, ebx
+    jnz .notCur ;If not the default, we do as told
+    ;Else, default behaviour
+    movzx ebx, word [curLineNum]
+    sub ebx, 11 ;Start printing 11 lines before the current line!
+    ja .notCur  
+    mov ebx, 1
+.notCur:
+    call findLine
+    retnz   ;Return if the line not found!
+    mov rsi, rdi
+    movzx edi, word [arg2]  ;Get the last line to print
+    inc edi
+    sub edi, ebx            ;Get the difference!
+    ja printLines   
+    mov edi, 23     ;Else the default
+    jmp printLines  ;Return through printLines!
 
 pageLines:
 ;Prints a page of lines
 ;Defaults to from current line to print 23 lines
+;Changes the current line to the last line printed!
 ;--------------------------------------------
 ;Invoked by: [line][,line]P
 ;--------------------------------------------
-    jmp _unimplementedFunction
+    cmp byte [argCnt], 2
+    ja printComErr
+    xor ebx, ebx    ;Set the pointer to the end of the file firstly
+    call findLine   
+    ;Use r10 to keep track of the last line in the file that we will set
+    mov r10, rdx
+    movzx ebx, word [arg1]
+    test ebx, ebx
+    jnz .notCur
+    movzx ebx, word [curLineNum]
+    cmp ebx, 1  ;If the first line is 1, keep it there
+    je .notCur
+    inc ebx     ;Else go to the line after
+.notCur:
+    cmp rbx, r10
+    reta    ;If we specify past the last line, do nothing
+    movzx edx, word [arg2]  
+    test edx, edx   ;Did the user give what line to stop printing on?
+    jnz .arg2Given 
+;vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+;Here is where the screen width is computed when we do dynamic 
+; screen size stuff
+    mov edx, ebx
+    add edx, 22     ;Else its current line + 23
+;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.arg2Given:
+    inc edx         ;Get that last line
+    cmp rdx, r10    ;Is it past the end of the file?
+    jbe .okRange
+    mov rdx, r10    ;Else, use r10 as the last line
+.okRange:
+    push rdx        ;Save the end line
+    push rbx        ;and the start line
+    mov ebx, edx    ;Now setup the pointers to point to the last line
+    dec ebx         
+    call findLine   ;Get the actual line number in dx and ptr in rdi
+    mov word [curLineNum], dx
+    mov qword [curLinePtr], rdi
+    pop rbx         ;Get back the actual start line
+    call findLine   ;Now find the first line!
+    mov rsi, rdi    ;This is the source of the copy
+    pop rdi         ;Get the end line count in edi
+    sub edi, ebx    ;Get the number of lines to print in edi
+    jmp printLines  ;Return through printLines!
 
 moveLines:
 ;Moves a block of lines elsewhere (non overlapping moves only)
@@ -345,7 +430,91 @@ transferLines:
 ;--------------------------------------------
 ;Invoked by: [line]T[d:]filename
 ;--------------------------------------------
-    jmp _unimplementedFunction
+    cmp byte [argCnt], 1
+    jne printComErr
+    call skipSpaces ;Move rsi to the first char of the xfrspec
+    dec rsi         ;Go to the first char
+    lea rdx, xfrName
+    mov rdi, rdx
+.nameCp:
+    lodsb
+    cmp al, SPC
+    je .cpOk
+    cmp al, TAB
+    je .cpOk
+    cmp al, CR
+    je .cpOk
+    cmp al, ";"
+    je .cpOk
+    stosb
+    jmp short .nameCp
+.cpOk:
+    mov byte [rdi], 0   ;Store terminating null
+    dec rsi             ;Now go to the char which terminated the copy
+    mov qword [charPtr], rsi    ;And store this as the new continuation ptr
+    mov eax, 3D00h      ;Open file pointed to by rdx for reading
+    int 21h
+    jnc .fileOpen
+    cmp ax, errFnf
+    lea rdx, badFindStr ;String for if the file is not found
+    lea rbx, badDrvStr  ;Else just say drive or fnf!
+    cmovne rdx, rbx
+    jmp printErr    ;Print the string in rdx
+.fileOpen:
+    mov word [xfrHdl], ax   ;Save the handle
+    ;Transfer lines works like insert lines, in that it is inserting lines
+    ; but from a separate file. We therefore set up a custom ^C handler 
+    ; and cleanup like insert if it is invoked!
+    mov eax, 2523h  ;Setup int 23h for xfr
+    lea rdx, i23hXfr
+    int 21h
+    movzx ebx, word [arg1]
+    test ebx, ebx
+    jnz .notCur
+    movzx ebx, word [curLineNum]    ;Get the current line number ptr
+.notCur:
+    call findLine   ;Get actual line number in dx, and ptr in rdi
+    mov ebx, edx
+    mov rdx, qword [endOfArena]     ;Copy to the end of the arena
+    call makeSpace  ;And jiggle it over
+    mov rdx, qword [curLinePtr] ;Read data into here now
+    mov rcx, qword [eofPtr]
+    sub ecx, edx    ;Get the number of chars of space we have to read in
+    push rcx
+    mov eax, 3F00h
+    movzx ebx, word [xfrHdl]
+    int 21h
+    pop rdx     ;Get the count back into rdx
+    mov ecx, eax    ;Move the count into ecx
+    cmp edx, eax
+    ja .fullXfr
+    ;We copied exactly the size of the arena, assume this means the whole 
+    ; file may not have been copied. We still proceed though
+    lea rdx, badMergeStr
+    mov rcx, qword [curLinePtr]
+    jmp .endXfr
+.fullXfr:
+    add rcx, qword [curLinePtr] ;Turn into offset from start of line
+    mov rsi, rcx
+    dec rsi ;Go to the last char we read in
+    lodsb
+    cmp al, EOF
+    jne .endXfr
+    dec rcx ;Drop a byte
+.endXfr:
+    mov rdi, rcx        ;Copy to the curLinePtr pos
+    mov rsi, qword [eofPtr]
+    inc rsi             ;Start copying from the stored data past the eofPtr
+    mov rcx, qword [endOfArena]
+    sub rcx, rsi
+    inc ecx             ;Add EOF char to the count
+    rep movsb
+    dec rdi             ;Go back to the EOF char
+    mov qword [eofPtr], rdi
+    movzx ebx, word [xfrHdl]
+    mov eax, 3E00h      ;Close handle!
+    int 21h
+    return
 
 writeLines:
 ;Writes the current arena to disk. If no 

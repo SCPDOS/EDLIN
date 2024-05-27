@@ -1,5 +1,75 @@
 ;General Utility functions for edlin go here
 
+replaceLine:
+;Replaces a line in memory with a line in a buffer.
+;Input: ecx = New line length
+;       rsi -> New line source ptr
+;       edx = Old line length
+;       rdi -> Old line ptr
+    cmp ecx, edx
+    je .doCopy
+    push rcx
+    push rsi
+    push rdi
+    mov rsi, rdi
+    add rsi, rdx    ;Go to the end of the old line 
+    add rdi, rcx    ;Go to where the new line will end
+    mov rax, qword [eofPtr]
+    sub rax, rdx    ;See if we have enough space for the new line!!
+    add rax, rcx
+    cmp rax, qword [endOfArena]
+    jae printMemErr
+    xchg qword [eofPtr], rax    ;This will be the new eof
+    mov rcx, rax    ;Get the old eofPtr in rcx
+    sub rcx, rsi
+    cmp rsi, rdi
+    ja .noRevMove
+    add rsi, rcx    ;Here we setup reverse copy!!
+    add rdi, rcx
+    std
+.noRevMove:
+    inc ecx         ;Add a char for the EOF itself!
+    rep movsb
+    cld
+    pop rdi
+    pop rsi
+    pop rcx
+    ;Now that there is space in the buffer, we can do the copy!
+.doCopy:
+    rep movsb
+    return
+
+stufBuf:
+;Stuffs the workLine with a line of text from memory!
+;Input: rsi -> Buffer to source the stuff from
+;Output: Buffer stuffed. If line too long, truncated to the first 253 chars.
+;       edx = Real length of line!
+    lea rdi, workLine + 2   ;Go to the start of the text portion
+    mov ecx, 255
+    xor edx, edx            ;Use as the char counter in the buffer
+.lp:
+    lodsb
+    stosb
+    inc edx     ;Copied one more char over
+    cmp al, CR  ;Was this a CR?
+    je .eol     ;Exit if so
+    dec ecx     ;Else decrement from buffer counter
+    jnz .lp     ; and go again!
+.eol:
+    dec edx     ;Drop the CR from the char count
+    mov byte [workLine + 1], dl ;Store the char count here
+    cmp al, CR  ;Now check we are here due to having a valid EOL
+    rete        ;Exit if so
+    inc edx
+.longLine:  ;Else scan for the EOL char
+    lodsb   ;Get the next char
+    inc edx ;Keep track of the real length of the line
+    cmp al, CR
+    jne .longLine   ;If not CR, keep searching
+    dec rdi ;Go back to the last char position in the buffer
+    stosb   ;Store the CR there
+    return  ;We stored max count in workLine+1 earlier. We are done
+
 doCmdChar:
 ;Handles command chars that are typed into the buffer. These chars are
 ; ^V<CHAR> where <CHAR> has to be a UC char to be treated as a command char.
@@ -412,6 +482,11 @@ getPtrToStr:
 ;---------------------------------------------------------------------------
 ;                  !!!! IMPORTANT Int 23h HANDLERS !!!!
 ;---------------------------------------------------------------------------
+i23hXfr:
+    movzx ebx, word [xfrHdl]
+    mov eax, 3E00h  ;Close the handle
+    int 21h
+    ;Now reset the stack and proceed as normal
 i23hInsert:
 ;^C handler for insert!
     lea rsp, stackTop

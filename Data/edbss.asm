@@ -58,6 +58,9 @@ argString   db halfLine_size dup (?)    ;Used by search and replace only
 noAppendErr db ?    ;Special init var, prevents append errors for initial load
 
 ;The workline gets preloaded with the original line before editing
-workLine    db 256 dup (?)  ;Line in which all editing takes place
-workLen     db ?    ;Line length before edit
-workEnd     db ?    ;Char which ended the line. 
+workLine    db 258 dup (?)  ;Line in which all editing takes place
+workLen     dd ?            ;Line length before edit
+spareLine   db 258 dup (?)  ;Spare editing line
+
+xfrName     db 128 dup (?)  ;Transfer name buffer
+xfrHdl      dw ?
