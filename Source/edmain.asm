@@ -133,11 +133,12 @@ nameCopy:
 .extSearch:
     lodsb
     test al, al
-    jz short .insertExt
+    jz .insertExt
     cmp al, "."
-    je short .extFound
+    je .extFound
     dec ecx
-    jnz short .extSearch    ;Impossible edgecase (TRUENAME returns 8.3 filename)
+    jnz .extSearch    
+    inc rsi ;Go to the next position so the below works
 .insertExt:
     ;rsi points just past the null
     mov byte [rsi - 1], "." ;Store a pathsep
