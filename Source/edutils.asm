@@ -1,53 +1,105 @@
-;Utility functions for edlin go here
+;General Utility functions for edlin go here
 
-printString:
-    mov eax, 0900h
-    int 21h
+doCmdChar:
+;Handles command chars that are typed into the buffer. These chars are
+; ^V<CHAR> where <CHAR> has to be a UC char to be treated as a command char.
+;Assumes that rsi is pointing to the start of the data portion of a command line.
+;Thus:  rsi -> Input buffer
+;       rsi - 1 = Number of chars typed 
+;       rsi - 2 = Input buffer length
+    cld                         ;Ensure we are searching the right way
+    push rcx
+    push rsi
+    push rdi
+    mov rdi, rsi                ;Copy the pointer for scanning
+    movzx ecx, byte [rsi - 1]   ;Get number of chars typed in to scan
+.lp:
+    jecxz .exit                 ;No more chars to handle, exit!
+    mov eax, CMD                ;Scan for the ^V char in al
+    repne scasb
+    jne .exit                   ;Ran out of chars to scan, exit!
+;Here rdi points to the char after the quote char.
+    mov al, byte [rdi]  ;Get the quote char
+    call doControl  ;Convert into a control char if appropriate
+    mov byte [rdi], al  ;Write back
+;Save our position and count and pull the string up.
+    push rcx
+    push rsi
+    push rdi
+    mov rsi, rdi    ;Start copying from this replaced char
+    dec rdi         ;Store to the char before
+    inc ecx         ;Copy over the CR too
+    rep movsb
+    pop rdi
+    pop rsi
+    pop rcx
+    jecxz .exit     ;If we terminated the line with a ^V<CR>, now exit
+    dec byte [rsi - 1]  ;Else drop one char from the count
+    jmp short .lp   ;And keep scanning
+.exit:
+    pop rdi
+    pop rsi
+    pop rcx
     return
-printArgError:
-    lea rdx, badInput
-    jmp short printErr
-printMemErr:
-    lea rdx, badMemSize
-    jmp short printErr
-printComErr:
-;JUMP to this procedure and it jumps back to
-; the command loop resetting the stack!
-    lea rdx, badInput
-printErr:
-    call printString
-    jmp getCommand
 
-;The below "Fail" units are a class of Edlin terminating functions
-badReadFail:
-    lea rdx, badRead
-    call printString
-    retToDOS errBadRead
-
-fullDiskFail:
-    lea rdx, badDskFull ;Write disk full error, but return to prompt
-    call printString
-    retToDOS errDskFull
+doControl:
+;Input: al = Possible control char. This has to be an uppercase char! 
+    push rax
+    and al, 0E0h    ;Preserve upper three bits only (not used for chars)
+    cmp al, 40h     ;Check if only the middle (UC) was set!
+    pop rax
+    retne
+    and al, asciiMask   ;Convert into a control char
+    return
 
 checkArgOrder:
 ;Checks two arguments to ensure the second one is 
 ; greater than the first.
-;Input: eax = first argument
-;       ebx = second argument
+;Input: bx = first argument
+;       word [arg2] = second argument
 ;Output: If it returns, its ok. Else it resets the command loop
-    cmp ebx, 0
-    retz
-    cmp ebx, eax
+    cmp word [arg2], 0
+    rete
+    cmp bx, word [arg2]
     reta
+    pop rax     ;Pop off the return address
     jmp printComErr
+
+makeSpace:
+;Makes space for a new string in the text
+;Input: rdx -> Where in the arena we will move our text
+;       rdi -> First byte we will be moving
+;       bx = Line number we are making space for!
+    mov rcx, qword [eofPtr]
+    mov rsi, rcx    ;Copy in reverse, sourcing from the EOF ptr!!    
+    sub rcx, rdi    ;Get the count of bytes to copy
+    inc ecx         ;Including EOF
+    mov rdi, rdx    
+    std
+    rep movsb
+    cld
+    xchg rsi, rdi   ;Swap the new EOF pointer and source
+    inc rdi         ;Point to the first byte of made space
+    mov rbp, rsi    ;Setup to fall through now
+setLineVars:
+;Sets the current line number, pointer and the new EOF pointer
+;Input: bx = Current line number
+;       rdi -> Space where this line is
+;       rbp -> EOF char pointer
+    mov word [curLineNum], bx
+    mov qword [curLinePtr], rdi
+    mov qword [eofPtr], rbp
+    return
 
 findLine:
 ;Given a line number, tries to find the actual line.
 ;Input: ebx = Line number to search for, 0 means exhaust all chars!
 ;Output: ZF=ZE: rdi -> Ptr to the line
-;               ebx = Actual line number we are at
+;               edx = Actual line number we are at
 ;               eax = Line number specified
 ;        ZF=NZ: Line not found. (i.e. beyond last line)
+;               edx = Line number past current line number
+;               rdi -> End of memory space
     movzx edx, word [curLineNum]    ;Line to start counting from
     mov rdi, qword [curLinePtr]     ;Pointer to this line
     cmp ebx, edx
@@ -252,49 +304,6 @@ delBkup:
     call printString
     retToDOS errBadBak
 
-getDecimalDwordLZ:
-;Use this function to replace leading 0's with spaces
-; in the decimalised DWORD from the below function.
-;Input: rcx = BCD packed DWORD (byte = ASCII digit)
-;Output: rcx = BCD packed DORD with leading spaces
-    push rax
-    mov rax, rcx
-    xor ecx, ecx    ;Use as a counter for how many times we roll right
-.lp:
-    cmp al, '0'     ;If not a zero, we are done
-    jne short .swapBack
-    rol rax, 8      ;Roll the upper byte low by 8 bits
-    add ecx, 8      ;Increase counter by this many bits
-    jmp short .lp
-.swapBack:
-    ror rax, cl     ;Undo the left rolls
-.exit:
-    mov rcx, rax
-    pop rax
-    return
-
-getDecimalDword:
-;Works on MAX A dword in eax
-;Gets the decimalised DWORD to print in rcx (at most 8 digits)
-;Input: eax = DWORD to decimalise
-;Output: rcx = BCD packed DWORD (byte = ASCII digit)
-    xor ecx, ecx
-    xor ebp, ebp  ;Use bp as #of digits counter
-    mov ebx, 0Ah  ;Divide by 10
-.dwpfb0:
-    inc ebp
-    shl rcx, 8    ;Space for next nybble
-    xor edx, edx
-    div rbx
-    add dl, '0'
-    cmp dl, '9'
-    jbe short .dwpfb1
-    add dl, 'A'-'0'-10
-.dwpfb1:
-    mov cl, dl    ;Save remainder byte
-    test rax, rax
-    jnz short .dwpfb0
-    return
 
 parseEntry:
 ;Parses a single command line argument.
@@ -400,33 +409,24 @@ getPtrToStr:
     pop rcx
     return
 
-printCRLF:
-;Prints CRLF
-    mov al, CR
-    call printChar
-printLF:
-    mov al, LF
-;Just fall into the next function
-printChar:
-;Input: al = Char to print
-    push rax    ;To preserve the rest of eax
-    push rdx
-    movzx edx, al
-    mov eax, 0200h
-    int 21h
-    pop rdx
-    pop rax
-    return
+;---------------------------------------------------------------------------
+;                  !!!! IMPORTANT Int 23h HANDLERS !!!!
+;---------------------------------------------------------------------------
+i23hInsert:
+;^C handler for insert!
+    lea rsp, stackTop
+    cld
+    call printCRLF
+    call insertLine.cleanInsert ;We now reset the state of the memory
+    jmp nextCmd     ;Now go to the next command in the command line!
 
-;---------------------------------------------------------------------------
-;                  !!!! IMPORTANT Int 23h HANDLER !!!!
-;---------------------------------------------------------------------------
 i23h:
 ;^C handler. Reset the stack pointer and jump to get command
     lea rsp, stackTop
     cld
     call printCRLF
     jmp getCommand  ;Now jump to get the command
+
 
 ;Remove before finishing!
 _unimplementedFunction:

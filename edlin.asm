@@ -34,6 +34,8 @@ progHeadPtr:      ;DO NOT TOUCH THIS POINTER. ALL TABLES ARE REL THIS PTR.
 %include "./Source/edmain.asm"
 %include "./Source/edutils.asm"
 %include "./Source/edfunc.asm"
+%include "./Source/edprn.asm"
+%include "./Source/ederr.asm"
 Segment .data align=1 follows=.text 
 %include "./Data/eddata.asm"
 %include "./Data/edmsg.asm"

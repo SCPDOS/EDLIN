@@ -13,6 +13,7 @@ DLE equ 10h ;^P         | ASCII Data Link End (Toggle Print Echo)
 DC3 equ 13h ;^S         | ASCII Device Control 3 (Toggle Scroll Lock)
 DC4 equ 14h ;^T         | ASCII Device Control 4
 NAK equ 15h ;^U         | ASCII Negative Acknowledgement
+CMD equ 16h ;^V         | EDLIN COMMAND CHAR
 ETB equ 17h ;^W         | ASCII End of Transmission Block
 EOF equ 1Ah ;^Z         | ASCII Substitute character (End of File)
 ESC equ 1Bh ;           | ASCII Escape char, used for ANSI.SYS
@@ -23,6 +24,8 @@ DEL equ 7Fh ;^?         | ASCII Rubout (Del char and dec cursor)
 CRLF equ 0A0Dh
 
 asciiCaret  equ 20h ;Used to check which chars need to be printed with caret
+asciiMask   equ asciiCaret - 1  ;Turn into a bitmask
+
 ;Extended Ascii Codes
 eF1     equ 3Bh ;F1 second byte
 eF2     equ 3Ch ;F2 second byte

@@ -142,12 +142,22 @@ editLine:
 ;--------------------------------------------
 ;Invoked by: [line]
 ;--------------------------------------------
+    cmp byte [argCnt], 1
+    jne printComErr
     dec qword [charPtr] ;Adjust ptr to point to the CR or ;
-    lea rdx, getCommand
-    mov eax, 2523h  ;Set the int 23h handler
-    int 21h
-
-    jmp _unimplementedFunction
+    movzx ebx, word [arg1]  ;Get the line number
+    test ebx, ebx
+    jnz .notNext
+    ;If 0, means next line
+    movzx ebx, word [curLineNum]    ;Get the current line number
+    inc ebx ;and go to the next line
+.notNext:
+    call findLine   ;rdi points to the end of memory selected line
+    mov word [curLineNum], dx
+    mov qword [curLinePtr], rdi
+    retnz   ;If the line specified was past the end, we return now
+    cmp rdi, qword [eofPtr]
+    rete    ;Return if these are equal!
 
 endEdit:
 ;Inserts a EOF char at the end of the file if one not already present
@@ -209,11 +219,64 @@ insertLine:
 ;--------------------------------------------
 ;Invoked by: [line]I
 ;--------------------------------------------
-;If a user types CTRL+V, then the next
-; UPPERCASE char is taken to be a control
-; char. Else, we throw away the ^V from the 
-; line before saving it.
-    jmp _unimplementedFunction
+    cmp byte [argCnt], 1
+    jne printComErr
+    lea rdx, i23hInsert ;Set to the insert handler
+    mov eax, 2523h
+    int 21h
+    movzx ebx, word [arg1]  ;Get the line number
+    test ebx, ebx
+    jnz .notNext
+    ;If 0, means next line
+    movzx ebx, word [curLineNum]    ;Get the current line number
+.notNext:
+    call findLine   ;Set line number in dx and rdi -> Space in memory!
+    mov ebx, edx    ;Move the actual line number into ebx
+    mov rdx, qword [endOfArena]
+    call makeSpace  ;Make space to insert new line!
+.inLp:
+    call setLineVars
+    call printLineNum
+    lea rdx, editLine
+    mov eax, 0A00h  ;Full on edit mode
+    int 21h
+    call printLF
+    ;Check if the first char in the buffer is a EOF
+    lea rsi, qword [rdx + 2]    ;Go to the string portion immediately
+    cmp byte [rsi], EOF         ;Apparent EDLIN behaviour, terminate insert so!
+    je .cleanInsert
+    call doCmdChar              ;Preserves rdi, the curLinePtr
+    movzx ecx, byte [rsi - 1]   ;Get the number of chars typed in
+    mov rdx, rdi                
+    inc ecx                     ;Make space for terminating LF too
+    add rdx, rcx                ;Check if we will go out of bounds
+    cmp rdx, qword [endOfArena]
+    jae .inBad
+    cmp rdx, rbp                ;Are we past file Eof?
+    jae .inBad                  ;Jump if so
+    rep movsb                   ;Else copy from edit line to space made
+    mov al, LF
+    stosb                       ;Store the line feed too
+    inc ebx                     ;Go to next line :)
+    jmp short .inLp
+.inBad:
+    breakpoint
+    call .cleanInsert
+    jmp printMemErr
+.cleanInsert: 
+;Undo the space we made in memory!! 
+    mov rsi, qword [eofPtr] 
+    mov rdi, qword [curLinePtr]
+    mov rcx, qword [endOfArena]
+    sub rcx, rsi    ;Get the number of bytes to copy high again
+    inc rsi         ;Go to char past EOF to source chars from
+    rep movsb
+    dec rdi         ;Go back to the EOF char itself
+    mov qword [eofPtr], rdi
+    lea rdx, i23h
+    mov eax, 2523h  ;Set Interrupt handler for Int 23h
+    int 21h
+    return
 
 listLines:
 ;Prints a line or a number of lines.

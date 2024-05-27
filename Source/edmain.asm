@@ -242,7 +242,7 @@ allocateMemory:
     int 21h
     jnc short .loadProgram
 .notEnoughMem:
-    lea rdx, badMemSize
+    lea rdx, badMemFull
     jmp badExitMsg
 .loadProgram:
 ;rax has pointer here
@@ -352,6 +352,7 @@ execCmd:
     movsx rbx, word [rbp + 2*rcx]    ;Get word ptr into rbx
     add rbx, rbp    ;Convert the word offset from cmdFcnTbl to pointer
     call rbx
+nextCmd:
     mov rsi, qword [charPtr]
     call skipSpaces ;Now move to the "following command" or CR
     cmp al, CR
