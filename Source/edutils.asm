@@ -131,7 +131,7 @@ checkArgOrder:
     cmp word [arg2], 0
     rete
     cmp bx, word [arg2]
-    reta
+    retbe
     pop rax     ;Pop off the return address
     jmp printComErr
 

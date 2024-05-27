@@ -135,7 +135,42 @@ deleteLines:
 ;--------------------------------------------
 ;Invoked by: [line][,line]D
 ;--------------------------------------------
-    jmp _unimplementedFunction
+    cmp byte [argCnt], 2
+    ja printComErr
+    movzx ebx, word [arg1]
+    test ebx, ebx
+    jnz .notCur
+    movzx ebx, word [curLineNum]
+    mov word [arg1], bx ;Store it explicitly for later
+.notCur:
+    movzx ebx, word [arg2]
+    test ebx, ebx
+    jnz .goDel
+    movzx ebx, word [arg1]     ;Use arg1 as the range end
+    mov word [arg2], bx
+.goDel:
+    movzx ebx, word [arg1]
+    call checkArgOrder  ;Now we check if our args are ok
+    call findLine   ;If ZF=NZ, start of del not found, just return
+    retnz
+    push rbx    ;Save the line number
+    push rdi    ;And pointer to it
+    movzx ebx, word [arg2]
+    inc ebx     ;Range so end at the line after
+    call findLine   ;Get the end of the copy ptr
+    mov rsi, rdi    ;Source chars from this line
+    pop rdi
+    pop rbx
+    mov word [curLineNum], bx   ;Now update the line number
+    mov qword [curLinePtr], rdi ;This is where we will be copying to
+    mov rcx, qword [eofPtr]
+    sub rcx, rsi    ;Get the number of chars to copy up
+    inc ecx         ;Add one char for the eof char itself
+    cld 
+    rep movsb       ;Copy the whole file up
+    dec rdi         ;Point to the EOF char itself
+    mov qword [eofPtr], rdi
+    return
 
 editLine:
 ;Displays a line and allows it to be edited
