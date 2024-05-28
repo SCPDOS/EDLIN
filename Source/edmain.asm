@@ -96,39 +96,44 @@ nameCopy:
     jne short nameCopy
     xor eax, eax
     stosb   ;Store the null terminating char
-    lea rdi, pathspec
-    mov rsi, rdi
-    mov eax, 6000h  ;TRUENAME the filename
-    int 21h
-    jnc short .nameGood ;Name ok, proceed
-    cmp al, errBadDrv
-    jne short .genericError
-    lea rdx, badDrvStr
-    jmp badExitMsg
-.genericError:
-    lea rdx, badFileStr ;If this fails, bad filespec
-    jc badExitMsg  ;The filename is bad for some reason!
-.nameGood:
+;Now we handle finding/adding an extension
+    lea rsi, pathspec
+    mov rdi, rsi
+    mov eax, 1211h  ;Normalise the pathspec provided
+    int 2fh 
 ;Now we produce a backup/working filespec
     lea rsi, pathspec
     lea rdi, wkfile ;This pathspec always has an extension
-    call strcpyASCIIZ
+    call strcpy
+;rdx still has the cmdArgs ptr. Use it!
+    lea rdi, qword [rdx + cmdArgs.fcb1]
+    mov eax, 2901h
+    int 21h
+    cmp al, -1  ;If this is the case, the drive specified is bad!
+    lea rdx, badDrvStr
+    je badExitMsg
 ;Now invalidate tmpNamePtr and tmpNamePtr2
     xor ecx, ecx
     mov qword [tmpNamePtr], rcx
     mov qword [tmpNamePtr2], rcx
-    dec rcx
+    dec ecx
     lea rdi, wkfile
+    mov rbx, rdi    ;Save address of head of file name
     xor eax, eax
-    repne scasb   ;rdi points past terminating null
-    ;Find the nearest pathsep (since we have fully qualified the name)
-    std
-    movzx eax, byte [pathSep]   ;Get pathsep char in al
-    repne scasb
-    cld
-    add rdi, 2  ;Point rdi to first char past the pathsep
-    mov qword [fileNamePtr], rdi    ;Save the ptr
+    repne scasb     ;rdi points past terminating null
     mov rsi, rdi
+    std             ;Go in reverse now
+.fileNameSearch:
+    lodsb
+    cmp al, byte [pathSep]  ;Are we at a pathsep?
+    je .fileNameOk  ;Yes, stop scanning
+    cmp rsi, rbx    ;Are we at the head of the path?
+    jne .fileNameSearch ;If not, keep going back
+    sub rsi, 2  ;Pretend we are past a pathSep
+.fileNameOk:
+    add rsi, 2  ;Now point to the first char of the buffer!
+    mov qword [fileNamePtr], rsi    ;Save the ptr
+    cld         ;Now go forwards!
     mov ecx, 8  ;number of chars to search thru
 .extSearch:
     lodsb

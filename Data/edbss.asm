@@ -29,7 +29,7 @@ writeHdl    dw ?    ;Handle to the temporary file
 
 pathspec    db 128 dup (?)  ;Space for the 128 byte buffer for full filename
 wkfile:                     ;Ptr to below path for "working" file
-bkupfile    db 128 dup (?)  ;Pathspec for backup file and working .??? file
+bkupfile    db 128 dup (?)  ;Pathspec for backup file 
 
 tmpNamePtr:         ;Ptr to the filename in the commandtail
 fileNamePtr dq ?    ;Ptr to the name portion of filespec

@@ -205,41 +205,7 @@ findLineCore:
 .exit:
     return
 
-strlen:
-;String length based on terminator in al
-;Input: rsi -> Source Ptr
-;       al = Terminating char to search for
-;Output: ecx = Number of chars instring including terminator
-    xor ecx, ecx
-    dec ecx
-    push rdi
-    mov rdi, rsi
-    repne scasb
-    pop rdi
-    neg ecx ;Take 2's compliment to get number of chars including terminator
-    return
-
 strcpy:
-;Copies a string from one buffer to another
-;Input: rsi -> Source Ptr
-;       rdi -> Destination Ptr
-    push rsi
-    push rdi
-    push rcx
-    mov ecx, lineLen    ;Max number of chars in a string
-.lp:
-    cmp byte [rsi], LF
-    je short .exit
-    movsb   ;Move the char over, inc both pointers
-    dec ecx
-    jnz short .lp
-.exit:
-    pop rcx
-    pop rdi
-    pop rsi
-    return
-
-strcpyASCIIZ:
 ;Copies a ASCIIZ string from one buffer to another. 
 ;Pointers don't move.
 ;Input: rsi -> Source Ptr
@@ -251,21 +217,6 @@ strcpyASCIIZ:
     stosb
     test al, al ;Was this a nul char?
     jnz .cpChar
-    pop rdi
-    pop rsi
-    return
-
-
-memmove:
-;Copies a number of bytes over from one buffer to another
-;Input: rsi -> Source Ptr
-;       rdi -> Destination Ptr
-;       ecx = Count of chars to copy
-    push rsi
-    push rdi
-    push rcx
-    rep movsb
-    pop rcx
     pop rdi
     pop rsi
     return
@@ -334,16 +285,6 @@ checkEOF:
     jmp short .niceExit
 
 
-markFileModified:
-    mov byte [modFlag], -1
-    return
-
-getModifiedStatus:
-;If returns ZF=ZE, file NOT modified.
-;Else, file modified.
-    test byte [modFlag], -1
-    return
-
 delBkup:
 ;Finally, we delete the backup if it exists. If it doesn't delete
 ; for some reason, might be problematic later but not a big issue.
@@ -351,7 +292,7 @@ delBkup:
 ;Preserves all registers!
     test byte [bkupDel], -1     ;If set, backup already deleted
     retnz
-    call getModifiedStatus   ;If clear, buffer has not been modified.
+    test byte [modFlag], -1   ;If clear, buffer has not been modified.
     retz                        
     test byte [newFileFlag], -1 ;If the file is new then it has no backup!
     retnz
@@ -464,19 +405,6 @@ skipSpaces:
     je short skipSpaces  
     cmp al, TAB
     je short skipSpaces
-    return
-
-getPtrToStr:
-;Gets a pointer to the string number specified.
-;Input: eax = String number to get a pointer to
-;Output: rsi -> First byte of the string selected
-    push rcx
-    push rsi
-    mov rsi, qword [memPtr] ;Get a pointer to the area to read
-    
-.exit:
-    pop rsi
-    pop rcx
     return
 
 ;---------------------------------------------------------------------------
