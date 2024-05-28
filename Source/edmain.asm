@@ -33,70 +33,127 @@ okVersion:
     mov ecx, "/"    ;Alternative pathsep
     cmp dl, "-"     ;Is the switch char default or alternative?
     cmove eax, ecx  ;Move if alternative
-    mov bl, dl  ;Preserve switch char in bl
-    mov byte [switchChar], bl
+    mov byte [switchChar], dl
     mov byte [pathSep], al
 getCmdTail:
     mov eax, 6101h  ;Get parsed FCB and cmdtail for filename in rdx
     int 21h
 ;Now parse the command line, to get full command spec for filename.
-    lea rdi, qword [rdx + cmdArgs.progTail]     ;Get ptr to tail
-    movzx ecx, byte [rdx + cmdArgs.parmList]    ;Get number of chars in cmdline
+    lea rsi, qword [rdx + cmdArgs.progTail]     ;Get ptr to tail
+    mov rbp, rdx        ;Save the cmdArgs ptr for use when checking drive ok
 cmdTailParse:
-    mov al, SPC ;Comparing against a space
-.searchLoop:
-    jecxz .parseComplete    ;If we run out of chars, exit!
-    repe scasb  ;Search for the first non-space char
-    cmp byte [rdi - 1], bl  ;Did we find a switchchar?
-    jne short .notSwitch
-    mov al, byte [rdi]      ;Get the char after the switch
-    ;Now we lookahead only if we have more than 1 char left in buffer
-    cmp ecx, 1  ;If we have 1 char left, automatically accept as arg
-    je short .goodSwitch
-    mov ah, byte byte [rdi + 1] ;Lookahead
-    cmp ah, SPC ;If char after switchchar is SPC, accept
-    je short .goodSwitch
-.parseBadExit:
+    call .skipSeps      ;Skips leading terminators
+    cmp al, CR          ;If al is CR, we are done!
+    je .parseComplete
+    cmp al, byte [switchChar]       ;If al is a switchchar, rsi points to it!
+    je .switchFnd
+;Else it must be a file name!
+    cmp qword [tmpNamePtr], 0
+    jnz .parseBadExit   ;If this is not empty, too many filenames specified!
+    mov qword [tmpNamePtr], rsi     ;Save the pointer here :)
+    call .findSep                   ;Find the end of the filename
+    mov qword [tmpNamePtr2], rsi    ;And save it here 
+    cmp al, CR                      ;Did we terminate with a CR?
+    je .parseComplete               ;If so, we are done!
+    jmp short cmdTailParse          ;Else, keep parsing!
+.switchFnd:
+    inc rsi                 ;Go to the char past the switch
+    lodsb                   ;Get the switchchar itself, advance rsi
+    and al, ~20h            ;Clear the LC bit from the char
+    cmp al, "B"
+    jne .parseBadExit
+    mov byte [noEofChar], -1   ;Set the internal flag
+    lodsb                   ;Now do lookahead
+    dec rsi                 ;Get the char rsi is pointing to, after B
+    cmp al, CR              ;If this is a CR, we are done!
+    je .parseComplete 
+    call .isAlSep           ;Is the char after /B a sep?
+    jz cmdTailParse         ;If so, keep parsing
+.parseBadExit:              ;Else, fallthru to error
     jmp badParmExit
+.skipSeps:
+;Leaves rsi pointing to the first non-separator char
+    lodsb
+    call .isAlSep
+    jz .skipSeps
+    dec rsi     ;Always return to the char itself!
+    return
+.findSep:
+;Leaves rsi pointing to the first found separator char, CR or switchChar
+;Input: rsi -> pathspec to find end of
+    lodsb
+    cmp al, CR
+    je .fsExit
+    cmp al, byte [switchChar]
+    je .fsExit
+    call .isAlSep
+    jnz .findSep
+.fsExit:
+    dec rsi
+    return
+.isAlSep:
+;Checks if al is a terminator char. Sets ZF if so.
+;Input: al = Char to check.
+    cmp al, SPC
+    rete
+    cmp al, TAB
+    rete
+    cmp al, ";"
+    rete
+    cmp al, ","
+    rete
+    cmp al, "="
+    return
 .nameBadExit:
     lea rdx, badNameStr
     jmp badExitMsg
-.goodSwitch:
-    and al, ~20h    ;Clear the lowercase flag
-    cmp al, "B"     ;The flag is /B
-    jne short .parseBadExit
-    mov byte [noEofChar], -1   ;Set the internal flag
-    inc rdi ;Move rdi to the char after the B
-    dec ecx ;And decrement count of chars left
-    jz short .parseComplete
-    jmp short cmdTailParse   ;Now skip next lot of spaces
-.notSwitch:
-    ;Thus rdi must point one char past the start of a filename. 
-    ;If there is no filename, accept the pointer. 
-    ;If not, fail.
-    cmp qword [tmpNamePtr], 0
-    jnz short .parseBadExit ;If its not empty, too many filenames passed in
-    dec rdi
-    mov qword [tmpNamePtr], rdi ;Store the ptr temporarily here
-    inc rdi
-    repne scasb ;Now we keep going until we hit a space
-    mov qword [tmpNamePtr2], rdi    ;Store first char past end of name here.
-    cmp byte [rdi - 1], al  ;Was this a space or run out of chars?
-    je short .searchLoop    ;Jump if a space, else, we parsed the tail.
 .parseComplete:
 ;Check we have a pointer to a filename AT LEAST.
     cmp qword [tmpNamePtr], 0
-    je short .nameBadExit
+    je .nameBadExit
 ;Now we copy the filename internally.
-    lea rdi, pathspec
-    mov rsi, qword [tmpNamePtr]
 nameCopy:
-    movsb   ;Copy one char at a time
+    lea rdi, pathspec   ;Store in the pathspec
+    mov rsi, qword [tmpNamePtr]
+    mov eax, 121Ah  ;Get the file drive, advance rsi if X:
+    int 2Fh
+    test al, al
+    jnz .notCurDrv
+    mov eax, 1900h  ;Get the current drive in al
+    int 21h
+    inc al  ;Turn it into a 1 based number
+.notCurDrv:
+    mov dl, al  ;Save the 1-based drive letter in dl
+    add al, "@" ;Convert into a drive letter
+    mov ah, ":"
+    stosw   ;Store the drive letter in the buffer, adv rdi by 2
+    lodsb   ;Get the first char from the pathspec given...
+    dec rsi ;...and go back to this char
+    cmp al, byte [pathSep]  ;If this is a pathsep, we have abs path!
+    je .cpLp    ;Avoid getting the current directory and copy immediately!
+    mov al, byte [pathSep]  ;Get a pathsep
+    stosb       ;and store it, incrementing rdi
+    push rsi    ;Save the source of chars in the spec now
+    mov rsi, rdi
+    mov eax, 4700h  ;Get current dir for drive in here
+    int 21h
+    pop rsi     ;Get back the source of chars 
+    jc badDrvExit
+    mov eax, 1212h  ;Strlen from char past leading sep, get the length in ecx 
+    int 2fh
+    dec ecx         ;Drop the terminating null from the count
+    add rdi, rcx    ;Go to the terminating null
+    mov al, byte [pathSep]
+    cmp byte [rdi - 1], al  ;If the char behind is a pathsep, skip doubling!
+    je .cpLp
+    stosb           ;Store the pathsep over this null, inc rdi
+.cpLp:
+    movsb   ;Now copy one char at a time
     cmp rsi, qword [tmpNamePtr2]    ;Check if we are equal to end of string ptr
-    jne short nameCopy
+    jne short .cpLp
     xor eax, eax
     stosb   ;Store the null terminating char
-;Now we handle finding/adding an extension
+;Now we normalise the pathspec
     lea rsi, pathspec
     mov rdi, rsi
     mov eax, 1211h  ;Normalise the pathspec provided
@@ -105,13 +162,12 @@ nameCopy:
     lea rsi, pathspec
     lea rdi, wkfile ;This pathspec always has an extension
     call strcpy
-;rdx still has the cmdArgs ptr. Use it!
-    lea rdi, qword [rdx + cmdArgs.fcb1]
+;rbp still has the cmdArgs ptr. Use it here for the fcb!!
+    lea rdi, qword [rbp + cmdArgs.fcb1]
     mov eax, 2901h
     int 21h
     cmp al, -1  ;If this is the case, the drive specified is bad!
-    lea rdx, badDrvStr
-    je badExitMsg
+    je badDrvExit
 ;Now invalidate tmpNamePtr and tmpNamePtr2
     xor ecx, ecx
     mov qword [tmpNamePtr], rcx
@@ -162,14 +218,11 @@ wildcardCheck:
 .mainlp:
     lodsb
     test al, al ;Once we're at the null char, proceed
-    jz short fileOpen
+    jz fileOpen
     cmp al, "?"
-    je short .error
+    je badDrvExit
     cmp al, "*"
-    jne short .mainlp
-.error:
-    lea rdx, badDrvStr
-    jmp badExitMsg
+    jne .mainlp
 ;Now we open the file to check if it exists and if it does, if it is readonly
 fileOpen:
 ;first set the handles to -1
@@ -375,6 +428,9 @@ nextCmd:
     jmp parseCommand
 
 ;----Bad Exits----
+badDrvExit:
+    lea rdx, badDrvStr
+    jmp short badExitMsg
 badParmExit:
     lea rdx, badParm    ;Bad number of parameters
 badExitMsg:
