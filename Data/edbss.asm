@@ -64,3 +64,10 @@ spareLine   db 258 dup (?)  ;Spare editing line
 
 xfrName     db 128 dup (?)  ;Transfer name buffer
 xfrHdl      dw ?
+
+movCpFlg    db ?    ;Set if move, clear if copy
+blkPtrSrc   dq ?    ;Ptr to the line which starts the copy
+blkPtrEnd   dq ?    ;Ptr to the line after the range we will copy
+cpyPtrDest  dq ?    ;Ptr to the line we will be copying to
+blkSize     dd ?    ;This is the size of the unit to move (cpySize)
+copySize    dd ?    ;This is the number of bytes we will copy (cpyLen)

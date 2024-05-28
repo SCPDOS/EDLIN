@@ -249,21 +249,146 @@ transferLines:
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; File block moving functions (copying and cutting and pasting)
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+;Both following functions need 3 arguments, but empty args are permitted!
 moveLines:
 ;Moves a block of lines elsewhere (non overlapping moves only)
 ;--------------------------------------------
-;Invoked by: [line][line],lineM
+;Invoked by: [line],[line],lineM
 ;--------------------------------------------
-    jmp _unimplementedFunction
-
+    cmp byte [argCnt], 3
+    jne printComErr
+    mov byte [movCpFlg], -1
+    jmp copyLines.common
 copyLines:
 ;Duplicates a line or a range of lines to a position specifed 
 ;   (non-overlapping) 
 ;--------------------------------------------
 ;Invoked by: [line],[line],line[,count]C
 ;--------------------------------------------
-    jmp _unimplementedFunction
+    cmp byte [argCnt], 3    ;This can be 3 or 4 arguments!
+    jb printComErr
+    mov byte [movCpFlg], 0
+.common:
+;arg1 = Start line of range for copy, default to current line
+;arg2 = End line of range for copy, default to line after current line
+;arg3 = Line to place it at, no default, cant be 0!
+;arg4 = Number of times to consecutively repeat the copy (copy only)
+    movzx ebx, word [arg3]  ;Check the mandatory argument
+    test ebx, ebx   ;Are we 0?
+    lea rdx, badDestStr
+    jz printErr
+    movzx ebx, word [arg1]
+    test ebx, ebx
+    jnz .gotStart
+    movzx ebx, word [curLineNum]
+    call checkArgOrder  ;Check that this is before arg2
+    mov word [arg1], bx
+.gotStart:
+    call findLine   ;Get in rdi the ptr to the first argument
+    jnz printComErr ;If the line is not found, we gotta complain!
+    mov qword [blkPtrSrc], rdi  ;Save the ptr to the line!
+    movzx ebx, word [arg2]
+    test ebx, ebx
+    jnz .gotEnd
+    ;Set the default line!
+    movzx ebx, word [curLineNum] 
+    mov word [arg2], bx
+.gotEnd:
+    push rbx            ;Save this line number
+    call findLine       ;Ensure the line in bx exists
+    pop rbx
+    jnz printComErr     ;Again, if the line not found, complain!
+    inc ebx             ;Now increment the line number to get line after
+    call findLine   ;This can be end of arena since this is end of copy blk
+    mov qword [blkPtrEnd], rdi     
+;We mightve changed the second argument so double check it!
+    movzx ebx, word [arg1]
+    cmp bx, word [arg2]
+    ja printComErr
+;Now we check against the third line. It must not be in the range 
+; specified, else error (cannot overlap copies or moves!!!)
+    movzx ebx, word [arg3]    ;Get the storage line
+    cmp bx, word [arg1]     ;arg3 <= arg1?
+    jbe .argsOk
+    cmp bx, word [arg2]     ;arg3 > arg2 ?
+    jbe printComErr
+.argsOk:
+    mov rcx, qword [blkPtrEnd]
+    sub rcx, qword [blkPtrSrc]  ;Get the size of one block that we will move
+    mov dword [blkSize], ecx
+    movzx eax, word [arg4]      ;Get the count length
+    test eax, eax
+    jz .noCount     ;If nothing, ecx is the copy size too
+;Here we compute the copySize as a multiple of blkSize
+    mul ecx
+    test edx, edx   ;Is this larger than a dword (should never happen!)
+    jnz printMemErr ;Bad arg4!!
+    mov ecx, eax    ;Make ecx the size of the copy
+.noCount:
+    mov dword [copySize], ecx
+;Now, can we fit our new section of text in memory?
+    mov rbx, qword [eofPtr]
+    mov rdx, qword [endOfArena]
+    sub rdx, rbx
+    cmp edx, ecx
+    jb printMemErr  ;Insufficient memory error!!
+;Finally, get the line we will place copy at!
+    movzx ebx, word [arg3]
+    call findLine
+    mov qword [cpyPtrDest], rdi ;Now save ptr to the line we copy to!
+;Now make space for one load of the copy
+    mov rsi, qword [eofPtr]
+    mov rcx, rsi
+    sub rcx, rdi    ;Get the number of bytes we will shift
+    inc ecx         ;Add EOF
+    mov rdi, rsi    ;This is the destination
+    mov eax, dword [copySize]
+    add rdi, rax    ;Go to the destination
+    mov qword [eofPtr], rdi ;This is the new eof position!
+    std
+    rep movsb   ;Now copy in reverse to be safe :)
+    cld
+;Adjust blkPtrs if they were in this region.
+    mov rbx, qword [cpyPtrDest]
+    cmp rbx, qword [blkPtrSrc]
+    ja .ptrsOk
+    mov ecx, dword [copySize]    ;Add this amount to the ptrs
+    add qword [blkPtrSrc], rcx
+    add qword [blkPtrEnd], rcx
+.ptrsOk:
+    movzx ebx, word [arg4]  ;Get count word to use as counter
+    mov rdi, qword [cpyPtrDest] ;Write to here!
+.cpLp:
+    mov ecx, dword [blkSize]
+    mov rsi, qword [blkPtrSrc]  ;Start the copy from here
+    rep movsb
+    sub ebx, 1  ;Default is 0, if we are below 0, set CF with sub
+    jnc .cpLp   ;If CF not yet set, keep going!
+    cmp byte [movCpFlg], 0  ;Was this a move or a copy?
+    je .copyDone
+;Now pull everything back over the source of the move
+    mov rdi, qword [blkPtrSrc]
+    mov rsi, qword [blkPtrEnd]
+    mov rcx, qword [eofPtr]
+    sub rcx, rsi    ;Get the number of bytes to move 
+    inc rcx         ;Include EOF
+    rep movsb
+    dec rdi         ;Go back to the EOF char itself
+    mov qword [eofPtr], rdi
+    movzx ebx, word [arg3]
+    cmp bx, word [arg1] ;Was this in the range of the move?
+    jbe .copyDone
+    ;If it was, add the difference - 1
+    add bx, word [arg1]
+    sub bx, word [arg2]
+    dec bx 
+    mov word [arg3], bx
+.copyDone:
+    movzx ebx, word [arg3]
+    call findLine
+    mov qword [curLinePtr], rdi
+    mov word [curLineNum], bx
+    return
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; File searching functions
@@ -557,7 +682,7 @@ endEdit:
     cmp byte [argCnt], 1
     jne printComErr
     cmp byte [arg1], 0
-    jne printArgError
+    jne printComErr
     test byte [roFlag], -1  ;If we are readonly, delete $$$ and quit
     jnz quit.roQuit
     mov byte [noAppendErr], -1  ;Suppress errors again

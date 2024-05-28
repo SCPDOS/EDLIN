@@ -2,9 +2,6 @@
 ; Error Routines here
 ;---------------------
 
-printArgError:
-    lea rdx, badInput
-    jmp short printErr
 printMemErr:
     lea rdx, badMemFull
     jmp short printErr
