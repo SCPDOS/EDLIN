@@ -318,11 +318,15 @@ copyLines:
     mov dword [blkSize], ecx
     movzx eax, word [arg4]      ;Get the count length
     test eax, eax
-    jz .noCount     ;If nothing, ecx is the copy size too
+    jnz .havCnt                 ;We have a given count
+    mov eax, 1                  ;Else, default to 1
+    mov word [arg4], ax
+    jmp short .noCount          ;ecx has the copysize, skip the multiply!
+.havCnt:
 ;Here we compute the copySize as a multiple of blkSize
     mul ecx
     test edx, edx   ;Is this larger than a dword (should never happen!)
-    jnz printMemErr ;Bad arg4!!
+    jnz printMemErr ;Bad count argument!!
     mov ecx, eax    ;Make ecx the size of the copy
 .noCount:
     mov dword [copySize], ecx
@@ -346,7 +350,7 @@ copyLines:
     add rdi, rax    ;Go to the destination
     mov qword [eofPtr], rdi ;This is the new eof position!
     std
-    rep movsb   ;Now copy in reverse to be safe :)
+    rep movsb   ;Now copy in reverse :)
     cld
 ;Adjust blkPtrs if they were in this region.
     mov rbx, qword [cpyPtrDest]
@@ -356,14 +360,14 @@ copyLines:
     add qword [blkPtrSrc], rcx
     add qword [blkPtrEnd], rcx
 .ptrsOk:
-    movzx ebx, word [arg4]  ;Get count word to use as counter
+    movzx ebx, word [arg4]  ;Get adjusted count to use as counter
     mov rdi, qword [cpyPtrDest] ;Write to here!
 .cpLp:
     mov ecx, dword [blkSize]
     mov rsi, qword [blkPtrSrc]  ;Start the copy from here
     rep movsb
-    sub ebx, 1  ;Default is 0, if we are below 0, set CF with sub
-    jnc .cpLp   ;If CF not yet set, keep going!
+    dec ebx
+    jnz .cpLp   ;If this is zero, finish!
     cmp byte [movCpFlg], 0  ;Was this a move or a copy?
     je .copyDone
 ;Now pull everything back over the source of the move
@@ -399,6 +403,10 @@ searchText:
 ;--------------------------------------------
 ;Invoked by: [line][,line][?]S[string]
 ;--------------------------------------------
+    cmp byte [argCnt], 2
+    ja printComErr
+    mov byte [searchMode], 1
+
     jmp _unimplementedFunction
 
 replaceText:

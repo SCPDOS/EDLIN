@@ -61,13 +61,15 @@ noAppendErr db ?    ;Special init var, prevents append errors for initial load
 workLine    db 258 dup (?)  ;Line in which all editing takes place
 workLen     dd ?            ;Line length before edit
 spareLine   db 258 dup (?)  ;Spare editing line
-
+;Transfer Vars
 xfrName     db 128 dup (?)  ;Transfer name buffer
 xfrHdl      dw ?
-
+;Block vars
 movCpFlg    db ?    ;Set if move, clear if copy
 blkPtrSrc   dq ?    ;Ptr to the line which starts the copy
 blkPtrEnd   dq ?    ;Ptr to the line after the range we will copy
 cpyPtrDest  dq ?    ;Ptr to the line we will be copying to
 blkSize     dd ?    ;This is the size of the unit to move (cpySize)
 copySize    dd ?    ;This is the number of bytes we will copy (cpyLen)
+;Search/Replace vars
+searchMode  db ?    ;Set = Search from current line + 1, clear = line 1
