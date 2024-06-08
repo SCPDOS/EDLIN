@@ -1,8 +1,30 @@
 ;General Utility functions for edlin go here
 
-goodFind:
+okPrompt:
 ;Checks if the user typed ? on a search or replace and prompts y/n
 ; indicating the response to the caller!
+;Returns: ZF=ZE if Y returned, ZF=NZ if N returned
+    test byte [qmarkSet], -1
+    retz
+.lp:
+    lea rdx, okString
+    call printString
+    mov eax, 0C01h  ;Take input one byte, return input byte in al
+    int 21h
+    push rax        ;Save the char as we print CRLF to denote acceptance
+    call printCRLF
+    pop rax
+    push rax
+    mov eax, 1213h  ;Get DOS to Uppercase for us
+    int 2fh
+    pop rdx         ;Pop the original char back
+    cmp al, "Y"
+    rete
+    cmp al, "N"
+    jne .lp         ;If not Y or N, go again.
+    inc al          ;Clear ZF, guaranteed to clear ZF since al = N
+    return
+
 
 findFirst:
     lea rdi, fndString1 + 1 ;Point to start of the actual string space!
@@ -54,10 +76,8 @@ findFirst:
     mov qword [fndLinePtr], rdi
     mov word [fndLineNum], dx
     movzx ebx, word [arg2]  ;Get the end of search range
-    test ebx, ebx
-    jz .skipDec
-    dec ebx
-.skipDec:
+    cmp bx, -1
+    sbb bx, -1
     call findLine   ;Get the vars for the end of the search
     mov rcx, rdi
     sub rcx, qword [fndStrPtr]  ;Get the number of chars we will be scanning
@@ -83,7 +103,7 @@ findNext:
 ;   qword [fndStrPtr], word [fndLineNum], dword [fndSrchLen] updated.
 ;   qword [fndLinePtr] points to start of line we found match
 
-    mov al, byte [fndString1]
+    mov al, byte [fndString1 + 1]
     mov ecx, dword [fndSrchLen]
 	mov rdi, qword [fndStrPtr]
 .lp:
@@ -594,12 +614,3 @@ i23h:
     cld
     call printCRLF
     jmp getCommand  ;Now jump to get the command
-
-
-;Remove before finishing!
-_unimplementedFunction:
-    lea rdx, .str
-    mov eax, 0900h
-    int 21h
-    return
-.str:   db CR,LF,"EXCEPTION: UNIMPLEMENTED FUNCTION CALLED",CR,LF,"$"

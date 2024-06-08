@@ -156,14 +156,16 @@ printLines:
     stosb
 .okLine:
     mov byte [rdi], 0   ;Null terminate the line for printing
-    call .prnChars  ;Print the chars in the buffer
+    call prnAsciiz  ;Print the chars in the buffer
     jecxz .exit     ;If we have no more chars to print, exit!
     inc ebx         ;Goto next line number
     dec edx         ;One less line to print!
     jnz .freshLine  ;If this is non-zero, keep going!
     dec ebx         ;We done the last line
+.exit:
     return
-.prnChars:
+
+prnAsciiz:
     push rsi
     lea rsi, spareLine  ;Now print the line we just made!
 .pcLp:
@@ -174,5 +176,4 @@ printLines:
     jmp short .pcLp
 .pcExit:
     pop rsi
-.exit:
     return

@@ -406,12 +406,9 @@ searchText:
     cmp byte [argCnt], 2
     ja printComErr
     mov byte [srchMode], 1      ;Search from current line + 1
-    jmp short .searchMain
-.startSrch:
-    mov byte [srchMode], 0      ;Search from the start
-.searchMain:
     mov byte [findMod], 1       ;Set that we are searching!
     call findFirst
+    jnz printLineNotFoundErr
 .lp:
     mov rsi, qword [fndLinePtr]
     movzx ebx, word [fndLineNum]
@@ -425,29 +422,104 @@ searchText:
     mov qword [fndLinePtr], rdi
     mov dword [fndSrchLen], ecx ;Remaining count for search region
     inc word [fndLineNum]   ;Goto next line now!
-    call goodFind
-    jz .badSearch
+    call okPrompt
+    jz findSetLine
     call findNext
     jnz printLineNotFoundErr    ;If no more found, print error message!
     jmp short .lp   ;Else, output it and loop again
 
-.badSearch:
+findSetLine:
     movzx ebx, word [fndLineNum]
+    cmp byte [findMod], 0   ;If we are search, we need to decrement
+    je .main
     dec ebx ;Advance from current line to the last line we found on!
-.badExit:
+.main:
     call findLine
     mov word [curLineNum], bx
     mov qword [curLinePtr], rdi
     return
-
 
 replaceText:
 ;Replaces all matching strings with specified string (NO REGEX)
 ;--------------------------------------------
 ;Invoked by: [line][,line][?]R[string]<EOF>[string]
 ;--------------------------------------------
-    jmp _unimplementedFunction
-
+    cmp byte [argCnt], 2
+    ja printComErr
+    mov byte [srchMode], 1  ;Search by default from current line + 1
+    mov byte [findMod], 0   ;Set that we are replacing the string!
+    call findFirst
+    jnz printLineNotFoundErr
+.lp:
+    mov rsi, qword [fndLinePtr]
+    call stufBuf    ;Get the line length in edx
+    movzx ecx, word [fndLenOld]
+    sub edx, ecx
+    movzx ecx, word [fndLenNew]
+    add edx, ecx
+    cmp edx, 254
+    ja .tooLong
+    movzx ebx, word [fndLineNum]
+    push rdx    ;Save the line length
+    call printLineNum   ;Print the line number in ebx
+    pop rdx
+    ;Now build the new string in the buffer to print as a replacement
+    mov rcx, qword [fndStrPtr]
+    mov rsi, qword [fndLinePtr]
+    sub rcx, rsi    ;Get the number of chars into the line our string is at
+    dec rcx         ;Drop the first char of the string we will replace
+    lea rdi, spareLine  ;Build the new line in this buffer 
+    call .cpyString
+    push rsi
+    lea rsi, fndString2 + 1
+    movzx ecx, word [fndLenNew]
+    call .cpyString
+    pop rsi
+    movzx ecx, word [fndLenOld]
+    add rsi, rcx
+    mov ecx, edx    ;Move the remaining chars count into ecx
+    add ecx, 2      ;Add 2 for the CR/LF
+    call .cpyString ;Write the last part of the line in
+    xor eax, eax
+    stosb           ;Store the null terminator too
+    call prnAsciiz
+    call okPrompt
+    jnz .gotoNext
+    call findSetLine
+    mov rdi, qword [fndStrPtr]
+    dec rdi
+    lea rsi, fndString2 + 1
+    movzx edx, word [fndLenOld]
+    movzx ecx, word [fndLenNew]
+    dec ecx
+    add qword [fndStrPtr], rcx  ;Go to the end of the found string
+    inc ecx
+    dec edx
+    sub dword [fndSrchLen], edx ;
+    jae .overspill
+    mov dword [fndSrchLen], 0
+.overspill:
+    inc edx
+    call replaceLine
+.gotoNext:
+    call findNext
+    retnz
+    jmp .lp
+.tooLong:
+    lea rdx, badLineLen
+    jmp printErr
+.cpyString:
+;Copies a string, ensures we have the last char in al when we return
+;Copies ecx number of chars
+    test ecx, ecx
+    retz
+.cpsLp:
+    lodsb
+    stosb
+    dec edx ;Decrement total line length
+    dec ecx ;Decrement line portion length
+    jnz .cpsLp
+    return
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; File listing functions

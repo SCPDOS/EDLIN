@@ -77,10 +77,10 @@ srchMode    db ?    ;Set = Find from current line + 1, clear = line 1
 findMod     db ?    ;Set = Search, Clear = Replace
 keepOld     db ?    ;Set = Keep old data. Clear = Clear old data (search/rep)
 fndLenOld   dw ?    ;Length of find string 
-fndLenNew   dw ?    ;New string length!
-fndStrPtr   dq ?    ;LSTFND = Ptr to the start of the last found string
-fndLinePtr  dq ?    ;NUMPOS = Ptr to the start of the last found line
-fndLineNum  dw ?    ;LSTNUM = Line number of the last found line
+fndLenNew   dw ?    ;New string length! 
+fndStrPtr   dq ?    ;[DOS LSTFND] Ptr to the start of the last found string
+fndLinePtr  dq ?    ;[DOS NUMPOS] Ptr to the start of the last found line
+fndLineNum  dw ?    ;[DOS LSTNUM] Line number of the last found line
 fndSrchLen  dd ?    ;Number of bytes we are searching through!
 fndString1  db 81h dup (?)  ;1 for string length prefix + 128 for the string
 fndString2  db 81h dup (?)
