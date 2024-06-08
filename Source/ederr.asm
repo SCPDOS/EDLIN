@@ -1,7 +1,9 @@
 ;---------------------
 ; Error Routines here
 ;---------------------
-
+printLineNotFoundErr:
+    lea rdx, badSearch
+    jmp short printErr
 printMemErr:
     lea rdx, badMemFull
     jmp short printErr

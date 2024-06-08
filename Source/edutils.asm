@@ -1,5 +1,170 @@
 ;General Utility functions for edlin go here
 
+goodFind:
+;Checks if the user typed ? on a search or replace and prompts y/n
+; indicating the response to the caller!
+
+findFirst:
+    lea rdi, fndString1 + 1 ;Point to start of the actual string space!
+    mov byte [keepOld], -1  ;We want to keep the old search data!
+    call getFindPatrn
+    test ecx, ecx   ;Was the length of the copy 0?
+    retz            ;Return if so!
+    cmp al, EOF
+    jne .replaceOld
+    mov byte [keepOld], 0   ;Reset the old data if EOF!
+.replaceOld: 
+    mov word [fndLenOld], cx  ;Save the length!
+    xor ecx, ecx
+    cmp al, CR
+    je .makeSrchBuf
+    cmp byte [findMod], 0
+    jz .repBuf
+.makeSrchBuf:
+    dec rsi
+.repBuf:
+    mov qword [charPtr], rsi
+    lea rdi, fndString2 + 1     ;Now we copy to the second buffer!
+    call getFindPatrn
+    cmp byte [findMod], 0   ;Are we replace?
+    jnz .notRep
+;Here only if we are replacing the string!
+    cmp al, CR  ;Did we read the last char in the string?
+    jne .eos
+    dec rsi     ;Go to the last char itself
+.eos:
+    mov qword [charPtr], rsi
+.notRep:
+    mov word [fndLenNew], cx     ;Save the new length of the copied string
+    movzx ebx, word [arg1]
+    test ebx, ebx   
+    jnz .havLine
+    cmp byte [srchMode], 0  ;If clear, we search from current line + 1!
+    jne .curLin
+    mov ebx, 1
+    jmp short .chkLineOk
+.curLin:
+    movzx ebx, word [curLineNum]
+    inc ebx
+.chkLineOk:
+    call checkArgOrder
+.havLine:
+    call findLine   ;Setup the vars to start searching!
+    mov qword [fndStrPtr], rdi
+    mov qword [fndLinePtr], rdi
+    mov word [fndLineNum], dx
+    movzx ebx, word [arg2]  ;Get the end of search range
+    test ebx, ebx
+    jz .skipDec
+    dec ebx
+.skipDec:
+    call findLine   ;Get the vars for the end of the search
+    mov rcx, rdi
+    sub rcx, qword [fndStrPtr]  ;Get the number of chars we will be scanning
+    or al, -1   ;Clear ZF
+    jecxz .exit
+    cmp cx, word [fndLenOld]  ;Is the init string 
+    jae .findNext
+.exit:
+    return
+.findNext:
+    mov dword [fndSrchLen], ecx
+findNext:
+;Finds our next match for the string in fndString1
+;Input:
+;   byte [fndString1 + 1] = String we are searching for
+;   word [fndLenOld] = Length of the string we are searching for
+;   qword [fndStrPtr] = Ptr to the start of where to start scanning from
+;   word [fndLineNum] = Line number of the string we are searching from
+;   dword [fndSrchLen] = Length of the arena we are searching.
+;   qword [fndLinePtr] = Ptr to the start of the line we are on.
+;Output:
+;   ZF=ZE if we found the search string. Else ZF=NZ.
+;   qword [fndStrPtr], word [fndLineNum], dword [fndSrchLen] updated.
+;   qword [fndLinePtr] points to start of line we found match
+
+    mov al, byte [fndString1]
+    mov ecx, dword [fndSrchLen]
+	mov rdi, qword [fndStrPtr]
+.lp:
+    test rdi, rdi           ;Clear ZF in case ecx is 0
+    jecxz findFirst.exit    ;Just exit in that case
+    repne scasb
+    retnz
+    mov edx, ecx    ;Save the remaining chars to scan thru
+    mov rbx, rdi    ;Save the ptr to the end of the string we scanned
+    movzx ecx, word [fndLenOld] ;Get the match string length
+    dec ecx
+    lea rsi, fndString1 + 2
+    cmp al, al  ;Set the zero flag incase ECX = 0
+    repe cmpsb  ;Compare the remainder of the strings
+    mov ecx, edx    ;Return the remaining chars for search
+    mov rdi, rbx    ;Retur the ptr
+    jne .lp ;Keep searching if the two strings were not 100% the same
+    mov dword [fndSrchLen], ecx
+    mov rcx, rdi
+    mov qword [fndStrPtr], rdi
+    mov rdi, qword [fndLinePtr]
+    sub rcx, rdi
+    mov al, LF
+    movzx edx, word [fndLineNum]
+;Now figure out which line we matched on
+.getLp:
+    inc edx
+    mov rbx, rdi
+    repne scasb
+    jz .getLp 
+    dec edx
+    mov word [fndLineNum], dx
+    mov qword [fndLinePtr], rbx
+    xor eax, eax    ;Clear the ZF
+    return
+
+getFindPatrn:
+;Moves the find pattern until ^Z or <CR> found. 
+;Input: rsi -> Command buffer
+;       rdi -> Storage buffer
+; byte [keepOld] = If we copy 0 chars, do we use old search data or not?
+;Output:
+;       al = Terminating char
+;       ecx = Number of chars copied
+;       rsi -> Char past the terminating char
+;       rdi -> Same in storage buffer
+    xor ecx, ecx
+.lp:
+    lodsb           ;Get char from buffer
+    cmp al, CMD     ;If not a ^V, check if it is a terminating char
+    jne .noConvert
+    lodsb   ;Get the next char to convert into a control character
+    call doControl  ;Convert it!
+    jmp short .checkCR  ;Ignore <EOF> in this case
+.noConvert:
+    cmp al, EOF ;Was char an <EOF>?
+    je .end     ;End if so!
+.checkCR:
+    cmp al, CR  ;Was char a <CR>?
+    je .end     ;End if so!
+    stosb       ;Else store and
+    inc ecx     ;inc the copy counter!
+    jmp short .lp
+.end:
+    test ecx, ecx   ;Did we copy zero chars?
+    jz .noNew       ;If so, check if we should use previous data...
+    push rdi
+    sub rdi, rcx    ;Else get a ptr to the start of the buffer
+    mov byte [rdi - 1], cl  ;And place the string length w/o terminator!
+    pop rdi
+    return
+.noNew:
+    test byte [keepOld], -1   ;Do we want to use old data?
+    jne .useOld     ;Jump if so!
+    mov byte [rdi - 1], cl  ;Else, reset the buffer length!! No search data!
+    return
+.useOld:
+    movzx ecx, byte [rdi - 1]   ;So get the length of the buffer
+    add rdi, rcx                ;And go to the end of the string!
+    return
+
 replaceLine:
 ;Replaces a line in memory with a line in a buffer.
 ;Input: ecx = New line length

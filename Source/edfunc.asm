@@ -405,9 +405,41 @@ searchText:
 ;--------------------------------------------
     cmp byte [argCnt], 2
     ja printComErr
-    mov byte [searchMode], 1
+    mov byte [srchMode], 1      ;Search from current line + 1
+    jmp short .searchMain
+.startSrch:
+    mov byte [srchMode], 0      ;Search from the start
+.searchMain:
+    mov byte [findMod], 1       ;Set that we are searching!
+    call findFirst
+.lp:
+    mov rsi, qword [fndLinePtr]
+    movzx ebx, word [fndLineNum]
+    call printLine      ;Print this line!
+    mov rdi, qword [fndStrPtr]
+    mov ecx, dword [fndSrchLen]
+    mov al, LF
+    repne scasb
+    jne printLineNotFoundErr
+    mov qword [fndStrPtr], rdi
+    mov qword [fndLinePtr], rdi
+    mov dword [fndSrchLen], ecx ;Remaining count for search region
+    inc word [fndLineNum]   ;Goto next line now!
+    call goodFind
+    jz .badSearch
+    call findNext
+    jnz printLineNotFoundErr    ;If no more found, print error message!
+    jmp short .lp   ;Else, output it and loop again
 
-    jmp _unimplementedFunction
+.badSearch:
+    movzx ebx, word [fndLineNum]
+    dec ebx ;Advance from current line to the last line we found on!
+.badExit:
+    call findLine
+    mov word [curLineNum], bx
+    mov qword [curLinePtr], rdi
+    return
+
 
 replaceText:
 ;Replaces all matching strings with specified string (NO REGEX)
