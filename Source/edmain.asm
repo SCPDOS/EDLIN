@@ -237,6 +237,8 @@ fileOpen:
     mov eax, 2F00h  ;Get a pointer to the DTA in rbx
     int 21h
     movzx eax, byte [rbx + ffBlock.attribFnd]
+    test al, dirCharDev
+    jnz charDevFail
     test al, dirReadOnly
     jz short .notReadOnly
 .readOnly:

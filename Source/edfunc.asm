@@ -628,7 +628,8 @@ appendLines:
 .argGiven:
 ;rdx -> The start of the read in buffer
     mov rcx, qword [endOfArena] ;Fill the arena
-    sub rcx, rdx        ;Get the number of bytes to read
+    sub rcx, rdx        ;Get the number of bytes to read save one paragraph
+    sub rcx, 16         ;This is so appending CRLF's or EOF's won't segfault
     jz printMemErr      ;If we @ end of arena, free some space!!
     mov r10, rcx        ;Use r10 to save byte count we want to read in
     movzx ebx, word [readHdl]

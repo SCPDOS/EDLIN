@@ -26,3 +26,7 @@ fullDiskFail:
     call printString
     retToDOS errDskFull
 
+charDevFail:
+    lea rdx, badFindStr
+    call printString
+    retToDOS errCharDev
