@@ -838,7 +838,10 @@ endEdit:
     lea rdi, pathspec   ;Now name the temp file by the og name!
     mov eax, 5600h
     int 21h
+    jc .renameFail
     retToDOS errOk ;Let DOS do cleanup of memory allocations!
+.renameFail:
+    retToDOS errBadRen
 
 quit:
 ;Quits EDLIN, not saving work and deleting working file.

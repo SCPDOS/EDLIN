@@ -11,17 +11,17 @@ Output file:  ./Binaries/EDLIN.COM
 -- Sections (summary) ---------------------------------------------------------
 
 Vstart            Start             Stop              Length    Class     Name
-               0                 0              16EA  000016EA  progbits  .text
-            16EA              16EA              198E  000002A4  progbits  .data
-            198E              198E              1FBD  0000062F  nobits    .bss
-            1FC0              1FC0              2600  00000640  nobits    .stack
+               0                 0              16F3  000016F3  progbits  .text
+            16F3              16F3              1997  000002A4  progbits  .data
+            1997              1997              1FC6  0000062F  nobits    .bss
+            1FD0              1FD0              2610  00000640  nobits    .stack
 
 -- Sections (detailed) --------------------------------------------------------
 
 ---- Section .text ------------------------------------------------------------
 
 class:     progbits
-length:                16EA
+length:                16F3
 start:                    0
 align:                    1
 follows:   not defined
@@ -33,10 +33,10 @@ vfollows:  not defined
 
 class:     progbits
 length:                 2A4
-start:                 16EA
+start:                 16F3
 align:                    1
 follows:   .text
-vstart:                16EA
+vstart:                16F3
 valign:    not defined
 vfollows:  not defined
 
@@ -44,10 +44,10 @@ vfollows:  not defined
 
 class:     nobits
 length:                 62F
-start:                 198E
+start:                 1997
 align:                    1
 follows:   not defined
-vstart:                198E
+vstart:                1997
 valign:                   1
 vfollows:  .data
 
@@ -55,10 +55,10 @@ vfollows:  .data
 
 class:     nobits
 length:                 640
-start:                 1FC0
+start:                 1FD0
 align:                   10
 follows:   not defined
-vstart:                1FC0
+vstart:                1FD0
 valign:                  10
 vfollows:  .bss
 
@@ -494,142 +494,143 @@ Real              Virtual           Name
             1463              1463  endEdit.writeLp
             148D              148D  endEdit.writeDone
             14EE              14EE  endEdit.skipBkup
-            1517              1517  quit
-            1546              1546  quit.roQuit
-            1568              1568  printString
-            156F              156F  ..@123._ret
-            1570              1570  printSpace
-            1574              1574  printCRLF
-            157B              157B  printLF
-            157D              157D  printChar
-            158B              158B  ..@124._ret
-            158C              158C  printLineNum
-            15AC              15AC  printNum
-            15E2              15E2  ..@125._ret
-            15E3              15E3  printNum.doCompute
-            15E9              15E9  printNum.printDig
-            15F7              15F7  printNum.pDigOk
-            15FB              15FB  printLine
-            1600              1600  printLines
-            160A              160A  ..@127._base
-            160E              160E  printLines.freshLine
-            161E              161E  printLines.goLine
-            1647              1647  printLines.store
-            1648              1648  printLines.goDone
-            1650              1650  printLines.lfFnd
-            1661              1661  printLines.putLF
-            1664              1664  printLines.okLine
-            1677              1677  printLines.exit
-            1677              1677  ..@128._ret
-            1678              1678  prnAsciiz
-            1680              1680  prnAsciiz.pcLp
-            168C              168C  prnAsciiz.pcExit
-            168D              168D  ..@129._ret
-            168E              168E  printLineNotFoundErr
-            1697              1697  printMemErr
-            16A0              16A0  printComErr
-            16A7              16A7  printErr
-            16B1              16B1  badReadFail
-            16C4              16C4  fullDiskFail
-            16D7              16D7  charDevFail
+            1519              1519  endEdit.renameFail
+            1520              1520  quit
+            154F              154F  quit.roQuit
+            1571              1571  printString
+            1578              1578  ..@124._ret
+            1579              1579  printSpace
+            157D              157D  printCRLF
+            1584              1584  printLF
+            1586              1586  printChar
+            1594              1594  ..@125._ret
+            1595              1595  printLineNum
+            15B5              15B5  printNum
+            15EB              15EB  ..@126._ret
+            15EC              15EC  printNum.doCompute
+            15F2              15F2  printNum.printDig
+            1600              1600  printNum.pDigOk
+            1604              1604  printLine
+            1609              1609  printLines
+            1613              1613  ..@128._base
+            1617              1617  printLines.freshLine
+            1627              1627  printLines.goLine
+            1650              1650  printLines.store
+            1651              1651  printLines.goDone
+            1659              1659  printLines.lfFnd
+            166A              166A  printLines.putLF
+            166D              166D  printLines.okLine
+            1680              1680  printLines.exit
+            1680              1680  ..@129._ret
+            1681              1681  prnAsciiz
+            1689              1689  prnAsciiz.pcLp
+            1695              1695  prnAsciiz.pcExit
+            1696              1696  ..@130._ret
+            1697              1697  printLineNotFoundErr
+            16A0              16A0  printMemErr
+            16A9              16A9  printComErr
+            16B0              16B0  printErr
+            16BA              16BA  badReadFail
+            16CD              16CD  fullDiskFail
+            16E0              16E0  charDevFail
 
 ---- Section .data ------------------------------------------------------------
 
 Real              Virtual           Name
-            16EA              16EA  cmdLetterTable
-            16F9              16F9  cmdFcnTable
-            1717              1717  cmdRoTable
-            1726              1726  newStr
-            1731              1731  eofStr
-            1745              1745  badVerStr
-            175B              175B  badDrvStr
-            1777              1777  badFindStr
-            1788              1788  badNameStr
-            17A6              17A6  badCreatStr
-            17C5              17C5  badOpenStr
-            17E2              17E2  badFileStr
-            1804              1804  badBackDel
-            182E              182E  badParm
-            1842              1842  badInput
-            1850              1850  badRealloc
-            1865              1865  badMemFull
-            187D              187D  badMergeStr
-            18A8              18A8  badFileExt
-            18CD              18CD  badROcmd
-            18EB              18EB  badDskFull
-            190B              190B  badRead
-            1931              1931  exitQuit
-            1944              1944  okString
-            194B              194B  badDestStr
-            1972              1972  badSearch
-            197E              197E  badLineLen
+            16F3              16F3  cmdLetterTable
+            1702              1702  cmdFcnTable
+            1720              1720  cmdRoTable
+            172F              172F  newStr
+            173A              173A  eofStr
+            174E              174E  badVerStr
+            1764              1764  badDrvStr
+            1780              1780  badFindStr
+            1791              1791  badNameStr
+            17AF              17AF  badCreatStr
+            17CE              17CE  badOpenStr
+            17EB              17EB  badFileStr
+            180D              180D  badBackDel
+            1837              1837  badParm
+            184B              184B  badInput
+            1859              1859  badRealloc
+            186E              186E  badMemFull
+            1886              1886  badMergeStr
+            18B1              18B1  badFileExt
+            18D6              18D6  badROcmd
+            18F4              18F4  badDskFull
+            1914              1914  badRead
+            193A              193A  exitQuit
+            194D              194D  okString
+            1954              1954  badDestStr
+            197B              197B  badSearch
+            1987              1987  badLineLen
 
 ---- Section .bss -------------------------------------------------------------
 
 Real              Virtual           Name
-            198E              198E  bssStart
-            198E              198E  pathSep
-            198F              198F  switchChar
-            1990              1990  roFlag
-            1991              1991  newFileFlag
-            1992              1992  noEofChar
-            1993              1993  eofReached
-            1994              1994  arenaSize
-            1998              1998  freeCnt
-            199C              199C  memPtr
-            19A4              19A4  fillPtr
-            19AC              19AC  curLineNum
-            19AE              19AE  curLinePtr
-            19B6              19B6  eofPtr
-            19BE              19BE  endOfArena
-            19C6              19C6  modFlag
-            19C7              19C7  bkupDel
-            19C8              19C8  readHdl
-            19CA              19CA  writeHdl
-            19CC              19CC  pathspec
-            1A4C              1A4C  wkfile
-            1A4C              1A4C  bkupfile
-            1ACC              1ACC  tmpNamePtr
-            1ACC              1ACC  fileNamePtr
-            1AD4              1AD4  tmpNamePtr2
-            1AD4              1AD4  fileExtPtr
-            1ADC              1ADC  cmdLine
-            1B5E              1B5E  charPtr
-            1B66              1B66  argCnt
-            1B67              1B67  argTbl
-            1B67              1B67  arg1
-            1B69              1B69  arg2
-            1B6B              1B6B  arg3
-            1B6D              1B6D  arg4
-            1B6F              1B6F  qmarkSet
-            1B70              1B70  argString
-            1BF2              1BF2  noAppendErr
-            1BF3              1BF3  workLine
-            1CF5              1CF5  workLen
-            1CF9              1CF9  spareLine
-            1DFB              1DFB  xfrName
-            1E7B              1E7B  xfrHdl
-            1E7D              1E7D  movCpFlg
-            1E7E              1E7E  blkPtrSrc
-            1E86              1E86  blkPtrEnd
-            1E8E              1E8E  cpyPtrDest
-            1E96              1E96  blkSize
-            1E9A              1E9A  copySize
-            1E9E              1E9E  srchMode
-            1E9F              1E9F  findMod
-            1EA0              1EA0  keepOld
-            1EA1              1EA1  fndLenOld
-            1EA3              1EA3  fndLenNew
-            1EA5              1EA5  fndStrPtr
-            1EAD              1EAD  fndLinePtr
-            1EB5              1EB5  fndLineNum
-            1EB7              1EB7  fndSrchLen
-            1EBB              1EBB  fndString1
-            1F3C              1F3C  fndString2
+            1997              1997  bssStart
+            1997              1997  pathSep
+            1998              1998  switchChar
+            1999              1999  roFlag
+            199A              199A  newFileFlag
+            199B              199B  noEofChar
+            199C              199C  eofReached
+            199D              199D  arenaSize
+            19A1              19A1  freeCnt
+            19A5              19A5  memPtr
+            19AD              19AD  fillPtr
+            19B5              19B5  curLineNum
+            19B7              19B7  curLinePtr
+            19BF              19BF  eofPtr
+            19C7              19C7  endOfArena
+            19CF              19CF  modFlag
+            19D0              19D0  bkupDel
+            19D1              19D1  readHdl
+            19D3              19D3  writeHdl
+            19D5              19D5  pathspec
+            1A55              1A55  wkfile
+            1A55              1A55  bkupfile
+            1AD5              1AD5  tmpNamePtr
+            1AD5              1AD5  fileNamePtr
+            1ADD              1ADD  tmpNamePtr2
+            1ADD              1ADD  fileExtPtr
+            1AE5              1AE5  cmdLine
+            1B67              1B67  charPtr
+            1B6F              1B6F  argCnt
+            1B70              1B70  argTbl
+            1B70              1B70  arg1
+            1B72              1B72  arg2
+            1B74              1B74  arg3
+            1B76              1B76  arg4
+            1B78              1B78  qmarkSet
+            1B79              1B79  argString
+            1BFB              1BFB  noAppendErr
+            1BFC              1BFC  workLine
+            1CFE              1CFE  workLen
+            1D02              1D02  spareLine
+            1E04              1E04  xfrName
+            1E84              1E84  xfrHdl
+            1E86              1E86  movCpFlg
+            1E87              1E87  blkPtrSrc
+            1E8F              1E8F  blkPtrEnd
+            1E97              1E97  cpyPtrDest
+            1E9F              1E9F  blkSize
+            1EA3              1EA3  copySize
+            1EA7              1EA7  srchMode
+            1EA8              1EA8  findMod
+            1EA9              1EA9  keepOld
+            1EAA              1EAA  fndLenOld
+            1EAC              1EAC  fndLenNew
+            1EAE              1EAE  fndStrPtr
+            1EB6              1EB6  fndLinePtr
+            1EBE              1EBE  fndLineNum
+            1EC0              1EC0  fndSrchLen
+            1EC4              1EC4  fndString1
+            1F45              1F45  fndString2
 
 ---- Section .stack -----------------------------------------------------------
 
 Real              Virtual           Name
-            2600              2600  stackTop
-            2600              2600  endOfProgram
+            2610              2610  stackTop
+            2610              2610  endOfProgram
 
