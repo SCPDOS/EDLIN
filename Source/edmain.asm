@@ -40,6 +40,12 @@ getCmdTail:
     int 21h
 ;Now parse the command line, to get full command spec for filename.
     lea rsi, qword [rdx + cmdArgs.progTail]     ;Get ptr to tail
+;Ensure the command line is CR terminated
+    movzx ecx, byte [rsi - 1] ;Get count byte
+    mov eax, 128 - 2        ;Max count byte 
+    cmp ecx, eax            ;Is count too big?
+    cmova ecx, eax          ;If so, use max count
+    mov byte [rsi + rcx], CR    ;And make sure we have a terminator here
     mov rbp, rdx        ;Save the cmdArgs ptr for use when checking drive ok
 cmdTailParse:
     call .skipSeps      ;Skips leading terminators
