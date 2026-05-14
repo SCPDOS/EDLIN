@@ -823,32 +823,12 @@ endEdit:
     int 21h
     test byte [newFileFlag], -1  ;If this is new file, skip this!
     jnz short .skipBkup
-    ;Now set the backup extension
+;Now ensure the backup extension
     mov rdi, qword [fileExtPtr]
     mov eax, "BAK"
     stosd
-;======NEW CODE======
-;Now ensure there is no old .BAK file by deleting it. 
-;If the delete fails, we proceed as normal. 
-;Worst case scenario, we end up with three files, .BAK, .EXT and .$$$. 
-;Deleting will always be ok, even if no .BAK file exists as del 
-; will just fnf fail in this case.
-    lea rdx, bkupfile
-    mov eax, 4100h
-    int 21h
-    lea rdi, pathspec
-    xchg rdi, rdx   ;Swap, for the rename
-;Note, that if the renames fail due to sharing issues (since we do close 
-; the files above thus losing our flocks on them), then we retain the 
-; two/three files. The presence of the .$$$ file and the original .BAK should 
-; make it incredibly unlikely that someone can overwrite your work. Also,
-; we're talking about a time period on the order of a matter of instructions.
-;If this EVER causes a problem, sue me.
-;======NEW CODE======
-;======OLD CODE======
-    ;lea rdx, pathspec
-    ;lea rdi, bkupfile
-;======OLD CODE======
+    lea rdx, pathspec
+    lea rdi, bkupfile
     mov eax, 5600h
     int 21h
 .skipBkup:

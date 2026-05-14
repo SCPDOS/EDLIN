@@ -476,9 +476,7 @@ delBkup:
 ;If returns with CF=CY, know that the backup didn't delete...
 ;Preserves all registers!
     test byte [bkupDel], -1     ;If set, backup already deleted
-    retnz
-    test byte [modFlag], -1   ;If clear, buffer has not been modified.
-    retz                        
+    retnz        
     test byte [newFileFlag], -1 ;If the file is new then it has no backup!
     retnz
     mov byte [bkupDel], -1      ;Now deleting backup
@@ -491,14 +489,27 @@ delBkup:
     lea rdx, bkupfile
     mov eax, 4100h
     int 21h
+    jnc .exit
+    cmp eax, errAccDen
+    jne .exit
+;Here if an access denied error. 
+; We close the .$$$ file, delete it and exit.
+    movzx ebx, word [writeHdl]
+    mov eax, 3E00h 
+    int 21h
+    mov rdi, qword [fileExtPtr]
+    mov eax, "$$$"
+    stosd
+    lea rdx, wkfile
+    mov eax, 4100h
+    int 21h    
+    lea rdx, badBackDel
+    jmp badExitMsg
+.exit:
     pop rdi
     pop rdx
     pop rax
-    retnc  ;Could overwrite first byte of this function with a ret 0:)
-    ;I like my idea... but no, we need the flag.
-    lea rdx, badBackDel
-    call printString
-    retToDOS errBadBak
+    return
 
 
 parseEntry:

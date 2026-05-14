@@ -19,7 +19,6 @@ curLinePtr  dq ?    ;Pointer to the current line
 eofPtr      dq ?    ;Pointer to the EOF char in the buffer
 endOfArena  dq ?    ;Ptr to the last available byte in the arena
 
-modFlag     db ?    ;Flag set to indicate the file was modified
 ;Backup is only deleted on exit or write, to make space for temp file.
 bkupDel     db ?    ;Flag to indicate that the backup was deleted
 

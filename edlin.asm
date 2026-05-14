@@ -24,24 +24,24 @@ BITS 64
 
 ;Edlin has two modes of operation: Command and Edit
 
-%include "./Include/dosMacro.mac"
-%include "./Include/dosError.inc"
-%include "./Include/edError.inc"
-%include "./Include/edStruc.inc"
-%include "./Include/dosStruc.inc"
+%include "./inc/dosMacro.mac"
+%include "./inc/dosError.inc"
+%include "./inc/edError.inc"
+%include "./inc/edStruc.inc"
+%include "./inc/dosStruc.inc"
 Segment .text align=1 
 progHeadPtr:      ;DO NOT TOUCH THIS POINTER. ALL TABLES ARE REL THIS PTR.
-%include "./Source/edmain.asm"
-%include "./Source/edutils.asm"
-%include "./Source/edfunc.asm"
-%include "./Source/edprn.asm"
-%include "./Source/ederr.asm"
+%include "./src/edmain.asm"
+%include "./src/edutils.asm"
+%include "./src/edfunc.asm"
+%include "./src/edprn.asm"
+%include "./src/ederr.asm"
 Segment .data align=1 follows=.text 
-%include "./Data/eddata.asm"
-%include "./Data/edmsg.asm"
+%include "./data/eddata.asm"
+%include "./data/edmsg.asm"
 Segment .bss align=1 follows=.data nobits
 bssStart:
-%include "./Data/edbss.asm"
+%include "./data/edbss.asm"
 bssLen equ ($ - bssStart)
 Segment .stack align=16 follows=.bss nobits
 ;Use a 200 QWORD stack
