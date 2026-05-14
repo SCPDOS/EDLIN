@@ -679,7 +679,7 @@
    244 000002C2 CD21                <1>     int 21h
    245 000002C4 0FB64315            <1>     movzx eax, byte [rbx + ffBlock.attribFnd]
    246 000002C8 A840                <1>     test al, dirCharDev
-   247 000002CA 0F8522140000        <1>     jnz charDevFail
+   247 000002CA 0F852C140000        <1>     jnz charDevFail
    248 000002D0 A801                <1>     test al, dirReadOnly
    249 000002D2 7407                <1>     jz short .notReadOnly
    250                              <1> .readOnly:
@@ -789,11 +789,11 @@
    353 0000042C B823250000          <1>     mov eax, 2523h  ;Set Interrupt handler for Int 23h
    354 00000431 CD21                <1>     int 21h
    355 00000433 B82A000000          <1>     mov eax, prompt
-   356 00000438 E85B110000          <1>     call printChar
+   356 00000438 E865110000          <1>     call printChar
    357 0000043D 488D15(4E010000)    <1>     lea rdx, cmdLine
    358 00000444 B8000A0000          <1>     mov eax, 0A00h  ;Take buffered input.
    359 00000449 CD21                <1>     int 21h
-   360 0000044B E846110000          <1>     call printLF 
+   360 0000044B E850110000          <1>     call printLF 
    361 00000450 488D35(50010000)    <1>     lea rsi, qword [cmdLine + halfLine.pString] ;Point to the text of the line
    362 00000457 488935(D0010000)    <1>     mov qword [charPtr], rsi
    363                              <1> ;Now we parse the command line!
@@ -835,7 +835,7 @@
    399 000004C4 488D3D(00000000)    <1>     lea rdi, cmdLetterTable
    400 000004CB B90F000000          <1>     mov ecx, cmdLetterTableL
    401 000004D0 F2AE                <1>     repne scasb
-   402 000004D2 0F85E3110000        <1>     jne printComErr ;Print an error if char not in table
+   402 000004D2 0F85ED110000        <1>     jne printComErr ;Print an error if char not in table
    403 000004D8 F7D1                <1>     not ecx ;1's compliment to subtract 1 too
    404 000004DA 81C10F000000        <1>     add ecx, cmdLetterTableL    ;Get L->R offset into table
    405                              <1> ;Now check the R/O permissions for the selected function
@@ -848,7 +848,7 @@
    412 000004F7 488D15(E3010000)    <1>     lea rdx, badROcmd
    413 000004FE B800090000          <1>     mov eax, 0900h
    414 00000503 CD21                <1>     int 21h
-   415 00000505 E9B1110000          <1>     jmp printComErr
+   415 00000505 E9BB110000          <1>     jmp printComErr
    416                              <1> execCmd:
    417 0000050A 488935(D0010000)    <1>     mov qword [charPtr], rsi
    418 00000511 488D2D(0F000000)    <1>     lea rbp, cmdFcnTable
@@ -919,11 +919,11 @@
     37                              <3>  %endif
      9                              <1> .lp:
     10 0000057E 488D15(5A020000)    <1>     lea rdx, okString
-    11 00000585 E8F90F0000          <1>     call printString
+    11 00000585 E803100000          <1>     call printString
     12 0000058A B8010C0000          <1>     mov eax, 0C01h  ;Take input one byte, return input byte in al
     13 0000058F CD21                <1>     int 21h
     14 00000591 50                  <1>     push rax        ;Save the char as we print CRLF to denote acceptance
-    15 00000592 E8F80F0000          <1>     call printCRLF
+    15 00000592 E802100000          <1>     call printCRLF
     16 00000597 58                  <1>     pop rax
     17 00000598 50                  <1>     push rax
     18 00000599 B813120000          <1>     mov eax, 1213h  ;Get DOS to Uppercase for us
@@ -1192,7 +1192,7 @@
    203 00000761 4829D0              <1>     sub rax, rdx    ;See if we have enough space for the new line!!
    204 00000764 4801C8              <1>     add rax, rcx
    205 00000767 483B05(30000000)    <1>     cmp rax, qword [endOfArena]
-   206 0000076E 0F833E0F0000        <1>     jae printMemErr
+   206 0000076E 0F83480F0000        <1>     jae printMemErr
    207 00000774 488705(28000000)    <1>     xchg qword [eofPtr], rax    ;This will be the new eof
    208 0000077B 4889C1              <1>     mov rcx, rax    ;Get the old eofPtr in rcx
    209 0000077E 4829F1              <1>     sub rcx, rsi
@@ -1400,7 +1400,7 @@
     36                              <3> %%a:
     37                              <3>  %endif
    320 00000827 58                  <1>     pop rax     ;Pop off the return address
-   321 00000828 E98E0E0000          <1>     jmp printComErr
+   321 00000828 E9980E0000          <1>     jmp printComErr
    322                              <1> 
    323                              <1> makeSpace:
    324                              <1> ;Makes space for a new string in the text
@@ -1734,7 +1734,7 @@
     37                              <3>  %endif
    498                              <1>     ;I like my idea... but no, we need the flag.
    499 00000959 488D15(1A010000)    <1>     lea rdx, badBackDel
-   500 00000960 E81E0C0000          <1>     call printString
+   500 00000960 E8280C0000          <1>     call printString
    501                              <1>     retToDOS errBadBak
     94 00000965 B8044C0000          <2>  mov eax, 04C00h | %1
     95 0000096A CD21                <2>  int 21h
@@ -1773,7 +1773,7 @@
    534 00000989 3C39                <1>     cmp al, "9"
    535 0000098B 771E                <1>     ja .endOfArg
    536 0000098D 81FB99190000        <1>     cmp ebx, 0FFFFh/0Ah ;If we are gonna go above the max, fail now
-   537 00000993 0F83220D0000        <1>     jae printComErr
+   537 00000993 0F832C0D0000        <1>     jae printComErr
    538 00000999 FFC9                <1>     dec ecx ;Indicate we have a valid digit
    539 0000099B 2C30                <1>     sub al, "0"
    540 0000099D 678D1C9B            <1>     lea ebx, dword [4*ebx + ebx]    ;5*ebx
@@ -1809,7 +1809,7 @@
     36                              <3> %%a:
     37                              <3>  %endif
    549 000009B0 85DB                <1>     test ebx, ebx   
-   550 000009B2 0F84030D0000        <1>     jz printComErr  ;Dont allow 0 as an argument
+   550 000009B2 0F840D0D0000        <1>     jz printComErr  ;Dont allow 0 as an argument
    551                              <1>     return
     13                              <2> %%_ret:
     14 000009B8 C3                  <2>  ret
@@ -1854,7 +1854,7 @@
    577                              <1> .validSpecial:
    578                              <1> ;Returns if it is a valid case to do so. Else no
    579 00000A02 803D(D8010000)04    <1>     cmp byte [argCnt], 4    ;Argument 2 is for the count
-   580 00000A09 0F84AC0C0000        <1>     je printComErr
+   580 00000A09 0F84B60C0000        <1>     je printComErr
    581                              <1>     return
     13                              <2> %%_ret:
     14 00000A0F C3                  <2>  ret
@@ -1887,7 +1887,7 @@
    604                              <1> ;^C handler for insert!
    605 00000A28 488D25(40060000)    <1>     lea rsp, stackTop
    606 00000A2F FC                  <1>     cld
-   607 00000A30 E85A0B0000          <1>     call printCRLF
+   607 00000A30 E8640B0000          <1>     call printCRLF
    608 00000A35 E848010000          <1>     call insertLine.cleanInsert ;We now reset the state of the memory
    609 00000A3A E9E4FAFFFF          <1>     jmp nextCmd     ;Now go to the next command in the command line!
    610                              <1> 
@@ -1895,7 +1895,7 @@
    612                              <1> ;^C handler. Reset the stack pointer and jump to get command
    613 00000A3F 488D25(40060000)    <1>     lea rsp, stackTop
    614 00000A46 FC                  <1>     cld
-   615 00000A47 E8430B0000          <1>     call printCRLF
+   615 00000A47 E84D0B0000          <1>     call printCRLF
    616 00000A4C E9CDF9FFFF          <1>     jmp getCommand  ;Now jump to get the command
     36                                  %include "./Source/edfunc.asm"
      1                              <1> ;This is where the main user selectable routines are
@@ -1911,7 +1911,7 @@
     11                              <1> ;Invoked by: [line]
     12                              <1> ;--------------------------------------------
     13 00000A51 803D(D8010000)01    <1>     cmp byte [argCnt], 1
-    14 00000A58 0F855D0C0000        <1>     jne printComErr
+    14 00000A58 0F85670C0000        <1>     jne printComErr
     15 00000A5E 48FF0D(D0010000)    <1>     dec qword [charPtr] ;Adjust ptr to point to the CR or ;
     16 00000A65 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]  ;Get the line number
     17 00000A6C 85DB                <1>     test ebx, ebx
@@ -1973,12 +1973,12 @@
     33 00000A9B E8F8FCFFFF          <1>     call stufBuf    ;Stuff the line pointed to by rsi into the buffer
     34 00000AA0 5E                  <1>     pop rsi         ;Get back the curLinePtr in rsi
     35 00000AA1 8915(67030000)      <1>     mov dword [workLen], edx    ;Store the real length into the var
-    36 00000AA7 E86A0B0000          <1>     call printLine      
-    37 00000AAC E8F60A0000          <1>     call printLineNum
+    36 00000AA7 E8740B0000          <1>     call printLine      
+    37 00000AAC E8000B0000          <1>     call printLineNum
     38 00000AB1 488D15(65020000)    <1>     lea rdx, workLine
     39 00000AB8 B8000A0000          <1>     mov eax, 0A00h  ;Edit magic woo
     40 00000ABD CD21                <1>     int 21h
-    41 00000ABF E8D20A0000          <1>     call printLF
+    41 00000ABF E8DC0A0000          <1>     call printLF
     42 00000AC4 807A0100            <1>     cmp byte [rdx + 1], 0   ;If just a CR input, return with no edit!
     43                              <1>     retz
     41                              <2> cret z
@@ -2017,7 +2017,7 @@
     54                              <1> ;Invoked by: [line]I
     55                              <1> ;--------------------------------------------
     56 00000AEA 803D(D8010000)01    <1>     cmp byte [argCnt], 1
-    57 00000AF1 0F85C40B0000        <1>     jne printComErr
+    57 00000AF1 0F85CE0B0000        <1>     jne printComErr
     58 00000AF7 488D152AFFFFFF      <1>     lea rdx, i23hInsert ;Set to the insert handler
     59 00000AFE B823250000          <1>     mov eax, 2523h
     60 00000B03 CD21                <1>     int 21h
@@ -2033,11 +2033,11 @@
     70 00000B25 E803FDFFFF          <1>     call makeSpace  ;Make space to insert new line!
     71                              <1> .inLp:
     72 00000B2A E81DFDFFFF          <1>     call setLineVars
-    73 00000B2F E8730A0000          <1>     call printLineNum
+    73 00000B2F E87D0A0000          <1>     call printLineNum
     74 00000B34 488D15(65020000)    <1>     lea rdx, workLine
     75 00000B3B B8000A0000          <1>     mov eax, 0A00h  ;Full on edit mode
     76 00000B40 CD21                <1>     int 21h
-    77 00000B42 E84F0A0000          <1>     call printLF
+    77 00000B42 E8590A0000          <1>     call printLF
     78                              <1>     ;Check if the first char in the buffer is a EOF
     79 00000B47 488D7202            <1>     lea rsi, qword [rdx + 2]    ;Go to the string portion immediately
     80 00000B4B 803E1A              <1>     cmp byte [rsi], EOF         ;Apparent EDLIN behaviour, terminate insert so!
@@ -2058,7 +2058,7 @@
     95 00000B76 EBB2                <1>     jmp short .inLp
     96                              <1> .inBad:
     97 00000B78 E805000000          <1>     call .cleanInsert
-    98 00000B7D E9300B0000          <1>     jmp printMemErr
+    98 00000B7D E93A0B0000          <1>     jmp printMemErr
     99                              <1> .cleanInsert: 
    100                              <1> ;Move the lines after the insertion point back to where they need to be :)
    101 00000B82 488B35(28000000)    <1>     mov rsi, qword [eofPtr] 
@@ -2083,7 +2083,7 @@
    117                              <1> ;Invoked by: [line][,line]D
    118                              <1> ;--------------------------------------------
    119 00000BB8 803D(D8010000)02    <1>     cmp byte [argCnt], 2
-   120 00000BBF 0F87F60A0000        <1>     ja printComErr
+   120 00000BBF 0F87000B0000        <1>     ja printComErr
    121 00000BC5 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
    122 00000BCC 85DB                <1>     test ebx, ebx
    123 00000BCE 750E                <1>     jnz .notCur
@@ -2149,7 +2149,7 @@
    160                              <1> ;Invoked by: [line]T[d:]filename
    161                              <1> ;--------------------------------------------
    162 00000C47 803D(D8010000)01    <1>     cmp byte [argCnt], 1
-   163 00000C4E 0F85670A0000        <1>     jne printComErr
+   163 00000C4E 0F85710A0000        <1>     jne printComErr
    164 00000C54 E8B7FDFFFF          <1>     call skipSpaces ;Move rsi to the first char of the xfrspec
    165 00000C59 48FFCE              <1>     dec rsi         ;Go to the first char
    166 00000C5C 488D15(6D040000)    <1>     lea rdx, xfrName
@@ -2170,339 +2170,340 @@
    181 00000C7A C60700              <1>     mov byte [rdi], 0   ;Store terminating null
    182 00000C7D 48FFCE              <1>     dec rsi             ;Now go to the char which terminated the copy
    183 00000C80 488935(D0010000)    <1>     mov qword [charPtr], rsi    ;And store this as the new continuation ptr
-   184 00000C87 B8003D0000          <1>     mov eax, 3D00h      ;Open file pointed to by rdx for reading
-   185 00000C8C CD21                <1>     int 21h
-   186 00000C8E 731B                <1>     jnc .fileOpen
-   187 00000C90 663D0200            <1>     cmp ax, errFnf
-   188 00000C94 488D15(8D000000)    <1>     lea rdx, badFindStr ;String for if the file is not found
-   189 00000C9B 488D1D(71000000)    <1>     lea rbx, badDrvStr  ;Else just say drive or fnf!
-   190 00000CA2 480F45D3            <1>     cmovne rdx, rbx
-   191 00000CA6 E9170A0000          <1>     jmp printErr    ;Print the string in rdx
-   192                              <1> .fileOpen:
-   193 00000CAB 668905(ED040000)    <1>     mov word [xfrHdl], ax   ;Save the handle
-   194                              <1>     ;Transfer lines works like insert lines, in that it is inserting lines
-   195                              <1>     ; but from a separate file. We therefore set up a custom ^C handler 
-   196                              <1>     ; and cleanup like insert if it is invoked!
-   197 00000CB2 B823250000          <1>     mov eax, 2523h  ;Setup int 23h for xfr
-   198 00000CB7 488D155CFDFFFF      <1>     lea rdx, i23hXfr
-   199 00000CBE CD21                <1>     int 21h
-   200 00000CC0 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
-   201 00000CC7 85DB                <1>     test ebx, ebx
-   202 00000CC9 7507                <1>     jnz .notCur
-   203 00000CCB 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum]    ;Get the current line number ptr
-   204                              <1> .notCur:
-   205 00000CD2 E88BFBFFFF          <1>     call findLine   ;Get actual line number in dx, and ptr in rdi
-   206 00000CD7 89D3                <1>     mov ebx, edx
-   207 00000CD9 488B15(30000000)    <1>     mov rdx, qword [endOfArena]     ;Copy to the end of the arena
-   208 00000CE0 E848FBFFFF          <1>     call makeSpace  ;And jiggle it over
-   209 00000CE5 488B15(20000000)    <1>     mov rdx, qword [curLinePtr] ;Read data into here now
-   210 00000CEC 488B0D(28000000)    <1>     mov rcx, qword [eofPtr]
-   211 00000CF3 29D1                <1>     sub ecx, edx    ;Get the number of chars of space we have to read in
-   212 00000CF5 51                  <1>     push rcx
-   213 00000CF6 B8003F0000          <1>     mov eax, 3F00h
-   214 00000CFB 0FB71D(ED040000)    <1>     movzx ebx, word [xfrHdl]
-   215 00000D02 CD21                <1>     int 21h
-   216 00000D04 5A                  <1>     pop rdx     ;Get the count back into rdx
-   217 00000D05 89C1                <1>     mov ecx, eax    ;Move the count into ecx
-   218 00000D07 39C2                <1>     cmp edx, eax
-   219 00000D09 7713                <1>     ja .fullXfr
-   220                              <1>     ;We copied exactly the size of the arena, assume this means the whole 
-   221                              <1>     ; file may not have been copied. We still proceed though
-   222 00000D0B 488D15(93010000)    <1>     lea rdx, badMergeStr
-   223 00000D12 488B0D(20000000)    <1>     mov rcx, qword [curLinePtr]
-   224 00000D19 E915000000          <1>     jmp .endXfr
-   225                              <1> .fullXfr:
-   226 00000D1E 48030D(20000000)    <1>     add rcx, qword [curLinePtr] ;Turn into offset from start of line
-   227 00000D25 4889CE              <1>     mov rsi, rcx
-   228 00000D28 48FFCE              <1>     dec rsi ;Go to the last char we read in
-   229 00000D2B AC                  <1>     lodsb
-   230 00000D2C 3C1A                <1>     cmp al, EOF
-   231 00000D2E 7503                <1>     jne .endXfr
-   232 00000D30 48FFC9              <1>     dec rcx ;Drop a byte
-   233                              <1> .endXfr:
-   234 00000D33 4889CF              <1>     mov rdi, rcx        ;Copy to the curLinePtr pos
-   235 00000D36 488B35(28000000)    <1>     mov rsi, qword [eofPtr]
-   236 00000D3D 48FFC6              <1>     inc rsi             ;Start copying from the stored data past the eofPtr
-   237 00000D40 488B0D(30000000)    <1>     mov rcx, qword [endOfArena]
-   238 00000D47 4829F1              <1>     sub rcx, rsi
-   239 00000D4A FFC1                <1>     inc ecx             ;Add EOF char to the count
-   240 00000D4C F3A4                <1>     rep movsb
-   241 00000D4E 48FFCF              <1>     dec rdi             ;Go back to the EOF char
-   242 00000D51 48893D(28000000)    <1>     mov qword [eofPtr], rdi
-   243 00000D58 0FB71D(ED040000)    <1>     movzx ebx, word [xfrHdl]
-   244 00000D5F B8003E0000          <1>     mov eax, 3E00h      ;Close handle!
-   245 00000D64 CD21                <1>     int 21h
-   246                              <1>     return
+   184                              <1>     ;Open file pointed to by rdx for reading
+   185 00000C87 B8203D0000          <1>     mov eax, (3Dh << 8) | ReadAccess | denyWriteShare
+   186 00000C8C CD21                <1>     int 21h
+   187 00000C8E 731B                <1>     jnc .fileOpen
+   188 00000C90 663D0200            <1>     cmp ax, errFnf
+   189 00000C94 488D15(8D000000)    <1>     lea rdx, badFindStr ;String for if the file is not found
+   190 00000C9B 488D1D(71000000)    <1>     lea rbx, badDrvStr  ;Else just say drive or fnf!
+   191 00000CA2 480F45D3            <1>     cmovne rdx, rbx
+   192 00000CA6 E9210A0000          <1>     jmp printErr    ;Print the string in rdx
+   193                              <1> .fileOpen:
+   194 00000CAB 668905(ED040000)    <1>     mov word [xfrHdl], ax   ;Save the handle
+   195                              <1>     ;Transfer lines works like insert lines, in that it is inserting lines
+   196                              <1>     ; but from a separate file. We therefore set up a custom ^C handler 
+   197                              <1>     ; and cleanup like insert if it is invoked!
+   198 00000CB2 B823250000          <1>     mov eax, 2523h  ;Setup int 23h for xfr
+   199 00000CB7 488D155CFDFFFF      <1>     lea rdx, i23hXfr
+   200 00000CBE CD21                <1>     int 21h
+   201 00000CC0 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
+   202 00000CC7 85DB                <1>     test ebx, ebx
+   203 00000CC9 7507                <1>     jnz .notCur
+   204 00000CCB 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum]    ;Get the current line number ptr
+   205                              <1> .notCur:
+   206 00000CD2 E88BFBFFFF          <1>     call findLine   ;Get actual line number in dx, and ptr in rdi
+   207 00000CD7 89D3                <1>     mov ebx, edx
+   208 00000CD9 488B15(30000000)    <1>     mov rdx, qword [endOfArena]     ;Copy to the end of the arena
+   209 00000CE0 E848FBFFFF          <1>     call makeSpace  ;And jiggle it over
+   210 00000CE5 488B15(20000000)    <1>     mov rdx, qword [curLinePtr] ;Read data into here now
+   211 00000CEC 488B0D(28000000)    <1>     mov rcx, qword [eofPtr]
+   212 00000CF3 29D1                <1>     sub ecx, edx    ;Get the number of chars of space we have to read in
+   213 00000CF5 51                  <1>     push rcx
+   214 00000CF6 B8003F0000          <1>     mov eax, 3F00h
+   215 00000CFB 0FB71D(ED040000)    <1>     movzx ebx, word [xfrHdl]
+   216 00000D02 CD21                <1>     int 21h
+   217 00000D04 5A                  <1>     pop rdx     ;Get the count back into rdx
+   218 00000D05 89C1                <1>     mov ecx, eax    ;Move the count into ecx
+   219 00000D07 39C2                <1>     cmp edx, eax
+   220 00000D09 7713                <1>     ja .fullXfr
+   221                              <1>     ;We copied exactly the size of the arena, assume this means the whole 
+   222                              <1>     ; file may not have been copied. We still proceed though
+   223 00000D0B 488D15(93010000)    <1>     lea rdx, badMergeStr
+   224 00000D12 488B0D(20000000)    <1>     mov rcx, qword [curLinePtr]
+   225 00000D19 E915000000          <1>     jmp .endXfr
+   226                              <1> .fullXfr:
+   227 00000D1E 48030D(20000000)    <1>     add rcx, qword [curLinePtr] ;Turn into offset from start of line
+   228 00000D25 4889CE              <1>     mov rsi, rcx
+   229 00000D28 48FFCE              <1>     dec rsi ;Go to the last char we read in
+   230 00000D2B AC                  <1>     lodsb
+   231 00000D2C 3C1A                <1>     cmp al, EOF
+   232 00000D2E 7503                <1>     jne .endXfr
+   233 00000D30 48FFC9              <1>     dec rcx ;Drop a byte
+   234                              <1> .endXfr:
+   235 00000D33 4889CF              <1>     mov rdi, rcx        ;Copy to the curLinePtr pos
+   236 00000D36 488B35(28000000)    <1>     mov rsi, qword [eofPtr]
+   237 00000D3D 48FFC6              <1>     inc rsi             ;Start copying from the stored data past the eofPtr
+   238 00000D40 488B0D(30000000)    <1>     mov rcx, qword [endOfArena]
+   239 00000D47 4829F1              <1>     sub rcx, rsi
+   240 00000D4A FFC1                <1>     inc ecx             ;Add EOF char to the count
+   241 00000D4C F3A4                <1>     rep movsb
+   242 00000D4E 48FFCF              <1>     dec rdi             ;Go back to the EOF char
+   243 00000D51 48893D(28000000)    <1>     mov qword [eofPtr], rdi
+   244 00000D58 0FB71D(ED040000)    <1>     movzx ebx, word [xfrHdl]
+   245 00000D5F B8003E0000          <1>     mov eax, 3E00h      ;Close handle!
+   246 00000D64 CD21                <1>     int 21h
+   247                              <1>     return
     13                              <2> %%_ret:
     14 00000D66 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   247                              <1> 
    248                              <1> 
-   249                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   250                              <1> ; File block moving functions (copying and cutting and pasting)
-   251                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   252                              <1> ;Both following functions need 3 arguments, but empty args are permitted!
-   253                              <1> moveLines:
-   254                              <1> ;Moves a block of lines elsewhere (non overlapping moves only)
-   255                              <1> ;--------------------------------------------
-   256                              <1> ;Invoked by: [line],[line],lineM
-   257                              <1> ;--------------------------------------------
-   258 00000D67 803D(D8010000)03    <1>     cmp byte [argCnt], 3
-   259 00000D6E 0F8547090000        <1>     jne printComErr
-   260 00000D74 C605(EF040000)FF    <1>     mov byte [movCpFlg], -1
-   261 00000D7B E914000000          <1>     jmp copyLines.common
-   262                              <1> copyLines:
-   263                              <1> ;Duplicates a line or a range of lines to a position specifed 
-   264                              <1> ;   (non-overlapping) 
-   265                              <1> ;--------------------------------------------
-   266                              <1> ;Invoked by: [line],[line],line[,count]C
-   267                              <1> ;--------------------------------------------
-   268 00000D80 803D(D8010000)03    <1>     cmp byte [argCnt], 3    ;This can be 3 or 4 arguments!
-   269 00000D87 0F822E090000        <1>     jb printComErr
-   270 00000D8D C605(EF040000)00    <1>     mov byte [movCpFlg], 0
-   271                              <1> .common:
-   272                              <1> ;arg1 = Start line of range for copy, default to current line
-   273                              <1> ;arg2 = End line of range for copy, default to line after current line
-   274                              <1> ;arg3 = Line to place it at, no default, cant be 0!
-   275                              <1> ;arg4 = Number of times to consecutively repeat the copy (copy only)
-   276 00000D94 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]  ;Check the mandatory argument
-   277 00000D9B 85DB                <1>     test ebx, ebx   ;Are we 0?
-   278 00000D9D 488D15(61020000)    <1>     lea rdx, badDestStr
-   279 00000DA4 0F8418090000        <1>     jz printErr
-   280 00000DAA 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
-   281 00000DB1 85DB                <1>     test ebx, ebx
-   282 00000DB3 7513                <1>     jnz .gotStart
-   283 00000DB5 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum]
-   284 00000DBC E852FAFFFF          <1>     call checkArgOrder  ;Check that this is before arg2
-   285 00000DC1 66891D(D9010000)    <1>     mov word [arg1], bx
-   286                              <1> .gotStart:
-   287 00000DC8 E895FAFFFF          <1>     call findLine   ;Get in rdi the ptr to the first argument
-   288 00000DCD 0F85E8080000        <1>     jnz printComErr ;If the line is not found, we gotta complain!
-   289 00000DD3 48893D(F0040000)    <1>     mov qword [blkPtrSrc], rdi  ;Save the ptr to the line!
-   290 00000DDA 0FB71D(DB010000)    <1>     movzx ebx, word [arg2]
-   291 00000DE1 85DB                <1>     test ebx, ebx
-   292 00000DE3 750E                <1>     jnz .gotEnd
-   293                              <1>     ;Set the default line!
-   294 00000DE5 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum] 
-   295 00000DEC 66891D(DB010000)    <1>     mov word [arg2], bx
-   296                              <1> .gotEnd:
-   297 00000DF3 53                  <1>     push rbx            ;Save this line number
-   298 00000DF4 E869FAFFFF          <1>     call findLine       ;Ensure the line in bx exists
-   299 00000DF9 5B                  <1>     pop rbx
-   300 00000DFA 0F85BB080000        <1>     jnz printComErr     ;Again, if the line not found, complain!
-   301 00000E00 FFC3                <1>     inc ebx             ;Now increment the line number to get line after
-   302 00000E02 E85BFAFFFF          <1>     call findLine   ;This can be end of arena since this is end of copy blk
-   303 00000E07 48893D(F8040000)    <1>     mov qword [blkPtrEnd], rdi     
-   304                              <1> ;We mightve changed the second argument so double check it!
-   305 00000E0E 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
-   306 00000E15 663B1D(DB010000)    <1>     cmp bx, word [arg2]
-   307 00000E1C 0F8799080000        <1>     ja printComErr
-   308                              <1> ;Now we check against the third line. It must not be in the range 
-   309                              <1> ; specified, else error (cannot overlap copies or moves!!!)
-   310 00000E22 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]    ;Get the storage line
-   311 00000E29 663B1D(D9010000)    <1>     cmp bx, word [arg1]     ;arg3 <= arg1?
-   312 00000E30 760D                <1>     jbe .argsOk
-   313 00000E32 663B1D(DB010000)    <1>     cmp bx, word [arg2]     ;arg3 > arg2 ?
-   314 00000E39 0F867C080000        <1>     jbe printComErr
-   315                              <1> .argsOk:
-   316 00000E3F 488B0D(F8040000)    <1>     mov rcx, qword [blkPtrEnd]
-   317 00000E46 482B0D(F0040000)    <1>     sub rcx, qword [blkPtrSrc]  ;Get the size of one block that we will move
-   318 00000E4D 890D(08050000)      <1>     mov dword [blkSize], ecx
-   319 00000E53 0FB705(DF010000)    <1>     movzx eax, word [arg4]      ;Get the count length
-   320 00000E5A 85C0                <1>     test eax, eax
-   321 00000E5C 750E                <1>     jnz .havCnt                 ;We have a given count
-   322 00000E5E B801000000          <1>     mov eax, 1                  ;Else, default to 1
-   323 00000E63 668905(DF010000)    <1>     mov word [arg4], ax
-   324 00000E6A EB0C                <1>     jmp short .noCount          ;ecx has the copysize, skip the multiply!
-   325                              <1> .havCnt:
-   326                              <1> ;Here we compute the copySize as a multiple of blkSize
-   327 00000E6C F7E1                <1>     mul ecx
-   328 00000E6E 85D2                <1>     test edx, edx   ;Is this larger than a dword (should never happen!)
-   329 00000E70 0F853C080000        <1>     jnz printMemErr ;Bad count argument!!
-   330 00000E76 89C1                <1>     mov ecx, eax    ;Make ecx the size of the copy
-   331                              <1> .noCount:
-   332 00000E78 890D(0C050000)      <1>     mov dword [copySize], ecx
-   333                              <1> ;Now, can we fit our new section of text in memory?
-   334 00000E7E 488B1D(28000000)    <1>     mov rbx, qword [eofPtr]
-   335 00000E85 488B15(30000000)    <1>     mov rdx, qword [endOfArena]
-   336 00000E8C 4829DA              <1>     sub rdx, rbx
-   337 00000E8F 39CA                <1>     cmp edx, ecx
-   338 00000E91 0F821B080000        <1>     jb printMemErr  ;Insufficient memory error!!
-   339                              <1> ;Finally, get the line we will place copy at!
-   340 00000E97 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]
-   341 00000E9E E8BFF9FFFF          <1>     call findLine
-   342 00000EA3 48893D(00050000)    <1>     mov qword [cpyPtrDest], rdi ;Now save ptr to the line we copy to!
-   343                              <1> ;Now make space for one load of the copy
-   344 00000EAA 488B35(28000000)    <1>     mov rsi, qword [eofPtr]
-   345 00000EB1 4889F1              <1>     mov rcx, rsi
-   346 00000EB4 4829F9              <1>     sub rcx, rdi    ;Get the number of bytes we will shift
-   347 00000EB7 FFC1                <1>     inc ecx         ;Add EOF
-   348 00000EB9 4889F7              <1>     mov rdi, rsi    ;This is the destination
-   349 00000EBC 8B05(0C050000)      <1>     mov eax, dword [copySize]
-   350 00000EC2 4801C7              <1>     add rdi, rax    ;Go to the destination
-   351 00000EC5 48893D(28000000)    <1>     mov qword [eofPtr], rdi ;This is the new eof position!
-   352 00000ECC FD                  <1>     std
-   353 00000ECD F3A4                <1>     rep movsb   ;Now copy in reverse :)
-   354 00000ECF FC                  <1>     cld
-   355                              <1> ;Adjust blkPtrs if they were in this region.
-   356 00000ED0 488B1D(00050000)    <1>     mov rbx, qword [cpyPtrDest]
-   357 00000ED7 483B1D(F0040000)    <1>     cmp rbx, qword [blkPtrSrc]
-   358 00000EDE 7714                <1>     ja .ptrsOk
-   359 00000EE0 8B0D(0C050000)      <1>     mov ecx, dword [copySize]    ;Add this amount to the ptrs
-   360 00000EE6 48010D(F0040000)    <1>     add qword [blkPtrSrc], rcx
-   361 00000EED 48010D(F8040000)    <1>     add qword [blkPtrEnd], rcx
-   362                              <1> .ptrsOk:
-   363 00000EF4 0FB71D(DF010000)    <1>     movzx ebx, word [arg4]  ;Get adjusted count to use as counter
-   364 00000EFB 488B3D(00050000)    <1>     mov rdi, qword [cpyPtrDest] ;Write to here!
-   365                              <1> .cpLp:
-   366 00000F02 8B0D(08050000)      <1>     mov ecx, dword [blkSize]
-   367 00000F08 488B35(F0040000)    <1>     mov rsi, qword [blkPtrSrc]  ;Start the copy from here
-   368 00000F0F F3A4                <1>     rep movsb
-   369 00000F11 FFCB                <1>     dec ebx
-   370 00000F13 75ED                <1>     jnz .cpLp   ;If this is zero, finish!
-   371 00000F15 803D(EF040000)00    <1>     cmp byte [movCpFlg], 0  ;Was this a move or a copy?
-   372 00000F1C 744F                <1>     je .copyDone
-   373                              <1> ;Now pull everything back over the source of the move
-   374 00000F1E 488B3D(F0040000)    <1>     mov rdi, qword [blkPtrSrc]
-   375 00000F25 488B35(F8040000)    <1>     mov rsi, qword [blkPtrEnd]
-   376 00000F2C 488B0D(28000000)    <1>     mov rcx, qword [eofPtr]
-   377 00000F33 4829F1              <1>     sub rcx, rsi    ;Get the number of bytes to move 
-   378 00000F36 48FFC1              <1>     inc rcx         ;Include EOF
-   379 00000F39 F3A4                <1>     rep movsb
-   380 00000F3B 48FFCF              <1>     dec rdi         ;Go back to the EOF char itself
-   381 00000F3E 48893D(28000000)    <1>     mov qword [eofPtr], rdi
-   382 00000F45 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]
-   383 00000F4C 663B1D(D9010000)    <1>     cmp bx, word [arg1] ;Was this in the range of the move?
-   384 00000F53 7618                <1>     jbe .copyDone
-   385                              <1>     ;If it was, add the difference - 1
-   386 00000F55 66031D(D9010000)    <1>     add bx, word [arg1]
-   387 00000F5C 662B1D(DB010000)    <1>     sub bx, word [arg2]
-   388 00000F63 66FFCB              <1>     dec bx 
-   389 00000F66 66891D(DD010000)    <1>     mov word [arg3], bx
-   390                              <1> .copyDone:
-   391 00000F6D 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]
-   392 00000F74 E8E9F8FFFF          <1>     call findLine
-   393 00000F79 48893D(20000000)    <1>     mov qword [curLinePtr], rdi
-   394 00000F80 66891D(1E000000)    <1>     mov word [curLineNum], bx
-   395                              <1>     return
+   249                              <1> 
+   250                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   251                              <1> ; File block moving functions (copying and cutting and pasting)
+   252                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   253                              <1> ;Both following functions need 3 arguments, but empty args are permitted!
+   254                              <1> moveLines:
+   255                              <1> ;Moves a block of lines elsewhere (non overlapping moves only)
+   256                              <1> ;--------------------------------------------
+   257                              <1> ;Invoked by: [line],[line],lineM
+   258                              <1> ;--------------------------------------------
+   259 00000D67 803D(D8010000)03    <1>     cmp byte [argCnt], 3
+   260 00000D6E 0F8551090000        <1>     jne printComErr
+   261 00000D74 C605(EF040000)FF    <1>     mov byte [movCpFlg], -1
+   262 00000D7B E914000000          <1>     jmp copyLines.common
+   263                              <1> copyLines:
+   264                              <1> ;Duplicates a line or a range of lines to a position specifed 
+   265                              <1> ;   (non-overlapping) 
+   266                              <1> ;--------------------------------------------
+   267                              <1> ;Invoked by: [line],[line],line[,count]C
+   268                              <1> ;--------------------------------------------
+   269 00000D80 803D(D8010000)03    <1>     cmp byte [argCnt], 3    ;This can be 3 or 4 arguments!
+   270 00000D87 0F8238090000        <1>     jb printComErr
+   271 00000D8D C605(EF040000)00    <1>     mov byte [movCpFlg], 0
+   272                              <1> .common:
+   273                              <1> ;arg1 = Start line of range for copy, default to current line
+   274                              <1> ;arg2 = End line of range for copy, default to line after current line
+   275                              <1> ;arg3 = Line to place it at, no default, cant be 0!
+   276                              <1> ;arg4 = Number of times to consecutively repeat the copy (copy only)
+   277 00000D94 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]  ;Check the mandatory argument
+   278 00000D9B 85DB                <1>     test ebx, ebx   ;Are we 0?
+   279 00000D9D 488D15(61020000)    <1>     lea rdx, badDestStr
+   280 00000DA4 0F8422090000        <1>     jz printErr
+   281 00000DAA 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
+   282 00000DB1 85DB                <1>     test ebx, ebx
+   283 00000DB3 7513                <1>     jnz .gotStart
+   284 00000DB5 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum]
+   285 00000DBC E852FAFFFF          <1>     call checkArgOrder  ;Check that this is before arg2
+   286 00000DC1 66891D(D9010000)    <1>     mov word [arg1], bx
+   287                              <1> .gotStart:
+   288 00000DC8 E895FAFFFF          <1>     call findLine   ;Get in rdi the ptr to the first argument
+   289 00000DCD 0F85F2080000        <1>     jnz printComErr ;If the line is not found, we gotta complain!
+   290 00000DD3 48893D(F0040000)    <1>     mov qword [blkPtrSrc], rdi  ;Save the ptr to the line!
+   291 00000DDA 0FB71D(DB010000)    <1>     movzx ebx, word [arg2]
+   292 00000DE1 85DB                <1>     test ebx, ebx
+   293 00000DE3 750E                <1>     jnz .gotEnd
+   294                              <1>     ;Set the default line!
+   295 00000DE5 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum] 
+   296 00000DEC 66891D(DB010000)    <1>     mov word [arg2], bx
+   297                              <1> .gotEnd:
+   298 00000DF3 53                  <1>     push rbx            ;Save this line number
+   299 00000DF4 E869FAFFFF          <1>     call findLine       ;Ensure the line in bx exists
+   300 00000DF9 5B                  <1>     pop rbx
+   301 00000DFA 0F85C5080000        <1>     jnz printComErr     ;Again, if the line not found, complain!
+   302 00000E00 FFC3                <1>     inc ebx             ;Now increment the line number to get line after
+   303 00000E02 E85BFAFFFF          <1>     call findLine   ;This can be end of arena since this is end of copy blk
+   304 00000E07 48893D(F8040000)    <1>     mov qword [blkPtrEnd], rdi     
+   305                              <1> ;We mightve changed the second argument so double check it!
+   306 00000E0E 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
+   307 00000E15 663B1D(DB010000)    <1>     cmp bx, word [arg2]
+   308 00000E1C 0F87A3080000        <1>     ja printComErr
+   309                              <1> ;Now we check against the third line. It must not be in the range 
+   310                              <1> ; specified, else error (cannot overlap copies or moves!!!)
+   311 00000E22 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]    ;Get the storage line
+   312 00000E29 663B1D(D9010000)    <1>     cmp bx, word [arg1]     ;arg3 <= arg1?
+   313 00000E30 760D                <1>     jbe .argsOk
+   314 00000E32 663B1D(DB010000)    <1>     cmp bx, word [arg2]     ;arg3 > arg2 ?
+   315 00000E39 0F8686080000        <1>     jbe printComErr
+   316                              <1> .argsOk:
+   317 00000E3F 488B0D(F8040000)    <1>     mov rcx, qword [blkPtrEnd]
+   318 00000E46 482B0D(F0040000)    <1>     sub rcx, qword [blkPtrSrc]  ;Get the size of one block that we will move
+   319 00000E4D 890D(08050000)      <1>     mov dword [blkSize], ecx
+   320 00000E53 0FB705(DF010000)    <1>     movzx eax, word [arg4]      ;Get the count length
+   321 00000E5A 85C0                <1>     test eax, eax
+   322 00000E5C 750E                <1>     jnz .havCnt                 ;We have a given count
+   323 00000E5E B801000000          <1>     mov eax, 1                  ;Else, default to 1
+   324 00000E63 668905(DF010000)    <1>     mov word [arg4], ax
+   325 00000E6A EB0C                <1>     jmp short .noCount          ;ecx has the copysize, skip the multiply!
+   326                              <1> .havCnt:
+   327                              <1> ;Here we compute the copySize as a multiple of blkSize
+   328 00000E6C F7E1                <1>     mul ecx
+   329 00000E6E 85D2                <1>     test edx, edx   ;Is this larger than a dword (should never happen!)
+   330 00000E70 0F8546080000        <1>     jnz printMemErr ;Bad count argument!!
+   331 00000E76 89C1                <1>     mov ecx, eax    ;Make ecx the size of the copy
+   332                              <1> .noCount:
+   333 00000E78 890D(0C050000)      <1>     mov dword [copySize], ecx
+   334                              <1> ;Now, can we fit our new section of text in memory?
+   335 00000E7E 488B1D(28000000)    <1>     mov rbx, qword [eofPtr]
+   336 00000E85 488B15(30000000)    <1>     mov rdx, qword [endOfArena]
+   337 00000E8C 4829DA              <1>     sub rdx, rbx
+   338 00000E8F 39CA                <1>     cmp edx, ecx
+   339 00000E91 0F8225080000        <1>     jb printMemErr  ;Insufficient memory error!!
+   340                              <1> ;Finally, get the line we will place copy at!
+   341 00000E97 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]
+   342 00000E9E E8BFF9FFFF          <1>     call findLine
+   343 00000EA3 48893D(00050000)    <1>     mov qword [cpyPtrDest], rdi ;Now save ptr to the line we copy to!
+   344                              <1> ;Now make space for one load of the copy
+   345 00000EAA 488B35(28000000)    <1>     mov rsi, qword [eofPtr]
+   346 00000EB1 4889F1              <1>     mov rcx, rsi
+   347 00000EB4 4829F9              <1>     sub rcx, rdi    ;Get the number of bytes we will shift
+   348 00000EB7 FFC1                <1>     inc ecx         ;Add EOF
+   349 00000EB9 4889F7              <1>     mov rdi, rsi    ;This is the destination
+   350 00000EBC 8B05(0C050000)      <1>     mov eax, dword [copySize]
+   351 00000EC2 4801C7              <1>     add rdi, rax    ;Go to the destination
+   352 00000EC5 48893D(28000000)    <1>     mov qword [eofPtr], rdi ;This is the new eof position!
+   353 00000ECC FD                  <1>     std
+   354 00000ECD F3A4                <1>     rep movsb   ;Now copy in reverse :)
+   355 00000ECF FC                  <1>     cld
+   356                              <1> ;Adjust blkPtrs if they were in this region.
+   357 00000ED0 488B1D(00050000)    <1>     mov rbx, qword [cpyPtrDest]
+   358 00000ED7 483B1D(F0040000)    <1>     cmp rbx, qword [blkPtrSrc]
+   359 00000EDE 7714                <1>     ja .ptrsOk
+   360 00000EE0 8B0D(0C050000)      <1>     mov ecx, dword [copySize]    ;Add this amount to the ptrs
+   361 00000EE6 48010D(F0040000)    <1>     add qword [blkPtrSrc], rcx
+   362 00000EED 48010D(F8040000)    <1>     add qword [blkPtrEnd], rcx
+   363                              <1> .ptrsOk:
+   364 00000EF4 0FB71D(DF010000)    <1>     movzx ebx, word [arg4]  ;Get adjusted count to use as counter
+   365 00000EFB 488B3D(00050000)    <1>     mov rdi, qword [cpyPtrDest] ;Write to here!
+   366                              <1> .cpLp:
+   367 00000F02 8B0D(08050000)      <1>     mov ecx, dword [blkSize]
+   368 00000F08 488B35(F0040000)    <1>     mov rsi, qword [blkPtrSrc]  ;Start the copy from here
+   369 00000F0F F3A4                <1>     rep movsb
+   370 00000F11 FFCB                <1>     dec ebx
+   371 00000F13 75ED                <1>     jnz .cpLp   ;If this is zero, finish!
+   372 00000F15 803D(EF040000)00    <1>     cmp byte [movCpFlg], 0  ;Was this a move or a copy?
+   373 00000F1C 744F                <1>     je .copyDone
+   374                              <1> ;Now pull everything back over the source of the move
+   375 00000F1E 488B3D(F0040000)    <1>     mov rdi, qword [blkPtrSrc]
+   376 00000F25 488B35(F8040000)    <1>     mov rsi, qword [blkPtrEnd]
+   377 00000F2C 488B0D(28000000)    <1>     mov rcx, qword [eofPtr]
+   378 00000F33 4829F1              <1>     sub rcx, rsi    ;Get the number of bytes to move 
+   379 00000F36 48FFC1              <1>     inc rcx         ;Include EOF
+   380 00000F39 F3A4                <1>     rep movsb
+   381 00000F3B 48FFCF              <1>     dec rdi         ;Go back to the EOF char itself
+   382 00000F3E 48893D(28000000)    <1>     mov qword [eofPtr], rdi
+   383 00000F45 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]
+   384 00000F4C 663B1D(D9010000)    <1>     cmp bx, word [arg1] ;Was this in the range of the move?
+   385 00000F53 7618                <1>     jbe .copyDone
+   386                              <1>     ;If it was, add the difference - 1
+   387 00000F55 66031D(D9010000)    <1>     add bx, word [arg1]
+   388 00000F5C 662B1D(DB010000)    <1>     sub bx, word [arg2]
+   389 00000F63 66FFCB              <1>     dec bx 
+   390 00000F66 66891D(DD010000)    <1>     mov word [arg3], bx
+   391                              <1> .copyDone:
+   392 00000F6D 0FB71D(DD010000)    <1>     movzx ebx, word [arg3]
+   393 00000F74 E8E9F8FFFF          <1>     call findLine
+   394 00000F79 48893D(20000000)    <1>     mov qword [curLinePtr], rdi
+   395 00000F80 66891D(1E000000)    <1>     mov word [curLineNum], bx
+   396                              <1>     return
     13                              <2> %%_ret:
     14 00000F87 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   396                              <1> 
-   397                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   398                              <1> ; File searching functions
-   399                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   400                              <1> 
-   401                              <1> searchText:
-   402                              <1> ;Searches text for a string
-   403                              <1> ;--------------------------------------------
-   404                              <1> ;Invoked by: [line][,line][?]S[string]
-   405                              <1> ;--------------------------------------------
-   406 00000F88 803D(D8010000)02    <1>     cmp byte [argCnt], 2
-   407 00000F8F 0F8726070000        <1>     ja printComErr
-   408 00000F95 C605(10050000)01    <1>     mov byte [srchMode], 1      ;Search from current line + 1
-   409 00000F9C C605(11050000)01    <1>     mov byte [findMod], 1       ;Set that we are searching!
-   410 00000FA3 E804F6FFFF          <1>     call findFirst
-   411 00000FA8 0F85FB060000        <1>     jnz printLineNotFoundErr
-   412                              <1> .lp:
-   413 00000FAE 488B35(1F050000)    <1>     mov rsi, qword [fndLinePtr]
-   414 00000FB5 0FB71D(27050000)    <1>     movzx ebx, word [fndLineNum]
-   415 00000FBC E855060000          <1>     call printLine      ;Print this line!
-   416 00000FC1 488B3D(17050000)    <1>     mov rdi, qword [fndStrPtr]
-   417 00000FC8 8B0D(29050000)      <1>     mov ecx, dword [fndSrchLen]
-   418 00000FCE B00A                <1>     mov al, LF
-   419 00000FD0 F2AE                <1>     repne scasb
-   420 00000FD2 0F85D1060000        <1>     jne printLineNotFoundErr
-   421 00000FD8 48893D(17050000)    <1>     mov qword [fndStrPtr], rdi
-   422 00000FDF 48893D(1F050000)    <1>     mov qword [fndLinePtr], rdi
-   423 00000FE6 890D(29050000)      <1>     mov dword [fndSrchLen], ecx ;Remaining count for search region
-   424 00000FEC 66FF05(27050000)    <1>     inc word [fndLineNum]   ;Goto next line now!
-   425 00000FF3 E87CF5FFFF          <1>     call okPrompt
-   426 00000FF8 740D                <1>     jz findSetLine
-   427 00000FFA E891F6FFFF          <1>     call findNext
-   428 00000FFF 0F85A4060000        <1>     jnz printLineNotFoundErr    ;If no more found, print error message!
-   429 00001005 EBA7                <1>     jmp short .lp   ;Else, output it and loop again
-   430                              <1> 
-   431                              <1> findSetLine:
-   432 00001007 0FB71D(27050000)    <1>     movzx ebx, word [fndLineNum]
-   433 0000100E 803D(11050000)00    <1>     cmp byte [findMod], 0   ;If we are search, we need to decrement
-   434 00001015 7402                <1>     je .main
-   435 00001017 FFCB                <1>     dec ebx ;Advance from current line to the last line we found on!
-   436                              <1> .main:
-   437 00001019 E844F8FFFF          <1>     call findLine
-   438 0000101E 66891D(1E000000)    <1>     mov word [curLineNum], bx
-   439 00001025 48893D(20000000)    <1>     mov qword [curLinePtr], rdi
-   440                              <1>     return
+   397                              <1> 
+   398                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   399                              <1> ; File searching functions
+   400                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   401                              <1> 
+   402                              <1> searchText:
+   403                              <1> ;Searches text for a string
+   404                              <1> ;--------------------------------------------
+   405                              <1> ;Invoked by: [line][,line][?]S[string]
+   406                              <1> ;--------------------------------------------
+   407 00000F88 803D(D8010000)02    <1>     cmp byte [argCnt], 2
+   408 00000F8F 0F8730070000        <1>     ja printComErr
+   409 00000F95 C605(10050000)01    <1>     mov byte [srchMode], 1      ;Search from current line + 1
+   410 00000F9C C605(11050000)01    <1>     mov byte [findMod], 1       ;Set that we are searching!
+   411 00000FA3 E804F6FFFF          <1>     call findFirst
+   412 00000FA8 0F8505070000        <1>     jnz printLineNotFoundErr
+   413                              <1> .lp:
+   414 00000FAE 488B35(1F050000)    <1>     mov rsi, qword [fndLinePtr]
+   415 00000FB5 0FB71D(27050000)    <1>     movzx ebx, word [fndLineNum]
+   416 00000FBC E85F060000          <1>     call printLine      ;Print this line!
+   417 00000FC1 488B3D(17050000)    <1>     mov rdi, qword [fndStrPtr]
+   418 00000FC8 8B0D(29050000)      <1>     mov ecx, dword [fndSrchLen]
+   419 00000FCE B00A                <1>     mov al, LF
+   420 00000FD0 F2AE                <1>     repne scasb
+   421 00000FD2 0F85DB060000        <1>     jne printLineNotFoundErr
+   422 00000FD8 48893D(17050000)    <1>     mov qword [fndStrPtr], rdi
+   423 00000FDF 48893D(1F050000)    <1>     mov qword [fndLinePtr], rdi
+   424 00000FE6 890D(29050000)      <1>     mov dword [fndSrchLen], ecx ;Remaining count for search region
+   425 00000FEC 66FF05(27050000)    <1>     inc word [fndLineNum]   ;Goto next line now!
+   426 00000FF3 E87CF5FFFF          <1>     call okPrompt
+   427 00000FF8 740D                <1>     jz findSetLine
+   428 00000FFA E891F6FFFF          <1>     call findNext
+   429 00000FFF 0F85AE060000        <1>     jnz printLineNotFoundErr    ;If no more found, print error message!
+   430 00001005 EBA7                <1>     jmp short .lp   ;Else, output it and loop again
+   431                              <1> 
+   432                              <1> findSetLine:
+   433 00001007 0FB71D(27050000)    <1>     movzx ebx, word [fndLineNum]
+   434 0000100E 803D(11050000)00    <1>     cmp byte [findMod], 0   ;If we are search, we need to decrement
+   435 00001015 7402                <1>     je .main
+   436 00001017 FFCB                <1>     dec ebx ;Advance from current line to the last line we found on!
+   437                              <1> .main:
+   438 00001019 E844F8FFFF          <1>     call findLine
+   439 0000101E 66891D(1E000000)    <1>     mov word [curLineNum], bx
+   440 00001025 48893D(20000000)    <1>     mov qword [curLinePtr], rdi
+   441                              <1>     return
     13                              <2> %%_ret:
     14 0000102C C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   441                              <1> 
-   442                              <1> replaceText:
-   443                              <1> ;Replaces all matching strings with specified string (NO REGEX)
-   444                              <1> ;--------------------------------------------
-   445                              <1> ;Invoked by: [line][,line][?]R[string]<EOF>[string]
-   446                              <1> ;--------------------------------------------
-   447 0000102D 803D(D8010000)02    <1>     cmp byte [argCnt], 2
-   448 00001034 0F8781060000        <1>     ja printComErr
-   449 0000103A C605(10050000)01    <1>     mov byte [srchMode], 1  ;Search by default from current line + 1
-   450 00001041 C605(11050000)00    <1>     mov byte [findMod], 0   ;Set that we are replacing the string!
-   451 00001048 E85FF5FFFF          <1>     call findFirst
-   452 0000104D 0F8556060000        <1>     jnz printLineNotFoundErr
-   453                              <1> .lp:
-   454 00001053 488B35(1F050000)    <1>     mov rsi, qword [fndLinePtr]
-   455 0000105A E839F7FFFF          <1>     call stufBuf    ;Get the line length in edx
-   456 0000105F 0FB70D(13050000)    <1>     movzx ecx, word [fndLenOld]
-   457 00001066 29CA                <1>     sub edx, ecx
-   458 00001068 0FB70D(15050000)    <1>     movzx ecx, word [fndLenNew]
-   459 0000106F 01CA                <1>     add edx, ecx
-   460 00001071 81FAFE000000        <1>     cmp edx, 254
-   461 00001077 0F87C0000000        <1>     ja .tooLong
-   462 0000107D 0FB71D(27050000)    <1>     movzx ebx, word [fndLineNum]
-   463 00001084 52                  <1>     push rdx    ;Save the line length
-   464 00001085 E81D050000          <1>     call printLineNum   ;Print the line number in ebx
-   465 0000108A 5A                  <1>     pop rdx
-   466                              <1>     ;Now build the new string in the buffer to print as a replacement
-   467 0000108B 488B0D(17050000)    <1>     mov rcx, qword [fndStrPtr]
-   468 00001092 488B35(1F050000)    <1>     mov rsi, qword [fndLinePtr]
-   469 00001099 4829F1              <1>     sub rcx, rsi    ;Get the number of chars into the line our string is at
-   470 0000109C 48FFC9              <1>     dec rcx         ;Drop the first char of the string we will replace
-   471 0000109F 488D3D(6B030000)    <1>     lea rdi, spareLine  ;Build the new line in this buffer 
-   472 000010A6 E89E000000          <1>     call .cpyString
-   473 000010AB 56                  <1>     push rsi
-   474 000010AC 488D35(AF050000)    <1>     lea rsi, fndString2 + 1
-   475 000010B3 0FB70D(15050000)    <1>     movzx ecx, word [fndLenNew]
-   476 000010BA E88A000000          <1>     call .cpyString
-   477 000010BF 5E                  <1>     pop rsi
-   478 000010C0 0FB70D(13050000)    <1>     movzx ecx, word [fndLenOld]
-   479 000010C7 4801CE              <1>     add rsi, rcx
-   480 000010CA 89D1                <1>     mov ecx, edx    ;Move the remaining chars count into ecx
-   481 000010CC 81C102000000        <1>     add ecx, 2      ;Add 2 for the CR/LF
-   482 000010D2 E872000000          <1>     call .cpyString ;Write the last part of the line in
-   483 000010D7 31C0                <1>     xor eax, eax
-   484 000010D9 AA                  <1>     stosb           ;Store the null terminator too
-   485 000010DA E8B4050000          <1>     call prnAsciiz
-   486 000010DF E890F4FFFF          <1>     call okPrompt
-   487 000010E4 754A                <1>     jnz .gotoNext
-   488 000010E6 E81CFFFFFF          <1>     call findSetLine
-   489 000010EB 488B3D(17050000)    <1>     mov rdi, qword [fndStrPtr]
-   490 000010F2 48FFCF              <1>     dec rdi
-   491 000010F5 488D35(AF050000)    <1>     lea rsi, fndString2 + 1
-   492 000010FC 0FB715(13050000)    <1>     movzx edx, word [fndLenOld]
-   493 00001103 0FB70D(15050000)    <1>     movzx ecx, word [fndLenNew]
-   494 0000110A FFC9                <1>     dec ecx
-   495 0000110C 48010D(17050000)    <1>     add qword [fndStrPtr], rcx  ;Go to the end of the found string
-   496 00001113 FFC1                <1>     inc ecx
-   497 00001115 FFCA                <1>     dec edx
-   498 00001117 2915(29050000)      <1>     sub dword [fndSrchLen], edx ;
-   499 0000111D 730A                <1>     jae .overspill
-   500 0000111F C705(29050000)0000- <1>     mov dword [fndSrchLen], 0
-   500 00001127 0000                <1>
-   501                              <1> .overspill:
-   502 00001129 FFC2                <1>     inc edx
-   503 0000112B E81AF6FFFF          <1>     call replaceLine
-   504                              <1> .gotoNext:
-   505 00001130 E85BF5FFFF          <1>     call findNext
-   506                              <1>     retnz
+   442                              <1> 
+   443                              <1> replaceText:
+   444                              <1> ;Replaces all matching strings with specified string (NO REGEX)
+   445                              <1> ;--------------------------------------------
+   446                              <1> ;Invoked by: [line][,line][?]R[string]<EOF>[string]
+   447                              <1> ;--------------------------------------------
+   448 0000102D 803D(D8010000)02    <1>     cmp byte [argCnt], 2
+   449 00001034 0F878B060000        <1>     ja printComErr
+   450 0000103A C605(10050000)01    <1>     mov byte [srchMode], 1  ;Search by default from current line + 1
+   451 00001041 C605(11050000)00    <1>     mov byte [findMod], 0   ;Set that we are replacing the string!
+   452 00001048 E85FF5FFFF          <1>     call findFirst
+   453 0000104D 0F8560060000        <1>     jnz printLineNotFoundErr
+   454                              <1> .lp:
+   455 00001053 488B35(1F050000)    <1>     mov rsi, qword [fndLinePtr]
+   456 0000105A E839F7FFFF          <1>     call stufBuf    ;Get the line length in edx
+   457 0000105F 0FB70D(13050000)    <1>     movzx ecx, word [fndLenOld]
+   458 00001066 29CA                <1>     sub edx, ecx
+   459 00001068 0FB70D(15050000)    <1>     movzx ecx, word [fndLenNew]
+   460 0000106F 01CA                <1>     add edx, ecx
+   461 00001071 81FAFE000000        <1>     cmp edx, 254
+   462 00001077 0F87C0000000        <1>     ja .tooLong
+   463 0000107D 0FB71D(27050000)    <1>     movzx ebx, word [fndLineNum]
+   464 00001084 52                  <1>     push rdx    ;Save the line length
+   465 00001085 E827050000          <1>     call printLineNum   ;Print the line number in ebx
+   466 0000108A 5A                  <1>     pop rdx
+   467                              <1>     ;Now build the new string in the buffer to print as a replacement
+   468 0000108B 488B0D(17050000)    <1>     mov rcx, qword [fndStrPtr]
+   469 00001092 488B35(1F050000)    <1>     mov rsi, qword [fndLinePtr]
+   470 00001099 4829F1              <1>     sub rcx, rsi    ;Get the number of chars into the line our string is at
+   471 0000109C 48FFC9              <1>     dec rcx         ;Drop the first char of the string we will replace
+   472 0000109F 488D3D(6B030000)    <1>     lea rdi, spareLine  ;Build the new line in this buffer 
+   473 000010A6 E89E000000          <1>     call .cpyString
+   474 000010AB 56                  <1>     push rsi
+   475 000010AC 488D35(AF050000)    <1>     lea rsi, fndString2 + 1
+   476 000010B3 0FB70D(15050000)    <1>     movzx ecx, word [fndLenNew]
+   477 000010BA E88A000000          <1>     call .cpyString
+   478 000010BF 5E                  <1>     pop rsi
+   479 000010C0 0FB70D(13050000)    <1>     movzx ecx, word [fndLenOld]
+   480 000010C7 4801CE              <1>     add rsi, rcx
+   481 000010CA 89D1                <1>     mov ecx, edx    ;Move the remaining chars count into ecx
+   482 000010CC 81C102000000        <1>     add ecx, 2      ;Add 2 for the CR/LF
+   483 000010D2 E872000000          <1>     call .cpyString ;Write the last part of the line in
+   484 000010D7 31C0                <1>     xor eax, eax
+   485 000010D9 AA                  <1>     stosb           ;Store the null terminator too
+   486 000010DA E8BE050000          <1>     call prnAsciiz
+   487 000010DF E890F4FFFF          <1>     call okPrompt
+   488 000010E4 754A                <1>     jnz .gotoNext
+   489 000010E6 E81CFFFFFF          <1>     call findSetLine
+   490 000010EB 488B3D(17050000)    <1>     mov rdi, qword [fndStrPtr]
+   491 000010F2 48FFCF              <1>     dec rdi
+   492 000010F5 488D35(AF050000)    <1>     lea rsi, fndString2 + 1
+   493 000010FC 0FB715(13050000)    <1>     movzx edx, word [fndLenOld]
+   494 00001103 0FB70D(15050000)    <1>     movzx ecx, word [fndLenNew]
+   495 0000110A FFC9                <1>     dec ecx
+   496 0000110C 48010D(17050000)    <1>     add qword [fndStrPtr], rcx  ;Go to the end of the found string
+   497 00001113 FFC1                <1>     inc ecx
+   498 00001115 FFCA                <1>     dec edx
+   499 00001117 2915(29050000)      <1>     sub dword [fndSrchLen], edx ;
+   500 0000111D 730A                <1>     jae .overspill
+   501 0000111F C705(29050000)0000- <1>     mov dword [fndSrchLen], 0
+   501 00001127 0000                <1>
+   502                              <1> .overspill:
+   503 00001129 FFC2                <1>     inc edx
+   504 0000112B E81AF6FFFF          <1>     call replaceLine
+   505                              <1> .gotoNext:
+   506 00001130 E85BF5FFFF          <1>     call findNext
+   507                              <1>     retnz
     45                              <2> cret nz
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
@@ -2526,15 +2527,15 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   507 00001138 E916FFFFFF          <1>     jmp .lp
-   508                              <1> .tooLong:
-   509 0000113D 488D15(94020000)    <1>     lea rdx, badLineLen
-   510 00001144 E979050000          <1>     jmp printErr
-   511                              <1> .cpyString:
-   512                              <1> ;Copies a string, ensures we have the last char in al when we return
-   513                              <1> ;Copies ecx number of chars
-   514 00001149 85C9                <1>     test ecx, ecx
-   515                              <1>     retz
+   508 00001138 E916FFFFFF          <1>     jmp .lp
+   509                              <1> .tooLong:
+   510 0000113D 488D15(94020000)    <1>     lea rdx, badLineLen
+   511 00001144 E983050000          <1>     jmp printErr
+   512                              <1> .cpyString:
+   513                              <1> ;Copies a string, ensures we have the last char in al when we return
+   514                              <1> ;Copies ecx number of chars
+   515 00001149 85C9                <1>     test ecx, ecx
+   516                              <1>     retz
     41                              <2> cret z
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
@@ -2555,41 +2556,41 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   516                              <1> .cpsLp:
-   517 0000114D AC                  <1>     lodsb
-   518 0000114E AA                  <1>     stosb
-   519 0000114F FFCA                <1>     dec edx ;Decrement total line length
-   520 00001151 FFC9                <1>     dec ecx ;Decrement line portion length
-   521 00001153 75F8                <1>     jnz .cpsLp
-   522                              <1>     return
+   517                              <1> .cpsLp:
+   518 0000114D AC                  <1>     lodsb
+   519 0000114E AA                  <1>     stosb
+   520 0000114F FFCA                <1>     dec edx ;Decrement total line length
+   521 00001151 FFC9                <1>     dec ecx ;Decrement line portion length
+   522 00001153 75F8                <1>     jnz .cpsLp
+   523                              <1>     return
     13                              <2> %%_ret:
     14 00001155 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   523                              <1> 
-   524                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   525                              <1> ; File listing functions
-   526                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   527                              <1> 
-   528                              <1> listLines:
-   529                              <1> ;Prints a line or a number of lines.
-   530                              <1> ;Defaults to from current line print 23 lines.
-   531                              <1> ;Doesnt change the current line!
-   532                              <1> ;--------------------------------------------
-   533                              <1> ;Invoked by: [line][,line]L
-   534                              <1> ;--------------------------------------------
-   535 00001156 803D(D8010000)02    <1>     cmp byte [argCnt], 2
-   536 0000115D 0F8758050000        <1>     ja printComErr
-   537 00001163 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
-   538 0000116A 85DB                <1>     test ebx, ebx
-   539 0000116C 7514                <1>     jnz .notCur ;If not the default, we do as told
-   540                              <1>     ;Else, default behaviour
-   541 0000116E 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum]
-   542 00001175 81EB0B000000        <1>     sub ebx, 11 ;Start printing 11 lines before the current line!
-   543 0000117B 7705                <1>     ja .notCur  
-   544 0000117D BB01000000          <1>     mov ebx, 1
-   545                              <1> .notCur:
-   546 00001182 E8DBF6FFFF          <1>     call findLine
-   547                              <1>     retnz   ;Return if the line not found!
+   524                              <1> 
+   525                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   526                              <1> ; File listing functions
+   527                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   528                              <1> 
+   529                              <1> listLines:
+   530                              <1> ;Prints a line or a number of lines.
+   531                              <1> ;Defaults to from current line print 23 lines.
+   532                              <1> ;Doesnt change the current line!
+   533                              <1> ;--------------------------------------------
+   534                              <1> ;Invoked by: [line][,line]L
+   535                              <1> ;--------------------------------------------
+   536 00001156 803D(D8010000)02    <1>     cmp byte [argCnt], 2
+   537 0000115D 0F8762050000        <1>     ja printComErr
+   538 00001163 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
+   539 0000116A 85DB                <1>     test ebx, ebx
+   540 0000116C 7514                <1>     jnz .notCur ;If not the default, we do as told
+   541                              <1>     ;Else, default behaviour
+   542 0000116E 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum]
+   543 00001175 81EB0B000000        <1>     sub ebx, 11 ;Start printing 11 lines before the current line!
+   544 0000117B 7705                <1>     ja .notCur  
+   545 0000117D BB01000000          <1>     mov ebx, 1
+   546                              <1> .notCur:
+   547 00001182 E8DBF6FFFF          <1>     call findLine
+   548                              <1>     retnz   ;Return if the line not found!
     45                              <2> cret nz
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
@@ -2610,37 +2611,37 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   548 00001189 4889FE              <1>     mov rsi, rdi
-   549 0000118C 0FB73D(DB010000)    <1>     movzx edi, word [arg2]  ;Get the last line to print
-   550 00001193 FFC7                <1>     inc edi
-   551 00001195 29DF                <1>     sub edi, ebx            ;Get the difference!
-   552 00001197 0F877E040000        <1>     ja printLines   
-   553 0000119D BF17000000          <1>     mov edi, 23     ;Else the default
-   554 000011A2 E974040000          <1>     jmp printLines  ;Return through printLines!
-   555                              <1> 
-   556                              <1> pageLines:
-   557                              <1> ;Prints a page of lines
-   558                              <1> ;Defaults to from current line to print 23 lines
-   559                              <1> ;Changes the current line to the last line printed!
-   560                              <1> ;--------------------------------------------
-   561                              <1> ;Invoked by: [line][,line]P
-   562                              <1> ;--------------------------------------------
-   563 000011A7 803D(D8010000)02    <1>     cmp byte [argCnt], 2
-   564 000011AE 0F8707050000        <1>     ja printComErr
-   565 000011B4 31DB                <1>     xor ebx, ebx    ;Set the pointer to the end of the file firstly
-   566 000011B6 E8A7F6FFFF          <1>     call findLine   
-   567                              <1>     ;Use r10 to keep track of the last line in the file that we will set
-   568 000011BB 4989D2              <1>     mov r10, rdx
-   569 000011BE 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
-   570 000011C5 85DB                <1>     test ebx, ebx
-   571 000011C7 7511                <1>     jnz .notCur
-   572 000011C9 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum]
-   573 000011D0 81FB01000000        <1>     cmp ebx, 1  ;If the first line is 1, keep it there
-   574 000011D6 7402                <1>     je .notCur
-   575 000011D8 FFC3                <1>     inc ebx     ;Else go to the line after
-   576                              <1> .notCur:
-   577 000011DA 4C39D3              <1>     cmp rbx, r10
-   578                              <1>     reta    ;If we specify past the last line, do nothing
+   549 00001189 4889FE              <1>     mov rsi, rdi
+   550 0000118C 0FB73D(DB010000)    <1>     movzx edi, word [arg2]  ;Get the last line to print
+   551 00001193 FFC7                <1>     inc edi
+   552 00001195 29DF                <1>     sub edi, ebx            ;Get the difference!
+   553 00001197 0F8788040000        <1>     ja printLines   
+   554 0000119D BF17000000          <1>     mov edi, 23     ;Else the default
+   555 000011A2 E97E040000          <1>     jmp printLines  ;Return through printLines!
+   556                              <1> 
+   557                              <1> pageLines:
+   558                              <1> ;Prints a page of lines
+   559                              <1> ;Defaults to from current line to print 23 lines
+   560                              <1> ;Changes the current line to the last line printed!
+   561                              <1> ;--------------------------------------------
+   562                              <1> ;Invoked by: [line][,line]P
+   563                              <1> ;--------------------------------------------
+   564 000011A7 803D(D8010000)02    <1>     cmp byte [argCnt], 2
+   565 000011AE 0F8711050000        <1>     ja printComErr
+   566 000011B4 31DB                <1>     xor ebx, ebx    ;Set the pointer to the end of the file firstly
+   567 000011B6 E8A7F6FFFF          <1>     call findLine   
+   568                              <1>     ;Use r10 to keep track of the last line in the file that we will set
+   569 000011BB 4989D2              <1>     mov r10, rdx
+   570 000011BE 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
+   571 000011C5 85DB                <1>     test ebx, ebx
+   572 000011C7 7511                <1>     jnz .notCur
+   573 000011C9 0FB71D(1E000000)    <1>     movzx ebx, word [curLineNum]
+   574 000011D0 81FB01000000        <1>     cmp ebx, 1  ;If the first line is 1, keep it there
+   575 000011D6 7402                <1>     je .notCur
+   576 000011D8 FFC3                <1>     inc ebx     ;Else go to the line after
+   577                              <1> .notCur:
+   578 000011DA 4C39D3              <1>     cmp rbx, r10
+   579                              <1>     reta    ;If we specify past the last line, do nothing
     73                              <2> cret a
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
@@ -2664,55 +2665,55 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   579 000011E0 0FB715(DB010000)    <1>     movzx edx, word [arg2]  
-   580 000011E7 85D2                <1>     test edx, edx   ;Did the user give what line to stop printing on?
-   581 000011E9 7508                <1>     jnz .arg2Given 
-   582                              <1> ;vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-   583                              <1> ;Here is where the screen width is computed when we do dynamic 
-   584                              <1> ; screen size stuff
-   585 000011EB 89DA                <1>     mov edx, ebx
-   586 000011ED 81C216000000        <1>     add edx, 22     ;Else its current line + 23
-   587                              <1> ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   588                              <1> .arg2Given:
-   589 000011F3 FFC2                <1>     inc edx         ;Get that last line
-   590 000011F5 4C39D2              <1>     cmp rdx, r10    ;Is it past the end of the file?
-   591 000011F8 7603                <1>     jbe .okRange
-   592 000011FA 4C89D2              <1>     mov rdx, r10    ;Else, use r10 as the last line
-   593                              <1> .okRange:
-   594 000011FD 52                  <1>     push rdx        ;Save the end line
-   595 000011FE 53                  <1>     push rbx        ;and the start line
-   596 000011FF 89D3                <1>     mov ebx, edx    ;Now setup the pointers to point to the last line
-   597 00001201 FFCB                <1>     dec ebx         
-   598 00001203 E85AF6FFFF          <1>     call findLine   ;Get the actual line number in dx and ptr in rdi
-   599 00001208 668915(1E000000)    <1>     mov word [curLineNum], dx
-   600 0000120F 48893D(20000000)    <1>     mov qword [curLinePtr], rdi
-   601 00001216 5B                  <1>     pop rbx         ;Get back the actual start line
-   602 00001217 E846F6FFFF          <1>     call findLine   ;Now find the first line!
-   603 0000121C 4889FE              <1>     mov rsi, rdi    ;This is the source of the copy
-   604 0000121F 5F                  <1>     pop rdi         ;Get the end line count in edi
-   605 00001220 29DF                <1>     sub edi, ebx    ;Get the number of lines to print in edi
-   606 00001222 E9F4030000          <1>     jmp printLines  ;Return through printLines!
-   607                              <1> 
-   608                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   609                              <1> ; File IO control functions
-   610                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   611                              <1> 
-   612                              <1> appendLines:
-   613                              <1> ;If the file is not fully loaded in arena, allows you to load 
-   614                              <1> ; the next portion into the arena. Essentially ignores the 
-   615                              <1> ; input and always fills up to the 3/4 limit.
-   616                              <1> ;--------------------------------------------
-   617                              <1> ;Invoked by: [n]A (number of bytes to read)
-   618                              <1> ;--------------------------------------------
-   619 00001227 803D(D8010000)01    <1>     cmp byte [argCnt], 1
-   620 0000122E 0F8587040000        <1>     jne printComErr
-   621 00001234 F605(05000000)FF    <1>     test byte [eofReached], -1
-   622 0000123B 0F8538010000        <1>     jnz .outEofStr   ;Print the eof reached string
-   623 00001241 488B15(28000000)    <1>     mov rdx, qword [eofPtr]
-   624 00001248 803D(D9010000)00    <1>     cmp byte [arg1], 0          ;Arg <> 0 means we fill the arena
-   625 0000124F 7509                <1>     jne .argGiven
-   626 00001251 483B15(16000000)    <1>     cmp rdx, qword [fillPtr]    ;Are we at/past the fill point?
-   627                              <1>     retnb   ;Return if so!
+   580 000011E0 0FB715(DB010000)    <1>     movzx edx, word [arg2]  
+   581 000011E7 85D2                <1>     test edx, edx   ;Did the user give what line to stop printing on?
+   582 000011E9 7508                <1>     jnz .arg2Given 
+   583                              <1> ;vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+   584                              <1> ;Here is where the screen width is computed when we do dynamic 
+   585                              <1> ; screen size stuff
+   586 000011EB 89DA                <1>     mov edx, ebx
+   587 000011ED 81C216000000        <1>     add edx, 22     ;Else its current line + 23
+   588                              <1> ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   589                              <1> .arg2Given:
+   590 000011F3 FFC2                <1>     inc edx         ;Get that last line
+   591 000011F5 4C39D2              <1>     cmp rdx, r10    ;Is it past the end of the file?
+   592 000011F8 7603                <1>     jbe .okRange
+   593 000011FA 4C89D2              <1>     mov rdx, r10    ;Else, use r10 as the last line
+   594                              <1> .okRange:
+   595 000011FD 52                  <1>     push rdx        ;Save the end line
+   596 000011FE 53                  <1>     push rbx        ;and the start line
+   597 000011FF 89D3                <1>     mov ebx, edx    ;Now setup the pointers to point to the last line
+   598 00001201 FFCB                <1>     dec ebx         
+   599 00001203 E85AF6FFFF          <1>     call findLine   ;Get the actual line number in dx and ptr in rdi
+   600 00001208 668915(1E000000)    <1>     mov word [curLineNum], dx
+   601 0000120F 48893D(20000000)    <1>     mov qword [curLinePtr], rdi
+   602 00001216 5B                  <1>     pop rbx         ;Get back the actual start line
+   603 00001217 E846F6FFFF          <1>     call findLine   ;Now find the first line!
+   604 0000121C 4889FE              <1>     mov rsi, rdi    ;This is the source of the copy
+   605 0000121F 5F                  <1>     pop rdi         ;Get the end line count in edi
+   606 00001220 29DF                <1>     sub edi, ebx    ;Get the number of lines to print in edi
+   607 00001222 E9FE030000          <1>     jmp printLines  ;Return through printLines!
+   608                              <1> 
+   609                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   610                              <1> ; File IO control functions
+   611                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   612                              <1> 
+   613                              <1> appendLines:
+   614                              <1> ;If the file is not fully loaded in arena, allows you to load 
+   615                              <1> ; the next portion into the arena. Essentially ignores the 
+   616                              <1> ; input and always fills up to the 3/4 limit.
+   617                              <1> ;--------------------------------------------
+   618                              <1> ;Invoked by: [n]A (number of bytes to read)
+   619                              <1> ;--------------------------------------------
+   620 00001227 803D(D8010000)01    <1>     cmp byte [argCnt], 1
+   621 0000122E 0F8591040000        <1>     jne printComErr
+   622 00001234 F605(05000000)FF    <1>     test byte [eofReached], -1
+   623 0000123B 0F8538010000        <1>     jnz .outEofStr   ;Print the eof reached string
+   624 00001241 488B15(28000000)    <1>     mov rdx, qword [eofPtr]
+   625 00001248 803D(D9010000)00    <1>     cmp byte [arg1], 0          ;Arg <> 0 means we fill the arena
+   626 0000124F 7509                <1>     jne .argGiven
+   627 00001251 483B15(16000000)    <1>     cmp rdx, qword [fillPtr]    ;Are we at/past the fill point?
+   628                              <1>     retnb   ;Return if so!
     69                              <2> cret nb
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
@@ -2733,114 +2734,114 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   628                              <1> .argGiven:
-   629                              <1> ;rdx -> The start of the read in buffer
-   630 0000125A 488B0D(30000000)    <1>     mov rcx, qword [endOfArena] ;Fill the arena
-   631 00001261 4829D1              <1>     sub rcx, rdx        ;Get the number of bytes to read save one paragraph
-   632 00001264 4881E910000000      <1>     sub rcx, 16         ;This is so appending CRLF's or EOF's won't segfault
-   633 0000126B 0F8441040000        <1>     jz printMemErr      ;If we @ end of arena, free some space!!
-   634 00001271 4989CA              <1>     mov r10, rcx        ;Use r10 to save byte count we want to read in
-   635 00001274 0FB71D(3A000000)    <1>     movzx ebx, word [readHdl]
-   636 0000127B B8003F0000          <1>     mov eax, 3F00h
-   637 00001280 CD21                <1>     int 21h
-   638 00001282 39C8                <1>     cmp eax, ecx
-   639 00001284 7426                <1>     je .notEof
-   640                              <1>     ;Check this is really the eof (by trying to read one more byte)
-   641 00001286 50                  <1>     push rax    ;Save the byte count
-   642 00001287 4801C2              <1>     add rdx, rax
-   643 0000128A B901000000          <1>     mov ecx, 1
-   644 0000128F B8003F0000          <1>     mov eax, 3F00h
-   645 00001294 CD21                <1>     int 21h
-   646 00001296 89C1                <1>     mov ecx, eax
-   647 00001298 58                  <1>     pop rax     ;Get original byte count back
-   648 00001299 0F822D040000        <1>     jc badReadFail
-   649 0000129F 85C9                <1>     test ecx, ecx   ;Did we read bytes?
-   650 000012A1 7507                <1>     jnz .notEofInc  ;If not, inc byte count!
-   651 000012A3 C605(05000000)FF    <1>     mov byte [eofReached], -1   ;Else, set the flag!!
-   652                              <1> .notEofInc:
-   653 000012AA FFC0                <1>     inc eax
-   654                              <1> .notEof:
-   655 000012AC 4801C2              <1>     add rdx, rax        ;rax has the number of bytes we have read
-   656 000012AF 89C1                <1>     mov ecx, eax        ;Save the byte count in ecx
-   657 000012B1 488B3D(28000000)    <1>     mov rdi, qword [eofPtr] ;Point rdi to the start of the read in region
-   658 000012B8 4989CB              <1>     mov r11, rcx            ;Save real byte count in r11 temporarily
-   659 000012BB E8F0F5FFFF          <1>     call checkEOF
-   660 000012C0 7507                <1>     jnz .noSetEof   ;Set the byte here if ZF=ZE on return
-   661 000012C2 C605(05000000)FF    <1>     mov byte [eofReached], -1   ;to keep it all on the same level!
-   662                              <1> .noSetEof:
-   663 000012C9 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]  ;Get the line number to read in to
-   664 000012D0 85DB                <1>     test ebx, ebx
-   665 000012D2 7521                <1>     jnz .fndLine    ;If we are searching for line 0, go to the end
-   666 000012D4 4889F8              <1>     mov rax, rdi
-   667 000012D7 4801C8              <1>     add rax, rcx    ;Move the the end of the text we read in
-   668 000012DA 483B05(16000000)    <1>     cmp rax, qword [fillPtr]
-   669 000012E1 7612                <1>     jbe .fndLine    ;If we are leq than fill point, scan for the lnnum  in bx!
-   670                              <1>     ;Else we search for one line past the fillPtr at most
-   671 000012E3 4889C1              <1>     mov rcx, rax
-   672 000012E6 488B3D(16000000)    <1>     mov rdi, qword [fillPtr]
-   673 000012ED 4829F9              <1>     sub rcx, rdi    ;Get the excess of bytes to scan for the line
-   674 000012F0 BB01000000          <1>     mov ebx, 1      ;Make sure we count only 1 line!
-   675                              <1> .fndLine:
-   676 000012F5 31D2                <1>     xor edx, edx    ;Set the line counter to start at 0
-   677 000012F7 E898F5FFFF          <1>     call findLineCore   ;Returns al = LF, rdi -> either LF or first char after ecx
-   678 000012FC 3847FF              <1>     cmp byte [rdi - 1], al
-   679 000012FF 742F                <1>     je .lineOk
-   680                              <1> ;Here we ran out of chars to scan through
-   681 00001301 F605(05000000)FF    <1>     test byte [eofReached], -1
-   682 00001308 7510                <1>     jnz .findPrevLine   ;If not at EOF, and ran out of chars, go to prev line
-   683                              <1>     ;Else, at EOF and ran out of chars, add a CRLF
-   684 0000130A B80D0A0000          <1>     mov eax, CRLF   ;Store in the empty space pointed to by rdi
-   685 0000130F 66AB                <1>     stosw    
-   686 00001311 4981C302000000      <1>     add r11, 2  ;Added two more chars to the count
-   687 00001318 EB16                <1>     jmp short .lineOk
-   688                              <1> .findPrevLine:
-   689 0000131A FFCA                <1>     dec edx     ;Remember we have to dec the line number
-   690 0000131C 48FFCF              <1>     dec rdi     ;Point to the char previous to start searching at
-   691 0000131F 8B0D(06000000)      <1>     mov ecx, dword [arenaSize]  ;Get the size of the allocation to search thru
-   692 00001325 FD                  <1>     std
-   693 00001326 F2AE                <1>     repne scasb ;Scan for the LF in al
-   694 00001328 FC                  <1>     cld
-   695 00001329 4881C702000000      <1>     add rdi, 2  ;Go to first char past it
-   696                              <1> .lineOk:
-   697 00001330 C6071A              <1>     mov byte [rdi], EOF ;Add the terminating EOF char here!
-   698 00001333 4C89D9              <1>     mov rcx, r11    ;Get back the real byte count
-   699 00001336 48030D(0E000000)    <1>     add rcx, qword [memPtr] ;Get ptr to last byte we actually read in
-   700 0000133D 4829F9              <1>     sub rcx, rdi    ;Get the excess number of chars we added since reading in
-   701 00001340 48873D(28000000)    <1>     xchg qword [eofPtr], rdi    ;Swap the old and new EOF char ptrs
-   702 00001347 4801CF              <1>     add rdi, rcx    ;Adjust file ptr by amount we read in but ignored
-   703 0000134A 4885FF              <1>     test rdi, rdi
-   704 0000134D 741E                <1>     jz .noIgnore    ;We ignored no bytes read in, proceed
-   705                              <1>     ;Else, we are at the previous line, so move file ptr there!
-   706 0000134F 53                  <1>     push rbx
-   707 00001350 52                  <1>     push rdx
-   708 00001351 4889FA              <1>     mov rdx, rdi
-   709 00001354 48B9FFFFFFFFFFFFFF- <1>     mov rcx, -1
-   709 0000135D FF                  <1>
-   710 0000135E B801420000          <1>     mov eax, 4201h  ;Seek from current position by the amount in dx
-   711 00001363 CD21                <1>     int 21h
-   712 00001365 5A                  <1>     pop rdx
-   713 00001366 5B                  <1>     pop rbx
-   714 00001367 0F825F030000        <1>     jc badReadFail
-   715                              <1> .noIgnore:
-   716 0000136D 39D3                <1>     cmp ebx, edx    ;Is the line number specified = line number we are at?
-   717 0000136F 7515                <1>     jne .checkEnd
-   718 00001371 C605(05000000)00    <1>     mov byte [eofReached], 0    ;Reset byte if this is the case (adding new lines)
-   719                              <1>     return
+   629                              <1> .argGiven:
+   630                              <1> ;rdx -> The start of the read in buffer
+   631 0000125A 488B0D(30000000)    <1>     mov rcx, qword [endOfArena] ;Fill the arena
+   632 00001261 4829D1              <1>     sub rcx, rdx        ;Get the number of bytes to read save one paragraph
+   633 00001264 4881E910000000      <1>     sub rcx, 16         ;This is so appending CRLF's or EOF's won't segfault
+   634 0000126B 0F844B040000        <1>     jz printMemErr      ;If we @ end of arena, free some space!!
+   635 00001271 4989CA              <1>     mov r10, rcx        ;Use r10 to save byte count we want to read in
+   636 00001274 0FB71D(3A000000)    <1>     movzx ebx, word [readHdl]
+   637 0000127B B8003F0000          <1>     mov eax, 3F00h
+   638 00001280 CD21                <1>     int 21h
+   639 00001282 39C8                <1>     cmp eax, ecx
+   640 00001284 7426                <1>     je .notEof
+   641                              <1>     ;Check this is really the eof (by trying to read one more byte)
+   642 00001286 50                  <1>     push rax    ;Save the byte count
+   643 00001287 4801C2              <1>     add rdx, rax
+   644 0000128A B901000000          <1>     mov ecx, 1
+   645 0000128F B8003F0000          <1>     mov eax, 3F00h
+   646 00001294 CD21                <1>     int 21h
+   647 00001296 89C1                <1>     mov ecx, eax
+   648 00001298 58                  <1>     pop rax     ;Get original byte count back
+   649 00001299 0F8237040000        <1>     jc badReadFail
+   650 0000129F 85C9                <1>     test ecx, ecx   ;Did we read bytes?
+   651 000012A1 7507                <1>     jnz .notEofInc  ;If not, inc byte count!
+   652 000012A3 C605(05000000)FF    <1>     mov byte [eofReached], -1   ;Else, set the flag!!
+   653                              <1> .notEofInc:
+   654 000012AA FFC0                <1>     inc eax
+   655                              <1> .notEof:
+   656 000012AC 4801C2              <1>     add rdx, rax        ;rax has the number of bytes we have read
+   657 000012AF 89C1                <1>     mov ecx, eax        ;Save the byte count in ecx
+   658 000012B1 488B3D(28000000)    <1>     mov rdi, qword [eofPtr] ;Point rdi to the start of the read in region
+   659 000012B8 4989CB              <1>     mov r11, rcx            ;Save real byte count in r11 temporarily
+   660 000012BB E8F0F5FFFF          <1>     call checkEOF
+   661 000012C0 7507                <1>     jnz .noSetEof   ;Set the byte here if ZF=ZE on return
+   662 000012C2 C605(05000000)FF    <1>     mov byte [eofReached], -1   ;to keep it all on the same level!
+   663                              <1> .noSetEof:
+   664 000012C9 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]  ;Get the line number to read in to
+   665 000012D0 85DB                <1>     test ebx, ebx
+   666 000012D2 7521                <1>     jnz .fndLine    ;If we are searching for line 0, go to the end
+   667 000012D4 4889F8              <1>     mov rax, rdi
+   668 000012D7 4801C8              <1>     add rax, rcx    ;Move the the end of the text we read in
+   669 000012DA 483B05(16000000)    <1>     cmp rax, qword [fillPtr]
+   670 000012E1 7612                <1>     jbe .fndLine    ;If we are leq than fill point, scan for the lnnum  in bx!
+   671                              <1>     ;Else we search for one line past the fillPtr at most
+   672 000012E3 4889C1              <1>     mov rcx, rax
+   673 000012E6 488B3D(16000000)    <1>     mov rdi, qword [fillPtr]
+   674 000012ED 4829F9              <1>     sub rcx, rdi    ;Get the excess of bytes to scan for the line
+   675 000012F0 BB01000000          <1>     mov ebx, 1      ;Make sure we count only 1 line!
+   676                              <1> .fndLine:
+   677 000012F5 31D2                <1>     xor edx, edx    ;Set the line counter to start at 0
+   678 000012F7 E898F5FFFF          <1>     call findLineCore   ;Returns al = LF, rdi -> either LF or first char after ecx
+   679 000012FC 3847FF              <1>     cmp byte [rdi - 1], al
+   680 000012FF 742F                <1>     je .lineOk
+   681                              <1> ;Here we ran out of chars to scan through
+   682 00001301 F605(05000000)FF    <1>     test byte [eofReached], -1
+   683 00001308 7510                <1>     jnz .findPrevLine   ;If not at EOF, and ran out of chars, go to prev line
+   684                              <1>     ;Else, at EOF and ran out of chars, add a CRLF
+   685 0000130A B80D0A0000          <1>     mov eax, CRLF   ;Store in the empty space pointed to by rdi
+   686 0000130F 66AB                <1>     stosw    
+   687 00001311 4981C302000000      <1>     add r11, 2  ;Added two more chars to the count
+   688 00001318 EB16                <1>     jmp short .lineOk
+   689                              <1> .findPrevLine:
+   690 0000131A FFCA                <1>     dec edx     ;Remember we have to dec the line number
+   691 0000131C 48FFCF              <1>     dec rdi     ;Point to the char previous to start searching at
+   692 0000131F 8B0D(06000000)      <1>     mov ecx, dword [arenaSize]  ;Get the size of the allocation to search thru
+   693 00001325 FD                  <1>     std
+   694 00001326 F2AE                <1>     repne scasb ;Scan for the LF in al
+   695 00001328 FC                  <1>     cld
+   696 00001329 4881C702000000      <1>     add rdi, 2  ;Go to first char past it
+   697                              <1> .lineOk:
+   698 00001330 C6071A              <1>     mov byte [rdi], EOF ;Add the terminating EOF char here!
+   699 00001333 4C89D9              <1>     mov rcx, r11    ;Get back the real byte count
+   700 00001336 48030D(0E000000)    <1>     add rcx, qword [memPtr] ;Get ptr to last byte we actually read in
+   701 0000133D 4829F9              <1>     sub rcx, rdi    ;Get the excess number of chars we added since reading in
+   702 00001340 48873D(28000000)    <1>     xchg qword [eofPtr], rdi    ;Swap the old and new EOF char ptrs
+   703 00001347 4801CF              <1>     add rdi, rcx    ;Adjust file ptr by amount we read in but ignored
+   704 0000134A 4885FF              <1>     test rdi, rdi
+   705 0000134D 741E                <1>     jz .noIgnore    ;We ignored no bytes read in, proceed
+   706                              <1>     ;Else, we are at the previous line, so move file ptr there!
+   707 0000134F 53                  <1>     push rbx
+   708 00001350 52                  <1>     push rdx
+   709 00001351 4889FA              <1>     mov rdx, rdi
+   710 00001354 48B9FFFFFFFFFFFFFF- <1>     mov rcx, -1
+   710 0000135D FF                  <1>
+   711 0000135E B801420000          <1>     mov eax, 4201h  ;Seek from current position by the amount in dx
+   712 00001363 CD21                <1>     int 21h
+   713 00001365 5A                  <1>     pop rdx
+   714 00001366 5B                  <1>     pop rbx
+   715 00001367 0F8269030000        <1>     jc badReadFail
+   716                              <1> .noIgnore:
+   717 0000136D 39D3                <1>     cmp ebx, edx    ;Is the line number specified = line number we are at?
+   718 0000136F 7515                <1>     jne .checkEnd
+   719 00001371 C605(05000000)00    <1>     mov byte [eofReached], 0    ;Reset byte if this is the case (adding new lines)
+   720                              <1>     return
     13                              <2> %%_ret:
     14 00001378 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   720                              <1> .outEofStr:
-   721 00001379 488D15(47000000)    <1>     lea rdx, eofStr
-   722 00001380 E8FE010000          <1>     call printString
-   723                              <1>     return
+   721                              <1> .outEofStr:
+   722 00001379 488D15(47000000)    <1>     lea rdx, eofStr
+   723 00001380 E808020000          <1>     call printString
+   724                              <1>     return
     13                              <2> %%_ret:
     14 00001385 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   724                              <1> .checkEnd:
-   725 00001386 F605(05000000)FF    <1>     test byte [eofReached], -1
-   726 0000138D 75EA                <1>     jnz .outEofStr
-   727 0000138F F605(64020000)FF    <1>     test byte [noAppendErr], -1 ;Ignore EOF errors on initial load!
-   728                              <1>     retnz 
+   725                              <1> .checkEnd:
+   726 00001386 F605(05000000)FF    <1>     test byte [eofReached], -1
+   727 0000138D 75EA                <1>     jnz .outEofStr
+   728 0000138F F605(64020000)FF    <1>     test byte [noAppendErr], -1 ;Ignore EOF errors on initial load!
+   729                              <1>     retnz 
     45                              <2> cret nz
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
@@ -2861,26 +2862,26 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   729 00001398 E915030000          <1>     jmp printMemErr
-   730                              <1> 
-   731                              <1> writeLines:
-   732                              <1> ;Writes the current arena to disk. If no 
-   733                              <1> ; n specified, EDLIN writes lines until
-   734                              <1> ; 1/4 of the arena is free.
-   735                              <1> ;--------------------------------------------
-   736                              <1> ;Invoked by: [n]W (number of bytes to write)
-   737                              <1> ;--------------------------------------------
-   738                              <1> ;When invoked, must delete the backup if it not already deleted.
-   739 0000139D 803D(D8010000)01    <1>     cmp byte [argCnt], 1
-   740 000013A4 0F8711030000        <1>     ja printComErr
-   741 000013AA 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
-   742 000013B1 85DB                <1>     test ebx, ebx
-   743 000013B3 7529                <1>     jnz .goFindLine
-   744                              <1>     ;If 0, means, write everything from 1/4 onwards
-   745 000013B5 8B0D(0A000000)      <1>     mov ecx, dword [freeCnt]    ;Get the count of 1/4 of the arena
-   746 000013BB 488B3D(28000000)    <1>     mov rdi, qword [eofPtr]
-   747 000013C2 4829CF              <1>     sub rdi, rcx    ;Move rdi back by a quarter
-   748                              <1>     retbe           ;If the result is leq 0, fail (never will happen)
+   730 00001398 E91F030000          <1>     jmp printMemErr
+   731                              <1> 
+   732                              <1> writeLines:
+   733                              <1> ;Writes the current arena to disk. If no 
+   734                              <1> ; n specified, EDLIN writes lines until
+   735                              <1> ; 1/4 of the arena is free.
+   736                              <1> ;--------------------------------------------
+   737                              <1> ;Invoked by: [n]W (number of bytes to write)
+   738                              <1> ;--------------------------------------------
+   739                              <1> ;When invoked, must delete the backup if it not already deleted.
+   740 0000139D 803D(D8010000)01    <1>     cmp byte [argCnt], 1
+   741 000013A4 0F871B030000        <1>     ja printComErr
+   742 000013AA 0FB71D(D9010000)    <1>     movzx ebx, word [arg1]
+   743 000013B1 85DB                <1>     test ebx, ebx
+   744 000013B3 7529                <1>     jnz .goFindLine
+   745                              <1>     ;If 0, means, write everything from 1/4 onwards
+   746 000013B5 8B0D(0A000000)      <1>     mov ecx, dword [freeCnt]    ;Get the count of 1/4 of the arena
+   747 000013BB 488B3D(28000000)    <1>     mov rdi, qword [eofPtr]
+   748 000013C2 4829CF              <1>     sub rdi, rcx    ;Move rdi back by a quarter
+   749                              <1>     retbe           ;If the result is leq 0, fail (never will happen)
     81                              <2> cret be
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
@@ -2901,8 +2902,8 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   749 000013C7 483B3D(0E000000)    <1>     cmp rdi, qword [memPtr] ;Are we pointing before the start of the arena
-   750                              <1>     retbe           ;Return as we have nothing to write!
+   750 000013C7 483B3D(0E000000)    <1>     cmp rdi, qword [memPtr] ;Are we pointing before the start of the arena
+   751                              <1>     retbe           ;Return as we have nothing to write!
     81                              <2> cret be
     19                              <3> %%_base:
     20                              <3> %assign baseVar %%_base-$$
@@ -2923,172 +2924,192 @@
     35                              <3>  return
     36                              <3> %%a:
     37                              <3>  %endif
-   751                              <1>     ;rdi now points back by a quarter
-   752 000013D0 31D2                <1>     xor edx, edx    ;Init to "line 0"
-   753 000013D2 BB01000000          <1>     mov ebx, 1      ;Find the end of the line we are
-   754 000013D7 E8B8F4FFFF          <1>     call findLineCore
-   755 000013DC EB07                <1>     jmp short .prepWrite
-   756                              <1> .goFindLine:
-   757 000013DE FFC3                <1>     inc ebx     ;Find line 1 (user said 0, this means 1 for us!)
-   758 000013E0 E87DF4FFFF          <1>     call findLine
-   759                              <1> .prepWrite:
-   760 000013E5 E82AF5FFFF          <1>     call delBkup    ;Delete the backup, all regs preserved
-   761 000013EA 4889F9              <1>     mov rcx, rdi    ;rdi points to up to where to do the write
-   762 000013ED 488B15(0E000000)    <1>     mov rdx, qword [memPtr] ;Start writing from here
-   763 000013F4 4829D1              <1>     sub rcx, rdx    ;Get the byte offset into the arena
-   764 000013F7 0FB71D(3C000000)    <1>     movzx ebx, word [writeHdl]
-   765 000013FE B800400000          <1>     mov eax, 4000h
-   766 00001403 CD21                <1>     int 21h
-   767 00001405 0F82D4020000        <1>     jc fullDiskFail
-   768 0000140B 39C8                <1>     cmp eax, ecx
-   769 0000140D 0F85CC020000        <1>     jne fullDiskFail
-   770                              <1>     ;Now pull up the rest of the arena and reset the internal line numbers
-   771 00001413 4889FE              <1>     mov rsi, rdi    ;Source chars from here
-   772 00001416 488B3D(0E000000)    <1>     mov rdi, qword [memPtr]
-   773 0000141D 48893D(20000000)    <1>     mov qword [curLinePtr], rdi
-   774 00001424 66C705(1E000000)01- <1>     mov word [curLineNum], 1    ;Go back to line 1 again
-   774 0000142C 00                  <1>
-   775 0000142D 488B0D(28000000)    <1>     mov rcx, qword [eofPtr]
-   776 00001434 4829F1              <1>     sub rcx, rsi    ;Get the number of bytes left in the arena to pull up
-   777 00001437 FFC1                <1>     inc ecx         ;Copy the EOF marker too
-   778 00001439 FC                  <1>     cld 
-   779 0000143A F3A4                <1>     rep movsb
-   780 0000143C 48FFCF              <1>     dec rdi         ;Go back to EOF
-   781 0000143F 48893D(28000000)    <1>     mov qword [eofPtr], rdi
-   782                              <1>     return
+   752                              <1>     ;rdi now points back by a quarter
+   753 000013D0 31D2                <1>     xor edx, edx    ;Init to "line 0"
+   754 000013D2 BB01000000          <1>     mov ebx, 1      ;Find the end of the line we are
+   755 000013D7 E8B8F4FFFF          <1>     call findLineCore
+   756 000013DC EB07                <1>     jmp short .prepWrite
+   757                              <1> .goFindLine:
+   758 000013DE FFC3                <1>     inc ebx     ;Find line 1 (user said 0, this means 1 for us!)
+   759 000013E0 E87DF4FFFF          <1>     call findLine
+   760                              <1> .prepWrite:
+   761 000013E5 E82AF5FFFF          <1>     call delBkup    ;Delete the backup, all regs preserved
+   762 000013EA 4889F9              <1>     mov rcx, rdi    ;rdi points to up to where to do the write
+   763 000013ED 488B15(0E000000)    <1>     mov rdx, qword [memPtr] ;Start writing from here
+   764 000013F4 4829D1              <1>     sub rcx, rdx    ;Get the byte offset into the arena
+   765 000013F7 0FB71D(3C000000)    <1>     movzx ebx, word [writeHdl]
+   766 000013FE B800400000          <1>     mov eax, 4000h
+   767 00001403 CD21                <1>     int 21h
+   768 00001405 0F82DE020000        <1>     jc fullDiskFail
+   769 0000140B 39C8                <1>     cmp eax, ecx
+   770 0000140D 0F85D6020000        <1>     jne fullDiskFail
+   771                              <1>     ;Now pull up the rest of the arena and reset the internal line numbers
+   772 00001413 4889FE              <1>     mov rsi, rdi    ;Source chars from here
+   773 00001416 488B3D(0E000000)    <1>     mov rdi, qword [memPtr]
+   774 0000141D 48893D(20000000)    <1>     mov qword [curLinePtr], rdi
+   775 00001424 66C705(1E000000)01- <1>     mov word [curLineNum], 1    ;Go back to line 1 again
+   775 0000142C 00                  <1>
+   776 0000142D 488B0D(28000000)    <1>     mov rcx, qword [eofPtr]
+   777 00001434 4829F1              <1>     sub rcx, rsi    ;Get the number of bytes left in the arena to pull up
+   778 00001437 FFC1                <1>     inc ecx         ;Copy the EOF marker too
+   779 00001439 FC                  <1>     cld 
+   780 0000143A F3A4                <1>     rep movsb
+   781 0000143C 48FFCF              <1>     dec rdi         ;Go back to EOF
+   782 0000143F 48893D(28000000)    <1>     mov qword [eofPtr], rdi
+   783                              <1>     return
     13                              <2> %%_ret:
     14 00001446 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
-   783                              <1> 
-   784                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   785                              <1> ; Exit functions
-   786                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   787                              <1> 
-   788                              <1> endEdit:
-   789                              <1> ;Inserts a EOF char at the end of the file if one not already present
-   790                              <1> ; renames the original file (if applicable) to have .bak ending and
-   791                              <1> ; renames the working file to the name originally specified.
-   792                              <1> ;--------------------------------------------
-   793                              <1> ;Invoked by: E
-   794                              <1> ;--------------------------------------------
-   795 00001447 803D(D8010000)01    <1>     cmp byte [argCnt], 1
-   796 0000144E 0F8567020000        <1>     jne printComErr
-   797 00001454 803D(D9010000)00    <1>     cmp byte [arg1], 0
-   798 0000145B 0F855A020000        <1>     jne printComErr
-   799 00001461 F605(02000000)FF    <1>     test byte [roFlag], -1  ;If we are readonly, delete $$$ and quit
-   800 00001468 0F85F3000000        <1>     jnz quit.roQuit
-   801 0000146E C605(64020000)FF    <1>     mov byte [noAppendErr], -1  ;Suppress errors again
-   802                              <1> .writeLp:
-   803 00001475 BBFFFFFFFF          <1>     mov ebx, -1             ;Write out max lines
-   804 0000147A E85FFFFFFF          <1>     call writeLines.goFindLine
-   805 0000147F F605(05000000)FF    <1>     test byte [eofReached], -1  ;Are we at EOF yet?
-   806 00001486 7517                <1>     jnz .writeDone  ;If yes, we are done writing to disk
-   807 00001488 C605(D8010000)01    <1>     mov byte [argCnt], 1    ;Else we keep reading the file
-   808 0000148F 66C705(D9010000)FF- <1>     mov word [arg1], -1     ;Now fill the arena with lines
-   808 00001497 FF                  <1>
-   809 00001498 E88AFDFFFF          <1>     call appendLines
-   810 0000149D EBD6                <1>     jmp short .writeLp      ;And write them out again
-   811                              <1> .writeDone:
-   812 0000149F 488B15(28000000)    <1>     mov rdx, qword [eofPtr] ;Now write out the EOF char to the file
-   813 000014A6 B901000000          <1>     mov ecx, 1
-   814 000014AB 0FB71D(3C000000)    <1>     movzx ebx, word [writeHdl]
-   815 000014B2 B800400000          <1>     mov eax, 4000h
-   816 000014B7 CD21                <1>     int 21h
-   817 000014B9 0FB71D(3A000000)    <1>     movzx ebx, word [readHdl]
-   818 000014C0 B8003E0000          <1>     mov eax, 3E00h  ;Close the reading file!
-   819 000014C5 CD21                <1>     int 21h
-   820 000014C7 0FB71D(3C000000)    <1>     movzx ebx, word [writeHdl]  ;Get the write handle
-   821 000014CE B8003E0000          <1>     mov eax, 3E00h  ;Close the temp file!
-   822 000014D3 CD21                <1>     int 21h
-   823 000014D5 F605(03000000)FF    <1>     test byte [newFileFlag], -1  ;If this is new file, skip this!
-   824 000014DC 7522                <1>     jnz short .skipBkup
-   825                              <1>     ;Now set the backup extension
-   826 000014DE 488B3D(46010000)    <1>     mov rdi, qword [fileExtPtr]
-   827 000014E5 B842414B00          <1>     mov eax, "BAK"
-   828 000014EA AB                  <1>     stosd
-   829 000014EB 488D15(3E000000)    <1>     lea rdx, pathspec
-   830 000014F2 488D3D(BE000000)    <1>     lea rdi, bkupfile
-   831 000014F9 B800560000          <1>     mov eax, 5600h
-   832 000014FE CD21                <1>     int 21h
-   833                              <1> .skipBkup:
-   834 00001500 B824242400          <1>     mov eax, "$$$"  ;Always set this as triple dollar as this is saved name!
-   835 00001505 488B3D(46010000)    <1>     mov rdi, qword [fileExtPtr]
-   836 0000150C AB                  <1>     stosd
-   837 0000150D 488D15(BE000000)    <1>     lea rdx, bkupfile
-   838 00001514 488D3D(3E000000)    <1>     lea rdi, pathspec   ;Now name the temp file by the og name!
-   839 0000151B B800560000          <1>     mov eax, 5600h
-   840 00001520 CD21                <1>     int 21h
-   841 00001522 7207                <1>     jc .renameFail
-   842                              <1>     retToDOS errOk ;Let DOS do cleanup of memory allocations!
-    94 00001524 B8004C0000          <2>  mov eax, 04C00h | %1
-    95 00001529 CD21                <2>  int 21h
-   843                              <1> .renameFail:
-   844                              <1>     retToDOS errBadRen
-    94 0000152B B8014C0000          <2>  mov eax, 04C00h | %1
-    95 00001530 CD21                <2>  int 21h
-   845                              <1> 
-   846                              <1> quit:
-   847                              <1> ;Quits EDLIN, not saving work and deleting working file.
-   848                              <1> ;--------------------------------------------
-   849                              <1> ;Invoked by: Q
-   850                              <1> ;--------------------------------------------
-   851 00001532 803D(02000000)FF    <1>     cmp byte [roFlag], -1   ;If the flag is clear, dont prompt, just quit.
-   852 00001539 7426                <1>     je short .roQuit
-   853 0000153B 488D15(47020000)    <1>     lea rdx, exitQuit
-   854 00001542 B800090000          <1>     mov eax, 0900h
-   855 00001547 CD21                <1>     int 21h
-   856 00001549 B8010C0000          <1>     mov eax, 0C01h  ;Flush input buffer and read a single char from stdin
-   857 0000154E CD21                <1>     int 21h
-   858 00001550 0FB6D8              <1>     movzx ebx, al
-   859 00001553 81E3DF000000        <1>     and ebx, 0DFh    ;Convert to upper case
-   860 00001559 81FB59000000        <1>     cmp ebx, "Y"
-   861 0000155F 752E                <1>     jne printCRLF   ;Print CRLF and return via that return instruction
-   862                              <1>     ;Delete the working file
-   863                              <1> .roQuit:
-   864 00001561 488B3D(46010000)    <1>     mov rdi, qword [fileExtPtr]
-   865 00001568 B824242400          <1>     mov eax, "$$$"
-   866 0000156D AB                  <1>     stosd
-   867 0000156E 488D15(BE000000)    <1>     lea rdx, wkfile
-   868 00001575 B800410000          <1>     mov eax, 4100h  ;Delete the file
-   869 0000157A CD21                <1>     int 21h
-   870                              <1>     retToDOS errOk
-    94 0000157C B8004C0000          <2>  mov eax, 04C00h | %1
-    95 00001581 CD21                <2>  int 21h
+   784                              <1> 
+   785                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   786                              <1> ; Exit functions
+   787                              <1> ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   788                              <1> 
+   789                              <1> endEdit:
+   790                              <1> ;Inserts a EOF char at the end of the file if one not already present
+   791                              <1> ; renames the original file (if applicable) to have .bak ending and
+   792                              <1> ; renames the working file to the name originally specified.
+   793                              <1> ;--------------------------------------------
+   794                              <1> ;Invoked by: E
+   795                              <1> ;--------------------------------------------
+   796 00001447 803D(D8010000)01    <1>     cmp byte [argCnt], 1
+   797 0000144E 0F8571020000        <1>     jne printComErr
+   798 00001454 803D(D9010000)00    <1>     cmp byte [arg1], 0
+   799 0000145B 0F8564020000        <1>     jne printComErr
+   800 00001461 F605(02000000)FF    <1>     test byte [roFlag], -1  ;If we are readonly, delete $$$ and quit
+   801 00001468 0F85FD000000        <1>     jnz quit.roQuit
+   802 0000146E C605(64020000)FF    <1>     mov byte [noAppendErr], -1  ;Suppress errors again
+   803                              <1> .writeLp:
+   804 00001475 BBFFFFFFFF          <1>     mov ebx, -1             ;Write out max lines
+   805 0000147A E85FFFFFFF          <1>     call writeLines.goFindLine
+   806 0000147F F605(05000000)FF    <1>     test byte [eofReached], -1  ;Are we at EOF yet?
+   807 00001486 7517                <1>     jnz .writeDone  ;If yes, we are done writing to disk
+   808 00001488 C605(D8010000)01    <1>     mov byte [argCnt], 1    ;Else we keep reading the file
+   809 0000148F 66C705(D9010000)FF- <1>     mov word [arg1], -1     ;Now fill the arena with lines
+   809 00001497 FF                  <1>
+   810 00001498 E88AFDFFFF          <1>     call appendLines
+   811 0000149D EBD6                <1>     jmp short .writeLp      ;And write them out again
+   812                              <1> .writeDone:
+   813 0000149F 488B15(28000000)    <1>     mov rdx, qword [eofPtr] ;Now write out the EOF char to the file
+   814 000014A6 B901000000          <1>     mov ecx, 1
+   815 000014AB 0FB71D(3C000000)    <1>     movzx ebx, word [writeHdl]
+   816 000014B2 B800400000          <1>     mov eax, 4000h
+   817 000014B7 CD21                <1>     int 21h
+   818 000014B9 0FB71D(3A000000)    <1>     movzx ebx, word [readHdl]
+   819 000014C0 B8003E0000          <1>     mov eax, 3E00h  ;Close the reading file!
+   820 000014C5 CD21                <1>     int 21h
+   821 000014C7 0FB71D(3C000000)    <1>     movzx ebx, word [writeHdl]  ;Get the write handle
+   822 000014CE B8003E0000          <1>     mov eax, 3E00h  ;Close the temp file!
+   823 000014D3 CD21                <1>     int 21h
+   824 000014D5 F605(03000000)FF    <1>     test byte [newFileFlag], -1  ;If this is new file, skip this!
+   825 000014DC 752C                <1>     jnz short .skipBkup
+   826                              <1>     ;Now set the backup extension
+   827 000014DE 488B3D(46010000)    <1>     mov rdi, qword [fileExtPtr]
+   828 000014E5 B842414B00          <1>     mov eax, "BAK"
+   829 000014EA AB                  <1>     stosd
+   830                              <1> ;======NEW CODE======
+   831                              <1> ;Now ensure there is no old .BAK file by deleting it. 
+   832                              <1> ;If the delete fails, we proceed as normal. 
+   833                              <1> ;Worst case scenario, we end up with three files, .BAK, .EXT and .$$$. 
+   834                              <1> ;Deleting will always be ok, even if no .BAK file exists as del 
+   835                              <1> ; will just fnf fail in this case.
+   836 000014EB 488D15(BE000000)    <1>     lea rdx, bkupfile
+   837 000014F2 B800410000          <1>     mov eax, 4100h
+   838 000014F7 CD21                <1>     int 21h
+   839 000014F9 488D3D(3E000000)    <1>     lea rdi, pathspec
+   840 00001500 4887FA              <1>     xchg rdi, rdx   ;Swap, for the rename
+   841                              <1> ;Note, that if the renames fail due to sharing issues (since we do close 
+   842                              <1> ; the files above thus losing our flocks on them), then we retain the 
+   843                              <1> ; two/three files. The presence of the .$$$ file and the original .BAK should 
+   844                              <1> ; make it incredibly unlikely that someone can overwrite your work. Also,
+   845                              <1> ; we're talking about a time period on the order of a matter of instructions.
+   846                              <1> ;If this EVER causes a problem, sue me.
+   847                              <1> ;======NEW CODE======
+   848                              <1> ;======OLD CODE======
+   849                              <1>     ;lea rdx, pathspec
+   850                              <1>     ;lea rdi, bkupfile
+   851                              <1> ;======OLD CODE======
+   852 00001503 B800560000          <1>     mov eax, 5600h
+   853 00001508 CD21                <1>     int 21h
+   854                              <1> .skipBkup:
+   855 0000150A B824242400          <1>     mov eax, "$$$"  ;Always set this as triple dollar as this is saved name!
+   856 0000150F 488B3D(46010000)    <1>     mov rdi, qword [fileExtPtr]
+   857 00001516 AB                  <1>     stosd
+   858 00001517 488D15(BE000000)    <1>     lea rdx, bkupfile
+   859 0000151E 488D3D(3E000000)    <1>     lea rdi, pathspec   ;Now name the temp file by the og name!
+   860 00001525 B800560000          <1>     mov eax, 5600h
+   861 0000152A CD21                <1>     int 21h
+   862 0000152C 7207                <1>     jc .renameFail
+   863                              <1>     retToDOS errOk ;Let DOS do cleanup of memory allocations!
+    94 0000152E B8004C0000          <2>  mov eax, 04C00h | %1
+    95 00001533 CD21                <2>  int 21h
+   864                              <1> .renameFail:
+   865                              <1>     retToDOS errBadRen
+    94 00001535 B8014C0000          <2>  mov eax, 04C00h | %1
+    95 0000153A CD21                <2>  int 21h
+   866                              <1> 
+   867                              <1> quit:
+   868                              <1> ;Quits EDLIN, not saving work and deleting working file.
+   869                              <1> ;--------------------------------------------
+   870                              <1> ;Invoked by: Q
+   871                              <1> ;--------------------------------------------
+   872 0000153C 803D(02000000)FF    <1>     cmp byte [roFlag], -1   ;If the flag is clear, dont prompt, just quit.
+   873 00001543 7426                <1>     je short .roQuit
+   874 00001545 488D15(47020000)    <1>     lea rdx, exitQuit
+   875 0000154C B800090000          <1>     mov eax, 0900h
+   876 00001551 CD21                <1>     int 21h
+   877 00001553 B8010C0000          <1>     mov eax, 0C01h  ;Flush input buffer and read a single char from stdin
+   878 00001558 CD21                <1>     int 21h
+   879 0000155A 0FB6D8              <1>     movzx ebx, al
+   880 0000155D 81E3DF000000        <1>     and ebx, 0DFh    ;Convert to upper case
+   881 00001563 81FB59000000        <1>     cmp ebx, "Y"
+   882 00001569 752E                <1>     jne printCRLF   ;Print CRLF and return via that return instruction
+   883                              <1>     ;Delete the working file
+   884                              <1> .roQuit:
+   885 0000156B 488B3D(46010000)    <1>     mov rdi, qword [fileExtPtr]
+   886 00001572 B824242400          <1>     mov eax, "$$$"
+   887 00001577 AB                  <1>     stosd
+   888 00001578 488D15(BE000000)    <1>     lea rdx, wkfile
+   889 0000157F B800410000          <1>     mov eax, 4100h  ;Delete the file
+   890 00001584 CD21                <1>     int 21h
+   891                              <1>     retToDOS errOk
+    94 00001586 B8004C0000          <2>  mov eax, 04C00h | %1
+    95 0000158B CD21                <2>  int 21h
     37                                  %include "./Source/edprn.asm"
      1                              <1> ;---------------------
      2                              <1> ; Print Routines here
      3                              <1> ;---------------------
      4                              <1> printString:
-     5 00001583 B800090000          <1>     mov eax, 0900h
-     6 00001588 CD21                <1>     int 21h
+     5 0000158D B800090000          <1>     mov eax, 0900h
+     6 00001592 CD21                <1>     int 21h
      7                              <1>     return
     13                              <2> %%_ret:
-    14 0000158A C3                  <2>  ret
+    14 00001594 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
      8                              <1> ;----------------------------------------
      9                              <1> ; These functions print individual chars
     10                              <1> ;----------------------------------------
     11                              <1> printSpace:
-    12 0000158B B020                <1>     mov al, SPC
-    13 0000158D EB09                <1>     jmp short printChar
+    12 00001595 B020                <1>     mov al, SPC
+    13 00001597 EB09                <1>     jmp short printChar
     14                              <1> printCRLF:
     15                              <1> ;Prints CRLF
-    16 0000158F B00D                <1>     mov al, CR
-    17 00001591 E802000000          <1>     call printChar
+    16 00001599 B00D                <1>     mov al, CR
+    17 0000159B E802000000          <1>     call printChar
     18                              <1> printLF:
-    19 00001596 B00A                <1>     mov al, LF
+    19 000015A0 B00A                <1>     mov al, LF
     20                              <1> printChar:
     21                              <1> ;Input: al = Char to print
-    22 00001598 50                  <1>     push rax    ;To preserve the rest of eax
-    23 00001599 52                  <1>     push rdx
-    24 0000159A 0FB6D0              <1>     movzx edx, al
-    25 0000159D B800020000          <1>     mov eax, 0200h
-    26 000015A2 CD21                <1>     int 21h
-    27 000015A4 5A                  <1>     pop rdx
-    28 000015A5 58                  <1>     pop rax
+    22 000015A2 50                  <1>     push rax    ;To preserve the rest of eax
+    23 000015A3 52                  <1>     push rdx
+    24 000015A4 0FB6D0              <1>     movzx edx, al
+    25 000015A7 B800020000          <1>     mov eax, 0200h
+    26 000015AC CD21                <1>     int 21h
+    27 000015AE 5A                  <1>     pop rdx
+    28 000015AF 58                  <1>     pop rax
     29                              <1>     return
     13                              <2> %%_ret:
-    14 000015A6 C3                  <2>  ret
+    14 000015B0 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     30                              <1> 
     31                              <1> ;------------------------------------------------
@@ -3097,64 +3118,64 @@
     34                              <1> printLineNum:
     35                              <1> ;Prints the line number in bx
     36                              <1> ;Input: bx = Line number to print
-    37 000015A7 E8DFFFFFFF          <1>     call printSpace
-    38 000015AC E816000000          <1>     call printNum
-    39 000015B1 B03A                <1>     mov al, ":"
-    40 000015B3 E8E0FFFFFF          <1>     call printChar
-    41 000015B8 663B1D(1E000000)    <1>     cmp bx, word [curLineNum]
-    42 000015BF B020                <1>     mov al, SPC
-    43 000015C1 75D5                <1>     jne printChar
-    44 000015C3 B02A                <1>     mov al, "*"
-    45 000015C5 EBD1                <1>     jmp short printChar
+    37 000015B1 E8DFFFFFFF          <1>     call printSpace
+    38 000015B6 E816000000          <1>     call printNum
+    39 000015BB B03A                <1>     mov al, ":"
+    40 000015BD E8E0FFFFFF          <1>     call printChar
+    41 000015C2 663B1D(1E000000)    <1>     cmp bx, word [curLineNum]
+    42 000015C9 B020                <1>     mov al, SPC
+    43 000015CB 75D5                <1>     jne printChar
+    44 000015CD B02A                <1>     mov al, "*"
+    45 000015CF EBD1                <1>     jmp short printChar
     46                              <1> 
     47                              <1> printNum:
     48                              <1> ;Takes in bx a binary word and prints the ASCII value
     49                              <1> ; with leading blanks suppressed.
     50                              <1> ;Trashes eax, ecx and edx only
-    51 000015C7 55                  <1>     push rbp
-    52 000015C8 31ED                <1>     xor ebp, ebp    ;If not zero, stop suppressing leading zeros
-    53 000015CA 0FB7D3              <1>     movzx edx, bx   ;Init with value in edx
+    51 000015D1 55                  <1>     push rbp
+    52 000015D2 31ED                <1>     xor ebp, ebp    ;If not zero, stop suppressing leading zeros
+    53 000015D4 0FB7D3              <1>     movzx edx, bx   ;Init with value in edx
     54                              <1> ;Do 10000's
-    55 000015CD B910270000          <1>     mov ecx, 10000
-    56 000015D2 E827000000          <1>     call .doCompute
+    55 000015D7 B910270000          <1>     mov ecx, 10000
+    56 000015DC E827000000          <1>     call .doCompute
     57                              <1> ;Do 1000's
-    58 000015D7 B9E8030000          <1>     mov ecx, 1000
-    59 000015DC E81D000000          <1>     call .doCompute
+    58 000015E1 B9E8030000          <1>     mov ecx, 1000
+    59 000015E6 E81D000000          <1>     call .doCompute
     60                              <1> ;Do 100's
-    61 000015E1 B964000000          <1>     mov ecx, 100
-    62 000015E6 E813000000          <1>     call .doCompute
+    61 000015EB B964000000          <1>     mov ecx, 100
+    62 000015F0 E813000000          <1>     call .doCompute
     63                              <1> ;Do 10's
-    64 000015EB B90A000000          <1>     mov ecx, 10
-    65 000015F0 E809000000          <1>     call .doCompute
+    64 000015F5 B90A000000          <1>     mov ecx, 10
+    65 000015FA E809000000          <1>     call .doCompute
     66                              <1> ;Do 1's, mild optimisation to avoid div move the remainder directly
-    67 000015F5 89D0                <1>     mov eax, edx    ;Remainder in edx
-    68 000015F7 E808000000          <1>     call .printDig  ;Print the value in eax
+    67 000015FF 89D0                <1>     mov eax, edx    ;Remainder in edx
+    68 00001601 E808000000          <1>     call .printDig  ;Print the value in eax
     69                              <1> ;Exit
-    70 000015FC 5D                  <1>     pop rbp
+    70 00001606 5D                  <1>     pop rbp
     71                              <1>     return
     13                              <2> %%_ret:
-    14 000015FD C3                  <2>  ret
+    14 00001607 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     72                              <1> .doCompute:
     73                              <1> ;Input: ecx = Divisor for place value
     74                              <1> ;       edx = Remainder left to divide
-    75 000015FE 89D0                <1>     mov eax, edx    ;Moves the prev. remainder into eax for dividing
-    76 00001600 31D2                <1>     xor edx, edx    
-    77 00001602 F7F1                <1>     div ecx         
+    75 00001608 89D0                <1>     mov eax, edx    ;Moves the prev. remainder into eax for dividing
+    76 0000160A 31D2                <1>     xor edx, edx    
+    77 0000160C F7F1                <1>     div ecx         
     78                              <1> .printDig:
     79                              <1> ;Now print the digit in al, the quotient. edx has the remainder
-    80 00001604 85ED                <1>     test ebp, ebp
-    81 00001606 750A                <1>     jnz .pDigOk
-    82 00001608 85C0                <1>     test eax, eax   ;Is ebp = 0 and value to print 0? 
-    83 0000160A 0F847BFFFFFF        <1>     jz printSpace   ;If so, print a space char (retz for no suppression)
-    84 00001610 FFCD                <1>     dec ebp         ;Else, now set ebp and print al
+    80 0000160E 85ED                <1>     test ebp, ebp
+    81 00001610 750A                <1>     jnz .pDigOk
+    82 00001612 85C0                <1>     test eax, eax   ;Is ebp = 0 and value to print 0? 
+    83 00001614 0F847BFFFFFF        <1>     jz printSpace   ;If so, print a space char (retz for no suppression)
+    84 0000161A FFCD                <1>     dec ebp         ;Else, now set ebp and print al
     85                              <1> .pDigOk:
-    86 00001612 0430                <1>     add al, "0"     ;Convert into an ASCII value
-    87 00001614 EB82                <1>     jmp short printChar   ;Return through printchar
+    86 0000161C 0430                <1>     add al, "0"     ;Convert into an ASCII value
+    87 0000161E EB82                <1>     jmp short printChar   ;Return through printchar
     88                              <1> 
     89                              <1> printLine:
     90                              <1> ;Prints a single line
-    91 00001616 BF01000000          <1>     mov edi, 1  ;Print a single line
+    91 00001620 BF01000000          <1>     mov edi, 1  ;Print a single line
     92                              <1> printLines:
     93                              <1> ;Prints many lines in EDLIN fashion. All regs trashed.
     94                              <1> ;Input:
@@ -3163,8 +3184,8 @@
     97                              <1> ;   edi = Number of lines to print. Used as a word!
     98                              <1> ;Output:
     99                              <1> ;   bx = Last line number printed
-   100 0000161B 488B0D(28000000)    <1>     mov rcx, qword [eofPtr]
-   101 00001622 4829F1              <1>     sub rcx, rsi
+   100 00001625 488B0D(28000000)    <1>     mov rcx, qword [eofPtr]
+   101 0000162C 4829F1              <1>     sub rcx, rsi
    102                              <1>     retz    ;If we are pointing to the eofPtr, nothing to print, return
     41                              <2> cret z
     19                              <3> %%_base:
@@ -3174,7 +3195,7 @@
     23                              <3>  %ifdef currSegVBase
     24                              <3>  j%+1 short (retOff+currSegVBase)
     25                              <3>  %else
-    26 00001625 74(FD)              <3>  j%+1 short retOff
+    26 0000162F 74(07)              <3>  j%+1 short retOff
     27                              <3>  %endif
     28                              <3>  %else
     29                              <3>  j%-1 short %%a
@@ -3189,125 +3210,125 @@
    103                              <1>     ;Now ecx = Number of chars to print!
    104                              <1> ;vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
    105                              <1> ; Get screen attribs here for controlled printing
-   106 00001627 89FA                <1>     mov edx, edi    ;Save number of lines to print in edx
+   106 00001631 89FA                <1>     mov edx, edi    ;Save number of lines to print in edx
    107                              <1> ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    108                              <1> .freshLine:
-   109 00001629 51                  <1>     push rcx
-   110 0000162A 52                  <1>     push rdx
-   111 0000162B E877FFFFFF          <1>     call printLineNum   ;Save ecx and edx as these are trashed!
-   112 00001630 5A                  <1>     pop rdx
-   113 00001631 59                  <1>     pop rcx
-   114 00001632 488D3D(6B030000)    <1>     lea rdi, spareLine
+   109 00001633 51                  <1>     push rcx
+   110 00001634 52                  <1>     push rdx
+   111 00001635 E877FFFFFF          <1>     call printLineNum   ;Save ecx and edx as these are trashed!
+   112 0000163A 5A                  <1>     pop rdx
+   113 0000163B 59                  <1>     pop rcx
+   114 0000163C 488D3D(6B030000)    <1>     lea rdi, spareLine
    115                              <1> .goLine:
    116                              <1> ;Now we read the line into the spare buffer and echo each char one by one
    117                              <1> ;ecx = Number of chars to print
    118                              <1> ;edx = Number of lines we are printing
-   119 00001639 AC                  <1>     lodsb
-   120 0000163A 55                  <1>     push rbp
-   121 0000163B 488D2D(69040000)    <1>     lea rbp, spareLine + 254
-   122 00001642 4839EF              <1>     cmp rdi, rbp
-   123 00001645 5D                  <1>     pop rbp
-   124 00001646 731B                <1>     jae .goDone
-   125 00001648 3C20                <1>     cmp al, SPC
-   126 0000164A 7316                <1>     jae .store  ;If a normal char print it
+   119 00001643 AC                  <1>     lodsb
+   120 00001644 55                  <1>     push rbp
+   121 00001645 488D2D(69040000)    <1>     lea rbp, spareLine + 254
+   122 0000164C 4839EF              <1>     cmp rdi, rbp
+   123 0000164F 5D                  <1>     pop rbp
+   124 00001650 731B                <1>     jae .goDone
+   125 00001652 3C20                <1>     cmp al, SPC
+   126 00001654 7316                <1>     jae .store  ;If a normal char print it
    127                              <1>     ;Pick off LF, CR and TAB as special chars. Everything else is a ctrl char!
-   128 0000164C 3C0A                <1>     cmp al, LF 
-   129 0000164E 7412                <1>     je .store
-   130 00001650 3C0D                <1>     cmp al, CR
-   131 00001652 740E                <1>     je .store
-   132 00001654 3C09                <1>     cmp al, TAB
-   133 00001656 740A                <1>     je .store
-   134 00001658 B45E                <1>     mov ah, "^"
-   135 0000165A 0C40                <1>     or al, 40h  ;Convert to UC
-   136 0000165C 86C4                <1>     xchg al, ah
-   137 0000165E 66AB                <1>     stosw   ;Store the pair of chars
-   138 00001660 EB01                <1>     jmp short .goDone
+   128 00001656 3C0A                <1>     cmp al, LF 
+   129 00001658 7412                <1>     je .store
+   130 0000165A 3C0D                <1>     cmp al, CR
+   131 0000165C 740E                <1>     je .store
+   132 0000165E 3C09                <1>     cmp al, TAB
+   133 00001660 740A                <1>     je .store
+   134 00001662 B45E                <1>     mov ah, "^"
+   135 00001664 0C40                <1>     or al, 40h  ;Convert to UC
+   136 00001666 86C4                <1>     xchg al, ah
+   137 00001668 66AB                <1>     stosw   ;Store the pair of chars
+   138 0000166A EB01                <1>     jmp short .goDone
    139                              <1> .store:
-   140 00001662 AA                  <1>     stosb
+   140 0000166C AA                  <1>     stosb
    141                              <1> .goDone:
-   142 00001663 3C0A                <1>     cmp al, LF  ;If not a line feed yet, keep going
-   143 00001665 7404                <1>     je .lfFnd   ;Else, we are done!
-   144 00001667 FFC9                <1>     dec ecx     ;One less char to deal with
-   145 00001669 75CE                <1>     jnz .goLine
+   142 0000166D 3C0A                <1>     cmp al, LF  ;If not a line feed yet, keep going
+   143 0000166F 7404                <1>     je .lfFnd   ;Else, we are done!
+   144 00001671 FFC9                <1>     dec ecx     ;One less char to deal with
+   145 00001673 75CE                <1>     jnz .goLine
    146                              <1> .lfFnd:
-   147 0000166B FFC9                <1>     dec ecx     ;Drop the final char on the line too!
-   148 0000166D 807FFF0A            <1>     cmp byte [rdi - 1], LF  ;Was the last char a LF?
-   149 00001671 740C                <1>     je .okLine
-   150 00001673 807FFF0D            <1>     cmp byte [rdi - 1], CR  ;Was the last char a CR?
-   151 00001677 7403                <1>     je .putLF
-   152 00001679 B00D                <1>     mov al, CR
-   153 0000167B AA                  <1>     stosb
+   147 00001675 FFC9                <1>     dec ecx     ;Drop the final char on the line too!
+   148 00001677 807FFF0A            <1>     cmp byte [rdi - 1], LF  ;Was the last char a LF?
+   149 0000167B 740C                <1>     je .okLine
+   150 0000167D 807FFF0D            <1>     cmp byte [rdi - 1], CR  ;Was the last char a CR?
+   151 00001681 7403                <1>     je .putLF
+   152 00001683 B00D                <1>     mov al, CR
+   153 00001685 AA                  <1>     stosb
    154                              <1> .putLF:
-   155 0000167C B00A                <1>     mov al, LF
-   156 0000167E AA                  <1>     stosb
+   155 00001686 B00A                <1>     mov al, LF
+   156 00001688 AA                  <1>     stosb
    157                              <1> .okLine:
-   158 0000167F C60700              <1>     mov byte [rdi], 0   ;Null terminate the line for printing
-   159 00001682 E80C000000          <1>     call prnAsciiz  ;Print the chars in the buffer
-   160 00001687 67E308              <1>     jecxz .exit     ;If we have no more chars to print, exit!
-   161 0000168A FFC3                <1>     inc ebx         ;Goto next line number
-   162 0000168C FFCA                <1>     dec edx         ;One less line to print!
-   163 0000168E 7599                <1>     jnz .freshLine  ;If this is non-zero, keep going!
-   164 00001690 FFCB                <1>     dec ebx         ;We done the last line
+   158 00001689 C60700              <1>     mov byte [rdi], 0   ;Null terminate the line for printing
+   159 0000168C E80C000000          <1>     call prnAsciiz  ;Print the chars in the buffer
+   160 00001691 67E308              <1>     jecxz .exit     ;If we have no more chars to print, exit!
+   161 00001694 FFC3                <1>     inc ebx         ;Goto next line number
+   162 00001696 FFCA                <1>     dec edx         ;One less line to print!
+   163 00001698 7599                <1>     jnz .freshLine  ;If this is non-zero, keep going!
+   164 0000169A FFCB                <1>     dec ebx         ;We done the last line
    165                              <1> .exit:
    166                              <1>     return
     13                              <2> %%_ret:
-    14 00001692 C3                  <2>  ret
+    14 0000169C C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
    167                              <1> 
    168                              <1> prnAsciiz:
-   169 00001693 56                  <1>     push rsi
-   170 00001694 488D35(6B030000)    <1>     lea rsi, spareLine  ;Now print the line we just made!
+   169 0000169D 56                  <1>     push rsi
+   170 0000169E 488D35(6B030000)    <1>     lea rsi, spareLine  ;Now print the line we just made!
    171                              <1> .pcLp:
-   172 0000169B AC                  <1>     lodsb
-   173 0000169C 84C0                <1>     test al, al
-   174 0000169E 7407                <1>     jz .pcExit
-   175 000016A0 E8F3FEFFFF          <1>     call printChar  ;Preserves dx
-   176 000016A5 EBF4                <1>     jmp short .pcLp
+   172 000016A5 AC                  <1>     lodsb
+   173 000016A6 84C0                <1>     test al, al
+   174 000016A8 7407                <1>     jz .pcExit
+   175 000016AA E8F3FEFFFF          <1>     call printChar  ;Preserves dx
+   176 000016AF EBF4                <1>     jmp short .pcLp
    177                              <1> .pcExit:
-   178 000016A7 5E                  <1>     pop rsi
+   178 000016B1 5E                  <1>     pop rsi
    179                              <1>     return
     13                              <2> %%_ret:
-    14 000016A8 C3                  <2>  ret
+    14 000016B2 C3                  <2>  ret
     15                              <2> %assign retOff %%_ret-$$
     38                                  %include "./Source/ederr.asm"
      1                              <1> ;---------------------
      2                              <1> ; Error Routines here
      3                              <1> ;---------------------
      4                              <1> printLineNotFoundErr:
-     5 000016A9 488D15(88020000)    <1>     lea rdx, badSearch
-     6 000016B0 EB10                <1>     jmp short printErr
+     5 000016B3 488D15(88020000)    <1>     lea rdx, badSearch
+     6 000016BA EB10                <1>     jmp short printErr
      7                              <1> printMemErr:
-     8 000016B2 488D15(7B010000)    <1>     lea rdx, badMemFull
-     9 000016B9 EB07                <1>     jmp short printErr
+     8 000016BC 488D15(7B010000)    <1>     lea rdx, badMemFull
+     9 000016C3 EB07                <1>     jmp short printErr
     10                              <1> printComErr:
     11                              <1> ;JUMP to this procedure and it jumps back to
     12                              <1> ; the command loop resetting the stack!
-    13 000016BB 488D15(58010000)    <1>     lea rdx, badInput
+    13 000016C5 488D15(58010000)    <1>     lea rdx, badInput
     14                              <1> printErr:
-    15 000016C2 E8BCFEFFFF          <1>     call printString
-    16 000016C7 E952EDFFFF          <1>     jmp getCommand
+    15 000016CC E8BCFEFFFF          <1>     call printString
+    16 000016D1 E948EDFFFF          <1>     jmp getCommand
     17                              <1> 
     18                              <1> ;The below "Fail" units are a class of Edlin terminating functions
     19                              <1> badReadFail:
-    20 000016CC 488D15(21020000)    <1>     lea rdx, badRead
-    21 000016D3 E8ABFEFFFF          <1>     call printString
+    20 000016D6 488D15(21020000)    <1>     lea rdx, badRead
+    21 000016DD E8ABFEFFFF          <1>     call printString
     22                              <1>     retToDOS errBadRead
-    94 000016D8 B8034C0000          <2>  mov eax, 04C00h | %1
-    95 000016DD CD21                <2>  int 21h
+    94 000016E2 B8034C0000          <2>  mov eax, 04C00h | %1
+    95 000016E7 CD21                <2>  int 21h
     23                              <1> 
     24                              <1> fullDiskFail:
-    25 000016DF 488D15(01020000)    <1>     lea rdx, badDskFull ;Write disk full error, but return to prompt
-    26 000016E6 E898FEFFFF          <1>     call printString
+    25 000016E9 488D15(01020000)    <1>     lea rdx, badDskFull ;Write disk full error, but return to prompt
+    26 000016F0 E898FEFFFF          <1>     call printString
     27                              <1>     retToDOS errDskFull
-    94 000016EB B8024C0000          <2>  mov eax, 04C00h | %1
-    95 000016F0 CD21                <2>  int 21h
+    94 000016F5 B8024C0000          <2>  mov eax, 04C00h | %1
+    95 000016FA CD21                <2>  int 21h
     28                              <1> 
     29                              <1> charDevFail:
-    30 000016F2 488D15(8D000000)    <1>     lea rdx, badFindStr
-    31 000016F9 E885FEFFFF          <1>     call printString
+    30 000016FC 488D15(8D000000)    <1>     lea rdx, badFindStr
+    31 00001703 E885FEFFFF          <1>     call printString
     32                              <1>     retToDOS errCharDev
-    94 000016FE B8054C0000          <2>  mov eax, 04C00h | %1
-    95 00001703 CD21                <2>  int 21h
+    94 00001708 B8054C0000          <2>  mov eax, 04C00h | %1
+    95 0000170D CD21                <2>  int 21h
     39                                  Segment .data align=1 follows=.text 
     40                                  %include "./Data/eddata.asm"
      1                              <1> ;Initialised data goes here :)
@@ -3328,7 +3349,7 @@
     15 0000001D (4711)              <1>     dw listLines - cmdFcnTable
     16 0000001F (9811)              <1>     dw pageLines - cmdFcnTable
     17 00000021 (580D)              <1>     dw moveLines - cmdFcnTable
-    18 00000023 (2315)              <1>     dw quit - cmdFcnTable
+    18 00000023 (2D15)              <1>     dw quit - cmdFcnTable
     19 00000025 (1E10)              <1>     dw replaceText - cmdFcnTable
     20 00000027 (790F)              <1>     dw searchText - cmdFcnTable
     21 00000029 (380C)              <1>     dw transferLines - cmdFcnTable
